@@ -417,6 +417,7 @@ def dashboard():
         "withheld": (withheld[0] if withheld else 0) or 0,
         "scans": scans, "recent_ledger": recent,
         "largest": largest, "sensitive": sens, "top_folders": top_folders,
+        "sensitive_count": tiers.get("Sensitive", 0),
     }
 
 

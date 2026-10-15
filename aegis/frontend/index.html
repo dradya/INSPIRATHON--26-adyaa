@@ -3,2687 +3,1149 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aegis — Private AI File Manager</title>
+<title>Aegis</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#070714">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Aegis">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<meta name="theme-color" content="#f7f5f0">
 <style>
-/* Self-hosted fonts: 100% offline, zero network requests */
-@font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
-@font-face{font-family:Inter;font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format("woff2")}
-@font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
-@font-face{font-family:Inter;font-style:normal;font-weight:700;font-display:swap;src:url(fonts/inter-700.woff2) format("woff2")}
-@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/space-grotesk-500.woff2) format("woff2")}
-@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/space-grotesk-600.woff2) format("woff2")}
-@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/space-grotesk-700.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
 
-:root {
-  --bg: #070714;
-  --panel: rgba(18, 18, 38, 0.72);
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --line: rgba(255, 255, 255, 0.08);
-  --txt: #f5f5f7;
-  --dim: rgba(245, 245, 247, 0.55);
-  --faint: rgba(245, 245, 247, 0.35);
-  --acc: #8075ff;
-  --acc-glow: rgba(128, 117, 255, 0.35);
-  --mint: #30d158;
-  --mint-bg: rgba(48, 209, 88, 0.15);
-  --peach: #ff9f0a;
-  --peach-bg: rgba(255, 159, 10, 0.16);
-  --red: #ff453a;
-  --red-bg: rgba(255, 69, 58, 0.16);
-  --blue: #0a84ff;
-  --radius-lg: 18px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
+:root{
+  --bg:#f7f5f0; --surface:#fffefb; --sunk:#f1eee7;
+  --ink:#23211d; --ink2:#5c5850; --ink3:#948f85;
+  --line:#e7e2d8; --line2:#d8d2c4;
+  --accent:#3f6b57; --accent-ink:#fff; --accent-soft:#e6efe9;
+  --warn:#9a5b22; --warn-soft:#f7ecdf;
+  --danger:#a33f2e; --danger-soft:#f7e4df;
+  --mark:#f4e4b0;
+  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --sans:Inter,-apple-system,"Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r:10px;
 }
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1b1a17; --surface:#22211d; --sunk:#181714;
+    --ink:#ece8df; --ink2:#b5afa3; --ink3:#857f74;
+    --line:#33312b; --line2:#423f37;
+    --accent:#8fb9a2; --accent-ink:#152019; --accent-soft:#26332c;
+    --warn:#d9a46b; --warn-soft:#352a1e;
+    --danger:#e08c7c; --danger-soft:#3a2420;
+    --mark:#5a4b22;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}
+h1{font-size:30px;line-height:1.2}
+h2{font-size:20px}
+h3{font-size:16px}
+.muted{color:var(--ink2)} .faint{color:var(--ink3)} .small{font-size:12.5px} .mono{font-family:var(--mono);font-size:12.5px}
+.row{display:flex;align-items:center;gap:10px} .wrap{flex-wrap:wrap} .grow{flex:1;min-width:0} .right{margin-left:auto}
+.stack>*+*{margin-top:14px}
+.hidden{display:none!important}
+svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-html, body { height: 100%; margin: 0; }
-body {
-  margin: 0;
-  color: var(--txt);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
-  font-size: 13.5px;
-  line-height: 1.45;
-  background:
-    radial-gradient(1100px 500px at 15% -5%, rgba(128, 117, 255, 0.28), transparent 65%),
-    radial-gradient(900px 500px at 85% 10%, rgba(48, 209, 88, 0.15), transparent 60%),
-    radial-gradient(800px 600px at 50% 110%, rgba(255, 159, 10, 0.10), transparent 65%),
-    #070714;
-  background-attachment: fixed;
-}
+/* ---------- layout ---------- */
+.app{display:grid;grid-template-columns:232px 1fr;height:100vh}
+.side{border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;overflow:auto}
+.brand{padding:0 10px 18px}
+.brand b{font-family:var(--serif);font-size:24px;font-weight:500;display:block}
+.brand span{font-size:12px;color:var(--ink3)}
+.nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;color:var(--ink2);text-decoration:none;cursor:pointer}
+.nav a:hover{background:var(--sunk);color:var(--ink)}
+.nav a.on{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.nav .count{margin-left:auto;font-size:11.5px;color:var(--ink3)}
+.side-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+.side-foot .row{margin-top:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+.dot.warn{background:var(--warn)}
+.main{overflow:auto;position:relative}
+.topbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:12px 36px;display:flex;align-items:center;gap:14px}
+.topbar .search{flex:1;max-width:520px;position:relative}
+.topbar .search input{width:100%;padding:8px 12px 8px 34px;border-radius:999px}
+.topbar .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+.scanstat{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:10px}
+.view{padding:32px 36px 80px;max-width:1120px}
+.head{margin-bottom:22px}
+.head p{margin:6px 0 0;color:var(--ink2);max-width:640px}
 
-h1, h2, h3, .disp { font-family: "Space Grotesk", -apple-system, Inter, sans-serif; letter-spacing: -0.02em; }
+/* ---------- controls ---------- */
+input[type=text],input[type=password],input:not([type]),select,textarea{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:8px 11px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{width:100%;resize:vertical;font-family:var(--mono);font-size:12.5px}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:7px 13px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line2))}
+.btn.danger.solid{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink2)}
+.btn.ghost:hover{background:var(--sunk);color:var(--ink)}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+.link{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+label.check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;color:var(--ink2);font-size:13px}
+input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer;background:var(--surface);color:var(--ink2)}
+.chip:hover{color:var(--ink);border-color:var(--ink3)}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--sunk);color:var(--ink2);white-space:nowrap}
+.tag.Sensitive{background:var(--danger-soft);color:var(--danger)}
+.tag.Internal{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:var(--accent-soft);color:var(--accent)}
+.tok{font-family:var(--mono);font-size:12px;background:var(--danger-soft);color:var(--danger);padding:0 5px;border-radius:4px}
+mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+mark.pii{background:var(--danger-soft);color:var(--danger)}
 
-/* Unified Apple Toolbar */
-#top {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  border-bottom: 1px solid var(--line);
-  background: rgba(11, 11, 28, 0.78);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  padding: 8px 18px;
-}
-#toprow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
+/* ---------- surfaces ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card+.card{margin-top:16px}
+.card h3{margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-bottom:16px}
+.stat{padding:18px 20px}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-family:var(--serif);font-size:26px;font-weight:500}
+.stat span{font-size:12.5px;color:var(--ink2)}
+.empty{padding:36px 20px;text-align:center;color:var(--ink2)}
+.empty h3{color:var(--ink);margin-bottom:6px}
+.note{background:var(--sunk);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--ink2)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.bars .b{display:grid;grid-template-columns:110px 1fr 80px;gap:12px;align-items:center;padding:5px 0;font-size:13px}
+.bars .track{height:6px;background:var(--sunk);border-radius:6px;overflow:hidden}
+.bars .fill{height:100%;background:var(--accent);border-radius:6px}
+.bars .b span:last-child{text-align:right;color:var(--ink2)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tabs button{border:0;background:none;padding:9px 14px;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--ink);border-color:var(--ink)}
 
-.logo-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  font-family: "Space Grotesk";
-  font-weight: 700;
-  font-size: 17px;
-  color: #070714;
-  background: linear-gradient(135deg, #c4b5fd, #8075ff 50%, #30d158 135%);
-  box-shadow: 0 0 24px -4px rgba(128, 117, 255, 0.7);
-}
-.brand b { font-family: "Space Grotesk"; font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
-.brand span { display: block; font-size: 10.5px; color: var(--dim); letter-spacing: 0.02em; }
+/* ---------- lists ---------- */
+.list{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line);cursor:default}
+.item:first-child{border-top:0}
+.item:hover{background:var(--sunk)}
+.item.clickable{cursor:pointer}
+.item .ic{color:var(--ink3)}
+.item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .sub{font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .meta{font-size:12.5px;color:var(--ink2);white-space:nowrap;text-align:right}
+.item .acts{display:flex;gap:2px;opacity:0;transition:opacity .12s}
+.item:hover .acts,.item.sel .acts{opacity:1}
+.item.sel{background:var(--accent-soft)}
+.list-head{display:flex;align-items:center;gap:12px;padding:8px 14px;font-size:12px;color:var(--ink3);border-bottom:1px solid var(--line);background:var(--sunk)}
 
-/* Apple-style History Nav Cluster */
-.nav-cluster {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  padding: 2px;
-  gap: 1px;
-}
-.nav-hist-btn {
-  border: 0;
-  background: transparent;
-  color: var(--txt);
-  width: 28px;
-  height: 26px;
-  border-radius: 7px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.nav-hist-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-}
-.nav-hist-btn:disabled {
-  opacity: 0.28;
-  cursor: default;
-}
+/* search results */
+.result{padding:16px 18px;border-top:1px solid var(--line);cursor:pointer}
+.result:first-child{border-top:0}
+.result:hover{background:var(--sunk)}
+.result .nm{font-weight:500;font-size:15px}
+.result .why{font-size:12.5px;color:var(--accent);margin-top:2px}
+.result .passage{font-size:13px;color:var(--ink2);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result .path{font-size:12px;color:var(--ink3);margin-top:4px}
+.bigsearch{position:relative}
+.bigsearch input{width:100%;font-size:17px;padding:14px 16px 14px 46px;border-radius:12px}
+.bigsearch svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--ink3)}
 
-/* macOS Segmented Tab Bar */
-nav.segmented {
-  display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  padding: 3px;
-  gap: 2px;
-  margin: 0 auto;
-}
-nav.segmented button {
-  border: 0;
-  background: transparent;
-  color: var(--dim);
-  padding: 6px 13px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-}
-nav.segmented button:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-}
-nav.segmented button.on {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.13);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-  font-weight: 600;
-}
-.nav-count {
-  font-size: 10px;
-  background: var(--red);
-  color: #fff;
-  border-radius: 99px;
-  padding: 1px 6px;
-  font-weight: 700;
-  margin-left: 2px;
-}
+/* explorer */
+.explorer{display:grid;grid-template-columns:210px 1fr;gap:22px}
+.places h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);font-weight:600;margin:16px 0 6px}
+.places h4:first-child{margin-top:0}
+.places a{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:7px;cursor:pointer;color:var(--ink2);text-decoration:none;font-size:13.5px}
+.places a:hover{background:var(--sunk);color:var(--ink)}
+.places a.on{color:var(--ink);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:13px;margin:10px 0 12px}
+.crumbs a{cursor:pointer;color:var(--ink2);padding:2px 5px;border-radius:5px;text-decoration:none}
+.crumbs a:hover{background:var(--sunk);color:var(--ink)}
+.crumbs a:last-child{color:var(--ink);font-weight:500}
+.crumbs .sep{color:var(--ink3)}
 
-/* Search and Quick action bar */
-#quickrow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 8px;
-  font-size: 12px;
-}
-input, select, button, textarea { font: inherit; color: var(--txt); }
-input, select, textarea {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 7px 11px;
-  transition: all 0.15s ease;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: rgba(128, 117, 255, 0.8);
-  box-shadow: 0 0 0 3px rgba(128, 117, 255, 0.22);
-}
-button { cursor: pointer; }
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(30,26,20,.25);z-index:20;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,94vw);background:var(--surface);border-left:1px solid var(--line);z-index:21;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer header{padding:18px 22px;border-bottom:1px solid var(--line)}
+.drawer .body{flex:1;overflow:auto;padding:18px 22px}
+.drawer footer{padding:12px 22px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+.drawer pre{white-space:pre-wrap;word-break:break-word;font:12.5px/1.6 var(--mono);background:var(--sunk);padding:14px;border-radius:8px;margin:0;max-height:none}
+.drawer img,.drawer video{max-width:100%;border-radius:8px;display:block;margin:0 auto}
+.drawer iframe{width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+dl.meta{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;font-size:13px;margin:0 0 16px}
+dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 
-.btn-pri {
-  background: linear-gradient(135deg, #a78bfa, #8075ff 45%, #30d158 140%);
-  border: 0;
-  color: #070714;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 7px 15px;
-  box-shadow: 0 2px 14px -3px var(--acc-glow);
-  transition: transform 0.12s ease, filter 0.15s ease;
-}
-.btn-pri:hover { transform: translateY(-1px); filter: brightness(1.06); }
-.btn-pri:active { transform: scale(0.97); }
+/* modal */
+.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(30,26,20,.32)}
+.modal.open{display:flex}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:min(600px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.modal .box>header{padding:20px 24px 8px}
+.modal .box>.body{padding:8px 24px;overflow:auto;flex:1}
+.modal .box>footer{padding:14px 24px 20px;display:flex;justify-content:flex-end;gap:8px}
+.group{border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow:hidden}
+.group .gh{background:var(--sunk);padding:7px 12px;font-size:12.5px;color:var(--ink2)}
+.group .gi{padding:6px 12px;font-size:13px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.group .gi:first-of-type{border-top:0}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;color:var(--ink2);margin-bottom:4px}
+.field input,.field select{width:100%}
 
-.btn-ghost {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 7px 13px;
-  font-weight: 500;
-  transition: all 0.15s ease;
-}
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.10);
-  border-color: rgba(255, 255, 255, 0.16);
-  color: #fff;
-}
-.btn-ghost:active { transform: scale(0.97); }
+/* assistant */
+.ask-btn{position:fixed;right:24px;bottom:22px;z-index:15;border-radius:999px;padding:10px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.ask{position:fixed;right:24px;bottom:76px;width:min(400px,92vw);height:min(540px,72vh);z-index:16;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.16);display:none;flex-direction:column}
+.ask.open{display:flex}
+.ask header{padding:14px 16px;border-bottom:1px solid var(--line)}
+.ask .log{flex:1;overflow:auto;padding:14px 16px}
+.msg{margin-bottom:12px;font-size:13.5px;white-space:pre-wrap}
+.msg.me{text-align:right}
+.msg.me span{display:inline-block;background:var(--accent-soft);padding:7px 11px;border-radius:12px 12px 2px 12px;text-align:left}
+.msg.bot .it{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:7px;margin-top:6px;cursor:pointer;font-size:12.5px;white-space:normal}
+.msg.bot .it:hover{background:var(--sunk)}
+.ask form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.ask form input{flex:1}
 
-button.danger {
-  border: 1px solid rgba(255, 69, 58, 0.45);
-  background: rgba(255, 69, 58, 0.12);
-  color: var(--red);
-  border-radius: 10px;
-  padding: 7px 13px;
-  font-weight: 600;
-  transition: all 0.15s ease;
-}
-button.danger:hover {
-  background: rgba(255, 69, 58, 0.22);
-  border-color: var(--red);
-}
+/* toast */
+#toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast button{background:none;border:0;color:var(--bg);text-decoration:underline;cursor:pointer;padding:0}
 
-.badge {
-  font-size: 11px;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.07);
-  padding: 3px 9px;
-  border-radius: 99px;
-  color: var(--dim);
-  white-space: nowrap;
-}
-.badge.ok { background: var(--mint-bg); color: var(--mint); }
-.badge.warn { background: var(--peach-bg); color: var(--peach); }
-.badge.danger { background: var(--red-bg); color: var(--red); }
-.badge.info { background: rgba(10, 132, 255, 0.16); color: var(--blue); }
-
-.tier {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 9px;
-  border-radius: 99px;
-  white-space: nowrap;
-  letter-spacing: 0.02em;
-}
-.tier.Public { background: var(--mint-bg); color: var(--mint); }
-.tier.Internal { background: var(--peach-bg); color: var(--peach); }
-.tier.Sensitive { background: var(--red-bg); color: var(--red); }
-.ptag {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-  background: var(--red-bg);
-  color: #ff9fa7;
-  white-space: nowrap;
-}
-
-#main {
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 22px 20px 100px;
-  min-height: 65vh;
-}
-.glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 16px;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  transition: border-color 0.18s ease;
-}
-.glass:hover { border-color: rgba(255, 255, 255, 0.14); }
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.stat {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  backdrop-filter: blur(14px);
-  transition: transform 0.18s ease, border-color 0.18s ease;
-}
-.stat:hover {
-  transform: translateY(-2px);
-  border-color: rgba(128, 117, 255, 0.4);
-}
-.stat b {
-  font-family: "Space Grotesk";
-  font-size: 29px;
-  display: block;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-.stat span {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--dim);
-}
-.stat small { display: block; font-size: 11px; color: var(--faint); margin-top: 3px; }
-
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 900px) {
-  .grid2 { grid-template-columns: 1fr; }
-  nav.segmented { order: 3; width: 100%; justify-content: center; }
-}
-
-.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.dim { color: var(--dim); }
-.small { font-size: 12px; }
-.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle; }
-th { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
-tr:hover { background: rgba(255, 255, 255, 0.03); }
-
-/* File rows & cards */
-.frow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  font-size: 13px;
-  transition: all 0.15s ease;
-}
-.frow:hover {
-  transform: translateX(2px);
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.14);
-}
-.frow.highlight {
-  background: rgba(128, 117, 255, 0.18);
-  border-color: var(--acc);
-  box-shadow: 0 0 20px -4px var(--acc-glow);
-  animation: pulse-glow 2s infinite ease-in-out;
-}
-@keyframes pulse-glow {
-  0%, 100% { border-color: var(--acc); }
-  50% { border-color: rgba(128, 117, 255, 0.4); }
-}
-
-.frow .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-.frow .s { font-size: 12px; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
-
-/* Interactive File Cards for Agent & Search */
-.file-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 11px;
-  padding: 8px 12px;
-  margin: 6px 0;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-.file-card:hover {
-  background: rgba(128, 117, 255, 0.14);
-  border-color: var(--acc);
-  transform: translateY(-1px);
-}
-.file-card .icon { font-size: 18px; }
-.file-card .info { flex: 1; min-width: 0; }
-.file-card .title { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-card .sub { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* ============================================================
- * Apple Quick Look File Viewer Modal & Smoothness Engine
- * ============================================================ */
-.ql-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(3, 3, 12, 0.78);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 120;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
-}
-.ql-overlay.open {
-  opacity: 1;
-  visibility: visible;
-}
-.ql-modal {
-  width: min(980px, 94vw);
-  height: min(780px, 88vh);
-  background: rgba(16, 16, 32, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transform: scale(0.95) translateY(12px);
-  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ql-overlay.open .ql-modal {
-  transform: scale(1) translateY(0);
-}
-.ql-header {
-  padding: 12px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-shrink: 0;
-}
-.ql-file-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  flex: 1;
-}
-.ql-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  display: grid;
-  place-items: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
-.ql-titles {
-  min-width: 0;
-  flex: 1;
-}
-.ql-name {
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ql-sub {
-  font-size: 11.5px;
-  color: var(--dim);
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.ql-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.ql-body {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: rgba(7, 7, 18, 0.95);
-}
-.ql-content-viewer {
-  flex: 1;
-  overflow: auto;
-  position: relative;
-}
-.ql-code-container {
-  margin: 0;
-  padding: 16px 20px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: #e2e8f0;
-  white-space: pre;
-  tab-size: 2;
-}
-.ql-image-container {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: radial-gradient(circle at center, rgba(30, 30, 60, 0.3), transparent 70%);
-}
-.ql-image-container img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-}
-.ql-iframe-container {
-  width: 100%;
-  height: 100%;
-}
-.ql-iframe-container iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #fff;
-}
-.ql-media-container {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-}
-.ql-toolbar {
-  padding: 8px 18px;
-  background: rgba(255, 255, 255, 0.02);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 11.5px;
-  color: var(--dim);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-
-/* Fluid View Transitions & Smoothness */
-@keyframes viewFadeSlide {
-  0% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-.view-enter {
-  animation: viewFadeSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Smooth custom glass scrollbars */
-::-webkit-scrollbar { width: 7px; height: 7px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
-
-html, body, #main, #ls, #awlog {
-  scroll-behavior: smooth;
-}
-
-/* Apple-style Visual Confirmation Sheet Modal */
-.sheet-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  animation: fadeIn 0.18s ease;
-}
-.sheet-overlay.open { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.sheet {
-  background: #14142b;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  padding: 24px;
-  width: min(620px, 94vw);
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes slideUp { from { transform: scale(0.96) translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
-
-.sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
-.sheet-icon-bubble {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  background: rgba(128, 117, 255, 0.16);
-  border: 1px solid rgba(128, 117, 255, 0.3);
-  color: var(--acc);
-}
-.sheet-icon-bubble.danger {
-  background: rgba(255, 69, 58, 0.16);
-  border-color: rgba(255, 69, 58, 0.3);
-  color: var(--red);
-}
-.sheet-title-group h2 { margin: 0 0 4px; font-size: 18px; }
-.sheet-title-group p { margin: 0; font-size: 13px; color: var(--dim); }
-
-.sheet-body {
-  flex: 1;
-  overflow-y: auto;
-  margin: 12px 0;
-  padding-right: 4px;
-}
-
-/* Visual change diff cards */
-.diff-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  padding: 12px 14px;
-  margin-bottom: 10px;
-}
-.diff-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.diff-from, .diff-to {
-  flex: 1;
-  min-width: 0;
-}
-.diff-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); font-weight: 700; margin-bottom: 3px; }
-.diff-val { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.diff-arrow { font-size: 16px; color: var(--acc); }
-
-.sheet-foot {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  margin-top: 8px;
-}
-
-/* Agent floating widget */
-#awbtn {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 80;
-  width: 54px;
-  height: 54px;
-  border-radius: 17px;
-  border: 0;
-  background: linear-gradient(135deg, #c4b5fd, #8075ff 50%, #30d158 135%);
-  box-shadow: 0 0 32px -4px rgba(128, 117, 255, 0.7);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-#awbtn:hover { transform: scale(1.05); }
-
-#awpanel {
-  position: fixed;
-  right: 22px;
-  bottom: 86px;
-  z-index: 80;
-  width: min(410px, calc(100vw - 36px));
-  height: 540px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 20px;
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(0.96) translateY(12px);
-  transform-origin: bottom right;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
-  background: rgba(18, 18, 40, 0.94);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
-}
-#awpanel.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
-#awlog { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.msg {
-  max-width: 90%;
-  border-radius: 15px;
-  padding: 10px 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-line;
-  word-break: break-word;
-}
-.msg.u { align-self: flex-end; background: linear-gradient(135deg, #8075ff, #6455f0); color: #fff; }
-.msg.a { align-self: flex-start; background: rgba(255, 255, 255, 0.075); border: 1px solid rgba(255, 255, 255, 0.05); }
-
-#awchips { display: flex; gap: 6px; overflow-x: auto; padding: 0 12px 8px; scrollbar-width: none; }
-#awchips::-webkit-scrollbar { display: none; }
-#awchips button {
-  flex-shrink: 0;
-  font-size: 11.5px;
-  padding: 5px 11px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--line);
-  color: var(--dim);
-}
-#awchips button:hover { color: #fff; border-color: rgba(255, 255, 255, 0.2); }
-
-#awform { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); background: rgba(0, 0, 0, 0.18); }
-#awform input { flex: 1; border-radius: 10px; }
-
-/* Modals & Toasts */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 95;
-}
-.modal > div {
-  background: #14142b;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 22px;
-  width: min(500px, 92vw);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-}
-.modal label { display: block; font-size: 11.5px; font-weight: 600; color: var(--dim); margin: 10px 0 4px; }
-.modal input, .modal select { width: 100%; }
-
-#toasts { position: fixed; bottom: 18px; left: 18px; z-index: 110; display: flex; flex-direction: column; gap: 8px; }
-.toast {
-  background: #181836;
-  border: 1px solid var(--acc);
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-size: 13px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  animation: toastIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes toastIn { from { transform: translateX(-16px); opacity: 0; } to { transform: none; opacity: 1; } }
-
-.spin {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #070714;
-  border-radius: 99px;
-  display: inline-block;
-  animation: sp 0.7s linear infinite;
-  vertical-align: -2px;
-}
-@keyframes sp { to { transform: rotate(360deg); } }
-
-/* Tree & Explorer */
-.tree { font-size: 13px; }
-.tree div {
-  padding: 4px 8px;
-  border-radius: 7px;
-  cursor: pointer;
-  color: var(--dim);
-  transition: all 0.12s ease;
-}
-.tree div:hover { color: #fff; background: rgba(255, 255, 255, 0.06); transform: translateX(2px); }
-.tree div.on { color: #fff; background: rgba(128, 117, 255, 0.16); font-weight: 600; }
-
-.crumbs { font-size: 12.5px; margin: 8px 0; color: var(--dim); }
-.crumbs a { color: var(--txt); text-decoration: none; font-weight: 500; }
-.crumbs a:hover { text-decoration: underline; }
-
-pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  padding: 12px;
-  font-size: 12px;
-  max-height: 280px;
-  overflow: auto;
-}
-.tok {
-  background: #5a0f16;
-  color: #ff9aa4;
-  border: 1px solid #8a1f2a;
-  border-radius: 5px;
-  padding: 1px 6px;
-  font-family: monospace;
-  font-size: 12px;
-}
-mark.pii {
-  background: rgba(255, 69, 58, 0.35);
-  color: #ffe6e8;
-  border-radius: 4px;
-  padding: 1px 4px;
-}
-mark.hl {
-  background: rgba(128, 117, 255, 0.38);
-  color: #fff;
-  border-radius: 3px;
-  padding: 0 3px;
-}
-
-.skel {
-  border-radius: 12px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
-  background-size: 200% 100%;
-  animation: sh 1.3s infinite;
-}
-@keyframes sh { to { background-position: -200% 0; } }
-
-.tdots span {
-  width: 6px;
-  height: 6px;
-  border-radius: 99px;
-  background: var(--dim);
-  display: inline-block;
-  margin-right: 3px;
-  animation: bl 1s infinite;
-}
-.tdots span:nth-child(2) { animation-delay: 0.15s; }
-.tdots span:nth-child(3) { animation-delay: 0.3s; }
-@keyframes bl { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-/* Charts */
-.bar { height: 8px; background: rgba(255, 255, 255, 0.07); border-radius: 99px; margin-top: 6px; overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8075ff, #c4b5fd); border-radius: 99px; transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
-.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--dim); margin-top: 10px; }
-.legend i { width: 9px; height: 9px; border-radius: 99px; display: inline-block; margin-right: 4px; }
-.tilebtn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 14px;
-  transition: all 0.15s ease;
-}
-.tilebtn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(128, 117, 255, 0.5);
-  background: rgba(128, 117, 255, 0.08);
+.spinner{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ledger-row{border-top:1px solid var(--line)}
+.ledger-row:first-child{border-top:0}
+.ledger-row summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;gap:12px;align-items:center}
+.ledger-row summary::-webkit-details-marker{display:none}
+.ledger-row summary:hover{background:var(--sunk)}
+.ledger-row .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.cmp pre,.pane{white-space:pre-wrap;word-break:break-word;font:12px/1.6 var(--mono);background:var(--sunk);padding:12px;border-radius:8px;margin:0;max-height:260px;overflow:auto}
+.pane-label{font-size:12px;color:var(--ink3);margin-bottom:5px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}.side{display:none}
+  .grid2,.grid3,.explorer{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}
+  .view{padding:22px 18px}.topbar{padding:10px 18px}
 }
 </style>
 </head>
 <body>
-
-<!-- Unified Apple Toolbar -->
-<div id="top">
-  <div id="toprow">
-    <div class="logo-group">
-      <span class="logo">A</span>
-      <span class="brand"><b>Aegis</b><span>private files, understood.</span></span>
-    </div>
-
-    <!-- Back / Forward Navigation Cluster -->
-    <div class="nav-cluster">
-      <button class="nav-hist-btn" id="btnBack" onclick="navBack()" title="Back (Alt+Left)" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <button class="nav-hist-btn" id="btnFwd" onclick="navForward()" title="Forward (Alt+Right)" disabled>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
-
-    <!-- Segmented Control for Views -->
-    <nav class="segmented" id="nav">
-      <button data-t="dashboard" class="on" onclick="navTab('dashboard', this)">❖ Dashboard</button>
-      <button data-t="search" onclick="navTab('search', this)">⌕ Search</button>
-      <button data-t="explorer" onclick="navTab('explorer', this)">🗂 Explorer</button>
-      <button data-t="storage" onclick="navTab('storage', this)">💽 Storage</button>
-      <button data-t="bin" onclick="navTab('bin', this)">🗑 Bin <span id="binCountBadge" class="nav-count" style="display:none">0</span></button>
-      <button data-t="organize" onclick="navTab('organize', this)">✦ Organize</button>
-      <button data-t="ledger" onclick="navTab('ledger', this)">🛡 Privacy Shield</button>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><b>Aegis</b><span>Your files, understood — privately.</span></div>
+    <nav class="nav" id="nav">
+      <a data-r="home"><svg class="i"><use href="#i-home"/></svg>Overview</a>
+      <a data-r="search"><svg class="i"><use href="#i-search"/></svg>Search</a>
+      <a data-r="files"><svg class="i"><use href="#i-folder"/></svg>Files</a>
+      <a data-r="storage"><svg class="i"><use href="#i-disk"/></svg>Storage</a>
+      <a data-r="tidy"><svg class="i"><use href="#i-tidy"/></svg>Tidy up</a>
+      <a data-r="privacy"><svg class="i"><use href="#i-shield"/></svg>Privacy</a>
+      <a data-r="bin"><svg class="i"><use href="#i-trash"/></svg>Bin <span class="count" id="binCount"></span></a>
     </nav>
+    <div class="side-foot">
+      <div class="row"><span class="dot" id="egressDot"></span><span id="egressText">Nothing leaves this computer</span></div>
+      <div class="row"><label class="check"><input type="checkbox" id="offlineToggle"> Offline only</label></div>
+      <div class="row"><button class="link" onclick="openSettings()">AI settings</button></div>
+    </div>
+  </aside>
 
-    <span class="badge ok" id="vaultbadge">● on-device</span>
-    <span class="badge info" style="font-size:11px;padding:3px 8px" title="Running as a Web Application at http://localhost:8000">🌐 Web App</span>
-    <button id="pwaInstallBtn" class="btn-ghost" style="display:none;padding:3px 9px;font-size:11px" onclick="installPWA()" title="Install Aegis as a Desktop Web App">Install App 📥</button>
-    <label class="small dim" title="Reveal hidden and system files"><input type="checkbox" id="power" onchange="state.power=this.checked;lsCur()"> Power</label>
-    <label class="small dim" title="Force zero egress offline"><input type="checkbox" id="offline" onchange="setOffline(this.checked)"> Offline</label>
-    <button class="btn-ghost" onclick="openSettings()">Settings</button>
-  </div>
-
-  <div id="quickrow">
-    <input id="scanpaths" size="32" placeholder="Scan folder (e.g. C:\Users\... blank = home)">
-    <button class="btn-pri" id="scanbtn" onclick="startScan()">Scan</button>
-    <button id="cancel" class="btn-ghost" style="display:none" onclick="stopScan()">Cancel</button>
-    <span id="prog" class="dim small"></span>
-    <span id="quick" class="row" style="gap:6px"></span>
-    <input id="topq" size="24" placeholder="Search by meaning… ( / )" onkeydown="if(event.key==='Enter')topSearch()">
-  </div>
+  <main class="main" id="main">
+    <div class="topbar">
+      <div class="search">
+        <svg class="i"><use href="#i-search"/></svg>
+        <input id="topSearch" placeholder="Search by meaning — e.g. “notes about recursion from last month”" autocomplete="off">
+      </div>
+      <div class="scanstat right" id="scanStat"></div>
+    </div>
+    <div class="view" id="view"></div>
+  </main>
 </div>
 
-<!-- Main App Body -->
-<div id="main"></div>
+<!-- preview drawer -->
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-label="File preview">
+  <header class="row"><div class="grow"><h2 id="dvTitle" style="word-break:break-all"></h2><div class="small faint" id="dvSub"></div></div><button class="btn ghost" onclick="closeDrawer()" aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <div class="body" id="dvBody"></div>
+  <footer id="dvFoot"></footer>
+</aside>
 
-<!-- Visual Confirmation Sheet (Apple Sheet Modal) -->
-<div class="sheet-overlay" id="confirmSheet">
-  <div class="sheet">
-    <div class="sheet-head">
-      <div class="row" style="gap:14px">
-        <div class="sheet-icon-bubble" id="sheetIcon">✦</div>
-        <div class="sheet-title-group">
-          <h2 id="sheetTitle">Confirm Changes</h2>
-          <p id="sheetSub">Please review the proposed file changes before applying.</p>
-        </div>
-      </div>
-      <button class="btn-ghost" style="padding:4px 9px" onclick="closeSheet()">✕</button>
-    </div>
+<!-- confirm sheet -->
+<div class="modal" id="sheet"><div class="box">
+  <header><h2 id="shTitle"></h2><p class="muted small" id="shNote" style="margin:6px 0 0"></p></header>
+  <div class="body" id="shBody"></div>
+  <footer><button class="btn" onclick="closeSheet()">Cancel</button><button class="btn primary" id="shGo">Apply</button></footer>
+</div></div>
 
-    <!-- Reversibility status pill -->
-    <div id="sheetStatusPill" style="margin-bottom:12px"></div>
+<!-- prompt modal -->
+<div class="modal" id="ask1"><div class="box" style="width:min(440px,94vw)">
+  <header><h2 id="a1Title"></h2></header>
+  <div class="body"><input id="a1Input" style="width:100%"></div>
+  <footer><button class="btn" onclick="closeModal('ask1')">Cancel</button><button class="btn primary" id="a1Go">Continue</button></footer>
+</div></div>
 
-    <div class="sheet-body" id="sheetBody">
-      <!-- Dynamic Diff Cards & Visual Groupings -->
-    </div>
-
-    <div class="sheet-foot">
-      <button class="btn-ghost" onclick="closeSheet()">Cancel</button>
-      <button class="btn-pri" id="sheetActionBtn" onclick="commitSheet()">Apply Changes</button>
-    </div>
+<!-- settings -->
+<div class="modal" id="settings"><div class="box" style="width:min(480px,94vw)">
+  <header><h2>AI settings</h2><p class="muted small" style="margin:6px 0 0">By default Aegis reasons with local rules — nothing is sent anywhere. If you connect a cloud model, only redacted text is sent, and every request is recorded in the Privacy ledger.</p></header>
+  <div class="body">
+    <div class="field"><label>Provider</label><select id="sProvider">
+      <option value="local-rules">On this computer only (recommended)</option>
+      <option value="ollama">Ollama (local model)</option>
+      <option value="anthropic">Anthropic</option>
+      <option value="openai">OpenAI-compatible</option>
+    </select></div>
+    <div class="field" data-for="anthropic openai"><label>Model</label><input id="sModel" placeholder="optional"></div>
+    <div class="field" data-for="openai"><label>Base URL</label><input id="sBase" placeholder="https://api.openai.com/v1"></div>
+    <div class="field" data-for="anthropic openai"><label>API key <span class="faint">(kept in memory only, never saved)</span></label><input id="sKey" type="password" placeholder="paste to set"></div>
+    <div class="field" data-for="ollama"><label>Ollama URL</label><input id="sOllamaUrl"></div>
+    <div class="field" data-for="ollama"><label>Ollama model</label><input id="sOllamaModel"></div>
   </div>
+  <footer><button class="btn ghost" onclick="clearKey()">Forget key</button><span class="grow"></span><button class="btn" onclick="closeModal('settings')">Cancel</button><button class="btn primary" onclick="saveSettings()">Save</button></footer>
+</div></div>
+
+<!-- assistant -->
+<button class="btn ask-btn" onclick="toggleAsk()"><svg class="i"><use href="#i-chat"/></svg>Ask Aegis</button>
+<div class="ask" id="ask">
+  <header class="row"><div class="grow"><h3>Ask Aegis</h3><div class="small faint">Answers come from your local index.</div></div><button class="btn ghost sm" onclick="toggleAsk()"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <div class="log" id="askLog"></div>
+  <form onsubmit="askSubmit(event)"><input id="askInput" placeholder="What can I delete?" autocomplete="off"><button class="btn primary">Send</button></form>
 </div>
 
-<!-- Apple Quick Look File Viewer Modal -->
-<div class="ql-overlay" id="quickLookOverlay" onclick="if(event.target===this)closeQuickLook()">
-  <div class="ql-modal" id="quickLookModal">
-    <div class="ql-header">
-      <div class="ql-file-info">
-        <div class="ql-icon" id="qlIcon">📄</div>
-        <div class="ql-titles">
-          <div class="ql-name" id="qlTitle">filename.ext</div>
-          <div class="ql-sub">
-            <span id="qlMeta">0 KB</span>
-            <span id="qlTier" class="tier Public">Public</span>
-            <span id="qlPii" class="ptag" style="display:none"></span>
-          </div>
-        </div>
-      </div>
-      <div class="ql-actions">
-        <button class="btn-pri" style="padding:5px 12px;font-size:11.5px;font-weight:600" onclick="qlOpenNative()" title="Open in Windows default program">Open in Windows 🚀</button>
-        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlOpenNewTab()" title="Open raw file in a new browser tab">New Tab ↗</button>
-        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlReveal()" title="Show in Windows File Explorer">Reveal 📂</button>
-        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlCopyPath()" title="Copy full file path">Copy Path 📋</button>
-        <button class="btn-ghost" style="padding:5px 10px;font-size:14px;line-height:1" onclick="closeQuickLook()" title="Close (Esc)">✕</button>
-      </div>
-    </div>
-    <div class="ql-body" id="qlBody">
-      <div class="ql-content-viewer" id="qlContent"></div>
-    </div>
-    <div class="ql-toolbar" id="qlToolbar">
-      <span id="qlStatus">Ready</span>
-      <div class="row" style="gap:8px">
-        <span class="dim" style="font-size:11px">Tip: Spacebar toggles Quick Look · Esc closes</span>
-        <button class="btn-ghost" id="qlCopyContentBtn" style="padding:2px 7px;font-size:11px;display:none" onclick="qlCopyContent()">Copy Content</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- Settings Modal -->
-<div class="modal" id="settings">
-  <div>
-    <h3 style="margin:0 0 8px">Settings <span class="dim small">(RAM-only, zero-disk storage for keys)</span></h3>
-    <label>Provider</label>
-    <select id="s_provider"><option>local-rules</option><option>anthropic</option><option>openai</option><option>ollama</option></select>
-    <label>API Key (never leaked back)</label>
-    <input id="s_key" type="password" placeholder="sk-...">
-    <label>Model</label>
-    <input id="s_model" placeholder="e.g. claude-sonnet-4-20250514 / gpt-4o-mini">
-    <label>Base URL (OpenAI-compatible)</label>
-    <input id="s_base" placeholder="https://api.openai.com/v1">
-    <label>Ollama URL & Model</label>
-    <div class="row"><input id="s_ollama" style="flex:1" placeholder="http://127.0.0.1:11434"><input id="s_omodel" style="flex:1" placeholder="llama3.1"></div>
-    <div class="row" style="margin-top:16px;justify-content:space-between">
-      <button class="btn-ghost danger" onclick="clearKey()">Forget Key</button>
-      <div class="row">
-        <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
-        <button class="btn-pri" onclick="saveSettings()">Save Preferences</button>
-      </div>
-    </div>
-    <p class="small dim" id="s_status" style="margin-top:10px"></p>
-  </div>
-</div>
-
-<!-- Toasts Container -->
 <div id="toasts"></div>
 
-<!-- Vault Agent Floating Widget -->
-<button id="awbtn" onclick="awToggle()" title="Ask Vault Agent (Clickable results in Explorer)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#070714" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1.2" fill="#070714"/><circle cx="14.5" cy="14" r="1.2" fill="#070714"/><path d="M12 9V5M9 5h6"/></svg></button>
-
-<div id="awpanel">
-  <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--line);justify-content:space-between">
-    <div class="row" style="gap:10px">
-      <span class="logo" style="width:28px;height:28px;font-size:14px;border-radius:8px">A</span>
-      <div>
-        <div style="font-weight:700;font-size:13.5px">Vault Agent</div>
-        <div class="small" style="color:var(--mint);font-size:11px">● reads local index · gives clickable results</div>
-      </div>
-    </div>
-    <button class="btn-ghost" style="padding:4px 8px;font-size:12px" onclick="awToggle()">✕</button>
-  </div>
-  <div id="awlog"></div>
-  <div id="awchips"></div>
-  <form id="awform" onsubmit="awSubmit(event)">
-    <input id="awin" placeholder="Ask or search (e.g. Find my notes on inheritance)…" autocomplete="off" onkeydown="if(event.key==='Escape')awToggle()">
-    <button class="btn-pri" style="padding:7px 13px">➤</button>
-  </form>
-</div>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-9 9"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></symbol>
+  <symbol id="i-disk" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M5.5 13 8 4h8l2.5 9M7 16.5h.01"/></symbol>
+  <symbol id="i-tidy" viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h6"/><path d="m16 15 2 2 4-4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.8 7.5 9 4.3-1.2 7.5-4.5 7.5-9V6z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-net" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-reveal" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/><path d="M12 11v5M9.5 13.5 12 11l2.5 2.5"/></symbol>
+</svg>
 
 <script>
-/* -------------------------------------------------------------
- * Application State & History Navigation Stack (Back / Forward)
- * ------------------------------------------------------------- */
-const state = {
-  power: false,
-  tab: 'dashboard',
-  treePath: '',
-  lsPath: '',
-  highlightPath: '',
-  plan: null,
-  sel: new Set(),
-  clean: true,
-  sort: 'name',
-  activeToken: null
+"use strict";
+/* =====================================================================
+   Aegis frontend — one file, no build step, talks only to 127.0.0.1.
+   ===================================================================== */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const view = () => $("#view");
+const S = {
+  dash: null, drives: null, cwd: "", power: false, filter: "", selected: null,
+  searchQ: "", storageTab: "largest", sheetToken: null, sheetDone: null,
+  scanning: false, lastScanDone: true,
 };
 
-// Navigation History Stack
-const navHistory = [];
-let navIndex = -1;
-let isNavigatingHistory = false;
+/* ---------- utilities ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const attr = s => esc(JSON.stringify(s));
+function bytes(b) {
+  b = +b || 0;
+  if (b < 1024) return b + " B";
+  const u = ["KB", "MB", "GB", "TB"]; let i = -1;
+  do { b /= 1024; i++; } while (b >= 1024 && i < u.length - 1);
+  return (b >= 100 ? b.toFixed(0) : b.toFixed(1)) + " " + u[i];
+}
+function when(ts) {
+  if (!ts) return "";
+  const d = new Date(ts * 1000), s = (Date.now() - d) / 1000;
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + " min ago";
+  if (s < 86400) return Math.floor(s / 3600) + " h ago";
+  if (s < 86400 * 7) return Math.floor(s / 86400) + " days ago";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+const num = n => (+n || 0).toLocaleString();
+const base = p => (p || "").replace(/[\\/]+$/, "").split(/[\\/]/).pop() || p;
+const dirname = p => { const s = (p || "").replace(/[\\/]+$/, ""); const i = Math.max(s.lastIndexOf("\\"), s.lastIndexOf("/")); return i > 0 ? s.slice(0, i) : s; };
+const isNetwork = p => /^\\\\/.test(p || "") || /^\/\//.test(p || "");
+const icon = (n, cls = "") => `<svg class="i ${cls}"><use href="#i-${n}"/></svg>`;
+function kindIcon(name, isDir) {
+  if (isDir) return "folder";
+  const e = (name.split(".").pop() || "").toLowerCase();
+  if (["jpg","jpeg","png","gif","webp","heic","bmp","svg"].includes(e)) return "image";
+  if (["mp4","mkv","mov","avi","webm"].includes(e)) return "video";
+  if (["mp3","wav","flac","ogg","m4a"].includes(e)) return "music";
+  if (["zip","rar","7z","tar","gz"].includes(e)) return "archive";
+  if (["js","jsx","ts","py","java","c","cpp","html","css","json","rs","go","sh"].includes(e)) return "code";
+  if (["pdf","doc","docx","txt","md","ppt","pptx","xls","xlsx","csv"].includes(e)) return "doc";
+  return "file";
+}
+const tierTag = t => t && t !== "Public" ? `<span class="tag ${esc(t)}">${t === "Sensitive" ? "Sensitive" : "Personal"}</span>` : "";
 
-function navPush(item) {
-  if (isNavigatingHistory) return;
-  // If we navigated back and then pushed a new state, drop forward states
-  if (navIndex < navHistory.length - 1) {
-    navHistory.splice(navIndex + 1);
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  let j = null;
+  try { j = await r.json(); } catch (_) { j = {}; }
+  if (!r.ok) throw new Error(j.error || j.detail || r.statusText);
+  return j;
+}
+function toast(msg, action, fn, ms = 4500) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span>${esc(msg)}</span>`;
+  if (action) {
+    const b = document.createElement("button");
+    b.textContent = action;
+    b.onclick = () => { el.remove(); fn(); };
+    el.appendChild(b);
   }
-  navHistory.push(item);
-  navIndex = navHistory.length - 1;
-  updateNavButtons();
+  $("#toasts").appendChild(el);
+  setTimeout(() => el.remove(), ms);
+}
+const fail = e => toast(e.message || String(e));
+const loading = (t = "Loading…") => `<div class="empty"><span class="spinner"></span><div class="small" style="margin-top:10px">${esc(t)}</div></div>`;
+function closeModal(id) { $("#" + id).classList.remove("open"); }
+
+function promptText(title, value, onOk) {
+  $("#a1Title").textContent = title;
+  const inp = $("#a1Input");
+  inp.value = value || "";
+  $("#ask1").classList.add("open");
+  setTimeout(() => { inp.focus(); const dot = inp.value.lastIndexOf("."); inp.setSelectionRange(0, dot > 0 ? dot : inp.value.length); }, 30);
+  const go = () => { const v = inp.value.trim(); if (!v) return; closeModal("ask1"); onOk(v); };
+  $("#a1Go").onclick = go;
+  inp.onkeydown = e => { if (e.key === "Enter") go(); if (e.key === "Escape") closeModal("ask1"); };
 }
 
-function updateNavButtons() {
-  const btnB = document.getElementById('btnBack');
-  const btnF = document.getElementById('btnFwd');
-  if (btnB) btnB.disabled = navIndex <= 0;
-  if (btnF) btnF.disabled = navIndex >= navHistory.length - 1;
+/* ---------- routing ---------- */
+const ROUTES = { home: vHome, search: vSearch, files: vFiles, storage: vStorage, tidy: vTidy, privacy: vPrivacy, bin: vBin };
+function go(route, params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const h = "#/" + route + (q ? "?" + q : "");
+  if (location.hash === h) render(); else location.hash = h;
 }
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const [r, q] = h.split("?");
+  return { route: ROUTES[r] ? r : "home", params: Object.fromEntries(new URLSearchParams(q || "")) };
+}
+function render() {
+  const { route, params } = parseHash();
+  $$("#nav a").forEach(a => a.classList.toggle("on", a.dataset.r === route));
+  $("#main").scrollTop = 0;
+  ROUTES[route](params);
+}
+window.addEventListener("hashchange", render);
+$$("#nav a").forEach(a => a.onclick = () => go(a.dataset.r));
 
-function navBack() {
-  if (navIndex > 0) {
-    navIndex--;
-    applyHistoryState(navHistory[navIndex]);
-    updateNavButtons();
+/* ---------- change engine (preview -> confirm -> commit) ---------- */
+async function change(kind, payload, after) {
+  let p;
+  try { p = await api("/api/change/preview", { kind, ...payload }); } catch (e) { return fail(e); }
+  if (!p.ok) return toast(p.error || "Couldn't prepare that change.");
+  if (!p.count) {
+    const why = (p.blocked || []).map(b => b.reason).filter(Boolean);
+    return toast(why.length ? "Not allowed: " + [...new Set(why)].join("; ") : "Nothing to change.");
   }
+  S.sheetToken = p.token; S.sheetDone = after;
+  $("#shTitle").textContent = p.title;
+  $("#shNote").textContent = p.note || (p.reversible ? "You can undo this afterwards." : "");
+  const groups = (p.groups || []).map(g => {
+    const head = g.to && g.from !== g.to
+      ? `${esc(g.from ? base(g.from) || g.from : "")} <span class="faint">→</span> ${esc(base(g.to) || g.to)}`
+      : esc(g.from || g.to);
+    const items = g.items.slice(0, 40).map(it => `<div class="gi">${icon(kindIcon(it.name, it.is_dir), "faint")}<span class="grow">${esc(it.name)}${it.new_name && it.new_name !== it.name ? ` <span class="faint">→</span> <b>${esc(it.new_name)}</b>` : ""}</span><span class="small faint">${it.size ? bytes(it.size) : ""}</span></div>`).join("");
+    const more = g.items.length > 40 ? `<div class="gi faint">and ${g.items.length - 40} more…</div>` : "";
+    return `<div class="group"><div class="gh">${head}</div>${items}${more}</div>`;
+  }).join("");
+  const blocked = (p.blocked || []).length ? `<div class="note warn" style="margin-top:10px">${p.blocked.length} item(s) skipped: ${esc([...new Set(p.blocked.map(b => b.reason))].join("; "))}</div>` : "";
+  $("#shBody").innerHTML = `<div class="small muted">${p.count} item${p.count === 1 ? "" : "s"}${p.bytes ? " · " + bytes(p.bytes) : ""}</div>${groups}${blocked}`;
+  const goBtn = $("#shGo");
+  goBtn.textContent = p.verb || "Apply";
+  goBtn.className = "btn " + (p.destructive && !p.reversible ? "danger solid" : "primary");
+  goBtn.disabled = false;
+  goBtn.onclick = commitSheet;
+  $("#sheet").classList.add("open");
 }
-
-function navForward() {
-  if (navIndex < navHistory.length - 1) {
-    navIndex++;
-    applyHistoryState(navHistory[navIndex]);
-    updateNavButtons();
-  }
-}
-
-function applyHistoryState(item) {
-  if (!item) return;
-  isNavigatingHistory = true;
+async function commitSheet() {
+  const btn = $("#shGo"); btn.disabled = true;
   try {
-    if (item.tab && item.tab !== state.tab) {
-      tab(item.tab, null, false);
-    }
-    if (item.tab === 'explorer' && item.path) {
-      goTree(item.path, false);
-      if (item.highlight) {
-        highlightItem(item.highlight);
-      }
-    }
-  } finally {
-    isNavigatingHistory = false;
-  }
+    const r = await api("/api/change/commit", { token: S.sheetToken });
+    $("#sheet").classList.remove("open");
+    if (!r.ok) return toast(r.error);
+    const msg = r.failed ? `${r.done} done, ${r.failed} couldn't be changed.` : `${r.title} — done.`;
+    if (r.undoable) toast(msg, "Undo", () => undo(r.batch), 7000); else toast(msg);
+    refreshBin();
+    if (S.sheetDone) S.sheetDone(r); else render();
+  } catch (e) { btn.disabled = false; fail(e); }
 }
+function closeSheet() {
+  if (S.sheetToken) api("/api/change/cancel", { token: S.sheetToken }).catch(() => {});
+  S.sheetToken = null;
+  $("#sheet").classList.remove("open");
+}
+async function undo(batch) {
+  try {
+    const p = await api("/api/change/preview", { kind: "undo", batch });
+    if (!p.ok || !p.count) return toast("Nothing left to undo.");
+    const r = await api("/api/change/commit", { token: p.token });
+    toast(r.ok ? "Undone." : (r.error || "Couldn't undo."));
+    refreshBin(); render();
+  } catch (e) { fail(e); }
+}
+const trash = (paths, after) => change("trash", { paths }, after);
+const renameOne = (path, name) => promptText("Rename", name, v => v !== name && change("rename", { path, new_name: v }));
 
-// Global Keyboard Navigation (Alt+Left, Alt+Right)
-window.addEventListener('keydown', e => {
-  if (e.altKey && e.key === 'ArrowLeft') {
-    e.preventDefault();
-    navBack();
-  } else if (e.altKey && e.key === 'ArrowRight') {
-    e.preventDefault();
-    navForward();
-  }
+/* ---------- open / reveal / preview ---------- */
+async function openPath(path) { try { const r = await api("/api/open", { path }); if (!r.ok) toast(r.error || "Couldn't open."); } catch (e) { fail(e); } }
+async function revealPath(path) { try { const r = await api("/api/reveal", { path }); if (!r.ok) toast(r.error || "Couldn't show it."); } catch (e) { fail(e); } }
+
+async function preview(path) {
+  $("#dvTitle").textContent = base(path);
+  $("#dvSub").textContent = dirname(path);
+  $("#dvBody").innerHTML = loading("Opening…");
+  $("#dvFoot").innerHTML = "";
+  $("#drawer").classList.add("open"); $("#scrim").classList.add("open");
+  let f;
+  try { f = await api("/api/file/read?path=" + encodeURIComponent(path)); }
+  catch (e) { $("#dvBody").innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  const raw = "/api/file/raw?path=" + encodeURIComponent(f.path);
+  const pii = (f.pii || "").split(",").map(s => s.trim()).filter(Boolean);
+  let content;
+  if (f.is_image) content = `<img src="${raw}" alt="">`;
+  else if (f.is_pdf) content = `<iframe src="${raw}"></iframe>`;
+  else if (f.is_video) content = `<video src="${raw}" controls></video>`;
+  else if (f.is_audio) content = `<audio src="${raw}" controls style="width:100%"></audio>`;
+  else if (f.is_text && f.content) content = `<pre>${esc(f.content.slice(0, 120000))}</pre>${f.truncated || f.content.length > 120000 ? '<p class="small faint">Showing the beginning of the file.</p>' : ""}`;
+  else content = `<div class="note">No preview for this kind of file. You can open it with its usual app.</div>`;
+  $("#dvBody").innerHTML = `
+    <dl class="meta">
+      <dt>Size</dt><dd>${bytes(f.size)}</dd>
+      <dt>Modified</dt><dd>${new Date(f.mtime * 1000).toLocaleString()}</dd>
+      <dt>Privacy</dt><dd>${f.tier === "Sensitive" ? '<span class="tag Sensitive">Sensitive</span> never sent to any cloud service' : f.tier === "Internal" ? '<span class="tag Internal">Personal</span> sent only after redaction' : '<span class="tag ok">Ordinary</span>'}</dd>
+      ${pii.length ? `<dt>Found inside</dt><dd>${pii.map(t => `<span class="tok">${esc(t)}</span>`).join(" ")}</dd>` : ""}
+    </dl>${content}`;
+  const ro = isNetwork(f.path);
+  $("#dvFoot").innerHTML = `
+    <button class="btn primary" onclick='openPath(${attr(f.path)})'>${icon("open")}Open</button>
+    <button class="btn" onclick='revealPath(${attr(f.path)})'>${icon("reveal")}Show in folder</button>
+    <button class="btn" onclick='navigator.clipboard.writeText(${attr(f.path)});toast("Path copied")'>Copy path</button>
+    <span class="grow"></span>
+    ${ro ? '<span class="small faint">Network location — read-only</span>' : `
+    <button class="btn" onclick='closeDrawer();renameOne(${attr(f.path)},${attr(f.name)})'>${icon("pen")}Rename</button>
+    <button class="btn danger" onclick='closeDrawer();trash([${attr(f.path)}])'>${icon("trash")}Move to Bin</button>`}`;
+}
+function closeDrawer() { $("#drawer").classList.remove("open"); $("#scrim").classList.remove("open"); }
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { closeDrawer(); closeSheet(); closeModal("settings"); }
+  if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); $("#topSearch").focus(); }
 });
 
-function navTab(t, el) {
-  tab(t, el, true);
-}
-
-function tab(t, el, push = true) {
+/* ---------- scanning ---------- */
+async function startScan(path) {
   try {
-    state.tab = t;
-    document.querySelectorAll('#nav button').forEach(x => x.classList.remove('on'));
-    const b = el || document.querySelector(`[data-t=${t}]`);
-    if (b) b.classList.add('on');
-    if (push) {
-      navPush({ tab: t, path: state.treePath });
-    }
-    const m = document.getElementById('main');
-    if (m) {
-      m.classList.remove('view-enter');
-      void m.offsetWidth;
-      m.classList.add('view-enter');
-    }
-    const views = {
-      dashboard: vDashboard,
-      search: vSearch,
-      explorer: vExplorer,
-      storage: vStorage,
-      bin: vBin,
-      organize: vOrganize,
-      ledger: vLedger
-    };
-    if (views[t]) views[t]();
-  } catch (e) {
-    toast('Navigation error: ' + e.message);
-  }
+    const r = await api("/api/scan", { paths: path ? [path] : [] });
+    if (r.started === false) toast(r.reason || "A scan is already running.");
+    S.scanning = true; pollScan();
+  } catch (e) { fail(e); }
 }
-
-/* -------------------------------------------------------------
- * Helpers & API
- * ------------------------------------------------------------- */
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const qesc = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-const fmt = n => n >= 1073741824 ? (n / 1073741824).toFixed(1) + ' GB' : n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : n >= 1024 ? (n / 1024).toFixed(0) + ' KB' : (n || 0) + ' B';
-const dt = t => t ? new Date(t * 1000).toLocaleString() : '—';
-const PAL = ['#8075ff', '#30d158', '#ff9f0a', '#0a84ff', '#bf5af2', '#64d2ff', '#ffd60a', '#8e8e93'];
-
-async function api(m, u, b) {
-  const r = await fetch(u, {
-    method: m,
-    headers: { 'Content-Type': 'application/json' },
-    body: b ? JSON.stringify(b) : undefined
-  });
-  return r.json();
-}
-
-function toast(m) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = m;
-  document.getElementById('toasts').appendChild(t);
-  setTimeout(() => t.remove(), 3200);
-}
-function lsGet(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } }
-function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-
-/* -------------------------------------------------------------
- * Visual Confirmation Sheet Engine (Before Making ANY Changes)
- * ------------------------------------------------------------- */
-let currentSheetCallback = null;
-
-async function requestChange(kind, payload, onComplete) {
-  try {
-    const prev = await api('POST', '/api/change/preview', { kind, ...payload });
-    if (!prev.ok) {
-      toast(prev.error || 'Change failed pre-check');
-      return;
-    }
-    if (!prev.ops || !prev.ops.length) {
-      toast('No changes needed.');
-      return;
-    }
-    openSheet(prev, onComplete);
-  } catch (e) {
-    toast('Change request error: ' + e.message);
-  }
-}
-
-function openSheet(previewData, onComplete) {
-  state.activeToken = previewData.token;
-  currentSheetCallback = onComplete;
-  const sheet = document.getElementById('confirmSheet');
-  const title = document.getElementById('sheetTitle');
-  const sub = document.getElementById('sheetSub');
-  const body = document.getElementById('sheetBody');
-  const act = document.getElementById('sheetActionBtn');
-  const icon = document.getElementById('sheetIcon');
-  const pill = document.getElementById('sheetStatusPill');
-
-  title.textContent = previewData.title || 'Review File Changes';
-  sub.textContent = `${previewData.count} item${previewData.count !== 1 ? 's' : ''} affected (${fmt(previewData.bytes)})`;
-  act.textContent = previewData.verb || 'Apply';
-
-  if (previewData.destructive) {
-    icon.className = 'sheet-icon-bubble danger';
-    icon.textContent = '🗑';
-    act.className = 'btn-pri danger';
-  } else {
-    icon.className = 'sheet-icon-bubble';
-    icon.textContent = '✦';
-    act.className = 'btn-pri';
-  }
-
-  // Reversibility Badge
-  if (previewData.reversible) {
-    pill.innerHTML = `<span class="badge ok">✓ Safe & Reversible · Changes can be undone anytime</span>`;
-  } else {
-    pill.innerHTML = `<span class="badge danger">⚠ Irreversible Action · Items will be permanently deleted</span>`;
-  }
-
-  // Render Visual Before/After Groups
-  let html = '';
-  if (previewData.note) {
-    html += `<div class="small dim" style="margin-bottom:12px;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:9px">${esc(previewData.note)}</div>`;
-  }
-
-  if (previewData.groups && previewData.groups.length) {
-    html += previewData.groups.map(g => `
-      <div class="diff-card">
-        <div class="diff-row" style="margin-bottom:10px">
-          <div class="diff-from">
-            <div class="diff-label">From Location</div>
-            <div class="diff-val truncate">📁 ${esc(g.from || 'Current Location')}</div>
-          </div>
-          <div class="diff-arrow">➔</div>
-          <div class="diff-to">
-            <div class="diff-label">To Location</div>
-            <div class="diff-val truncate">📁 ${esc(g.to || 'Same Folder')}</div>
-          </div>
-        </div>
-        <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">
-          ${g.items.slice(0, 15).map(it => `
-            <div class="row" style="justify-content:space-between;padding:4px 0;font-size:12.5px">
-              <span class="truncate" style="flex:1">
-                ${it.is_dir ? '📁' : '📄'} <b>${esc(it.name)}</b>
-                ${it.new_name && it.new_name !== it.name ? `<span style="color:var(--mint)"> ➔ ${esc(it.new_name)}</span>` : ''}
-              </span>
-              <span class="dim small" style="white-space:nowrap">${fmt(it.size)}</span>
-            </div>
-          `).join('')}
-          ${g.items.length > 15 ? `<div class="small dim" style="margin-top:4px">+ ${g.items.length - 15} more items</div>` : ''}
-        </div>
-      </div>
-    `).join('');
-  }
-
-  if (previewData.blocked && previewData.blocked.length) {
-    html += `<div style="margin-top:12px"><div class="diff-label" style="color:var(--peach)">Skipped / Blocked Items (${previewData.blocked.length})</div>
-      ${previewData.blocked.map(b => `<div class="small dim">• ${esc(b.src)}: ${esc(b.reason)}</div>`).join('')}
-    </div>`;
-  }
-
-  body.innerHTML = html;
-  sheet.classList.add('open');
-}
-
-function closeSheet() {
-  const sheet = document.getElementById('confirmSheet');
-  sheet.classList.remove('open');
-  if (state.activeToken) {
-    api('POST', '/api/change/cancel', { token: state.activeToken }).catch(() => {});
-    state.activeToken = null;
-  }
-}
-
-async function commitSheet() {
-  if (!state.activeToken) return;
-  const btn = document.getElementById('sheetActionBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Applying…';
-  try {
-    const res = await api('POST', '/api/change/commit', { token: state.activeToken });
-    closeSheet();
-    if (res.ok) {
-      toast(`Successfully completed: ${res.title} (${res.done} items)`);
-      updateBinBadge();
-      if (currentSheetCallback) currentSheetCallback(res);
-      // Refresh current active view
-      tab(state.tab, null, false);
-    } else {
-      toast(res.error || 'Commit failed');
-    }
-  } catch (e) {
-    toast('Execution error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-/* -------------------------------------------------------------
- * Direct Clickable Explorer Navigation
- * ------------------------------------------------------------- */
-function jumpToExplorer(targetPath) {
-  if (!targetPath) return;
-  tab('explorer', null, true);
-  // If target is file, open parent folder and highlight
-  setTimeout(async () => {
-    try {
-      const isDir = targetPath.endsWith('/') || targetPath.endsWith('\\');
-      let folderPath = targetPath;
-      let fileName = '';
-      if (!isDir) {
-        const parts = targetPath.split(/[\\/]/);
-        fileName = parts.pop();
-        folderPath = parts.join('/') || '/';
-      }
-      await goTree(folderPath);
-      if (fileName) {
-        highlightItem(targetPath);
-      }
-    } catch (e) {}
-  }, 100);
-}
-
-function highlightItem(fullPath) {
-  state.highlightPath = fullPath;
-  const targetNorm = (fullPath || '').replace(/\\/g, '/').toLowerCase();
-  setTimeout(() => {
-    const rows = document.querySelectorAll('#ls .frow');
-    rows.forEach(r => {
-      const rowNorm = (r.dataset.path || '').replace(/\\/g, '/').toLowerCase();
-      if (rowNorm && (rowNorm === targetNorm || rowNorm.endsWith('/' + targetNorm) || rowNorm.endsWith(targetNorm))) {
-        r.classList.add('highlight');
-        r.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(() => r.classList.remove('highlight'), 3800);
-      }
-    });
-  }, 250);
-}
-
-/* -------------------------------------------------------------
- * Scanning & Quick Bar
- * ------------------------------------------------------------- */
-async function startScan() {
-  const v = document.getElementById('scanpaths').value;
-  const paths = v.split(',').map(s => s.trim()).filter(Boolean);
-  document.getElementById('scanbtn').disabled = true;
-  try {
-    await api('POST', '/api/scan', { paths });
-  } catch (e) {
-    toast('Backend unreachable');
-    document.getElementById('scanbtn').disabled = false;
-    return;
-  }
-  loadQuick();
-  pollProg();
-}
-
-async function stopScan() {
-  try { await api('POST', '/api/scan/stop'); } catch (e) {}
-  toast('Stopping scan…');
-}
-
-async function pollProg() {
+async function pollScan() {
   let p;
-  try { p = await api('GET', '/api/scan/progress'); } catch (e) { return; }
-  document.getElementById('prog').textContent = p.running ? `scanning ${p.phase} · ${p.seen} files` : (p.done ? (p.error ? 'scan error' : `scan complete · ${p.seen} files`) : '');
-  document.getElementById('cancel').style.display = p.running ? '' : 'none';
-  const vb = document.getElementById('vaultbadge');
+  try { p = await api("/api/scan/progress"); } catch (_) { return setTimeout(pollScan, 2000); }
+  const el = $("#scanStat");
   if (p.running) {
-    vb.textContent = '◌ scanning…';
-    vb.className = 'badge warn';
+    S.scanning = true;
+    const phase = { metadata: "Finding files", content: "Reading contents & checking for personal data", embeddings: "Learning what files are about" }[p.phase] || "Working";
+    el.innerHTML = `<span class="spinner"></span><span>${phase}… ${num(p.seen)} files</span><button class="btn sm" onclick="api('/api/scan/stop',{}).then(()=>toast('Stopping…'))">Stop</button>`;
+    setTimeout(pollScan, 900);
   } else {
-    vb.textContent = '● vault loaded';
-    vb.className = 'badge ok';
-    document.getElementById('scanbtn').disabled = false;
-    if (state.tab === 'storage') vStorage();
-    else if (state.tab === 'dashboard') vDashboard();
-  }
-  if (p.running) setTimeout(pollProg, 1400);
-}
-
-async function loadQuick() {
-  try {
-    const d = await api('GET', '/api/drives');
-    window._home = d.home;
-    const chips = [{ label: 'Home', path: d.home }, ...(d.specials || []).filter(s => /downloads|documents|desktop/i.test(s.label))];
-    window._quickDash = chips.slice(0, 3);
-    const rec = lsGet('aegis-recent', []);
-    document.getElementById('quick').innerHTML = '<span class="dim small">quick:</span>' +
-      chips.map(c => `<button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="quickScan('${qesc(c.path)}')">${esc(c.label)}</button>`).join('') +
-      rec.slice(0, 3).map(p => `<button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="quickScan('${qesc(p)}')">🕘 ${esc(String(p).split(/[\\/]/).filter(Boolean).pop())}</button>`).join('');
-  } catch (e) {}
-}
-
-function quickScan(p) {
-  if (!p) return;
-  document.getElementById('scanpaths').value = p;
-  startScan();
-}
-
-function topSearch() {
-  const v = document.getElementById('topq').value;
-  if (!v.trim()) return;
-  tab('search', null, true);
-  setTimeout(() => {
-    const q = document.getElementById('q');
-    if (q) { q.value = v; doSearch(); }
-  }, 90);
-}
-
-async function updateBinBadge() {
-  try {
-    const b = await api('GET', '/api/bin');
-    const badge = document.getElementById('binCountBadge');
-    if (badge) {
-      if (b.count > 0) {
-        badge.textContent = b.count;
-        badge.style.display = 'inline-block';
-      } else {
-        badge.style.display = 'none';
-      }
+    el.innerHTML = "";
+    if (S.scanning) {
+      S.scanning = false;
+      if (p.error) toast("Scan stopped: " + p.error); else toast(`Finished — ${num(p.seen)} files looked at.`);
+      S.dash = null; S.insights = null; render();
     }
-  } catch (e) {}
+  }
 }
 
-/* -------------------------------------------------------------
- * VIEW: DASHBOARD
- * ------------------------------------------------------------- */
-async function vDashboard() {
-  const m = document.getElementById('main');
-  m.innerHTML = `<div class="stats">${'<div class="stat skel" style="height:96px"></div>'.repeat(4)}</div>
-  <div class="grid2"><div class="glass skel" style="height:280px"></div><div class="glass skel" style="height:280px"></div></div>`;
+/* ---------- shared small renderers ---------- */
+function fileRow(f, opts = {}) {
+  const sub = opts.sub ?? (f.folder || dirname(f.path));
+  return `<div class="item clickable" onclick='preview(${attr(f.path)})'>
+    ${opts.check ? `<input type="checkbox" class="pick" value="${esc(f.path)}" onclick="event.stopPropagation()" ${opts.checked ? "checked" : ""}>` : ""}
+    <span class="ic">${icon(kindIcon(f.name || base(f.path), f.is_dir))}</span>
+    <div class="grow"><div class="nm">${esc(f.name || base(f.path))} ${tierTag(f.tier)}</div><div class="sub">${esc(sub)}</div></div>
+    <div class="meta">${opts.meta ?? bytes(f.size)}</div>
+  </div>`;
+}
+const picked = (root = view()) => $$(".pick:checked", root).map(x => x.value);
+function needsScan(msg = "Aegis hasn't looked at your files yet.") {
+  return `<div class="card empty"><h3>${esc(msg)}</h3><p>Choose a folder on the Overview page and Aegis will read it — entirely on this computer.</p><button class="btn primary" onclick="go('home')">Go to Overview</button></div>`;
+}
 
-  let d;
-  try { d = await api('GET', '/api/dashboard'); } catch (e) {
-    m.innerHTML = `<div class="glass" style="text-align:center;padding:40px"><h2>Backend Not Reachable</h2><p class="dim">Run <kbd>python app.py</kbd> in aegis.</p></div>`;
-    return;
-  }
+/* =====================================================================
+   OVERVIEW
+   ===================================================================== */
+async function vHome() {
+  view().innerHTML = loading();
+  let d, drv;
+  try { [d, drv] = await Promise.all([api("/api/dashboard"), S.drives || api("/api/drives")]); } catch (e) { view().innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  S.dash = d; S.drives = drv;
+  const scanCard = (title, lead) => `
+    <div class="card">
+      <h3>${title}</h3>
+      <p class="muted" style="margin:-4px 0 14px">${lead}</p>
+      <div class="row wrap">
+        <input id="scanPath" class="grow" placeholder="${esc(drv.home)}" style="min-width:260px">
+        <button class="btn primary" onclick="startScan($('#scanPath').value.trim())">Scan folder</button>
+      </div>
+      <div class="row wrap" style="margin-top:12px">
+        <span class="small faint">Quick picks:</span>
+        ${drv.specials.map(s => `<button class="chip" onclick='$("#scanPath").value=${attr(s.path)}'>${esc(s.label)}</button>`).join("")}
+      </div>
+    </div>`;
 
   if (!d.indexed) {
-    m.innerHTML = `<div class="glass" style="text-align:center;padding:50px 20px">
-      <div style="font-size:48px;margin-bottom:12px">❖</div>
-      <h2 style="margin:0 0 8px">Welcome to Aegis</h2>
-      <p class="dim" style="max-width:520px;margin:0 auto 18px">Your private, Apple-grade file manager. Everything runs 100% on this computer with zero cloud egress. Scan a folder to start.</p>
-      <div class="row" style="justify-content:center;gap:10px" id="dscan"></div>
+    view().innerHTML = `
+      <div class="head"><h1>Welcome.</h1><p>Aegis helps you find files by what they're about, free up space, and keep personal documents private. Start by letting it read a folder — nothing is uploaded.</p></div>
+      ${scanCard("Pick a folder to begin", "Your Documents or Downloads folder is a good place to start. Large folders take a minute or two.")}`;
+    return;
+  }
+  const cats = d.by_category || [];
+  const maxCat = Math.max(1, ...cats.map(c => c[1]));
+  view().innerHTML = `
+    <div class="head"><h1>${num(d.files)} files, ${bytes(d.total)}.</h1><p>Here's what stands out, and what you might want to do about it.</p></div>
+    <div class="stats">
+      <div class="stat"><b>${bytes(d.reclaimable)}</b><span>could be freed</span></div>
+      <div class="stat"><b>${num(d.sensitive_count ?? (d.sensitive || []).length)}</b><span>sensitive files kept local</span></div>
+      <div class="stat"><b>${d.bytes_sent ? bytes(d.bytes_sent) : "None"}</b><span>sent to the cloud</span></div>
+      <div class="stat"><b>${num(d.entities)}</b><span>personal details redacted</span></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>Suggestions</h3><div id="sugg">${loading("Thinking…")}</div></div>
+      <div class="card"><h3>What takes up space</h3>
+        <div class="bars">${cats.map(([c, b]) => `<div class="b"><span>${esc(c)}</span><div class="track"><div class="fill" style="width:${(b / maxCat * 100).toFixed(1)}%"></div></div><span>${bytes(b)}</span></div>`).join("") || '<p class="faint">No data.</p>'}</div>
+        <div style="margin-top:12px"><button class="link" onclick="go('storage')">Explore storage</button></div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div><h3 style="margin-bottom:10px">Largest files</h3><div class="list">${(d.largest || []).map(f => fileRow(f)).join("") || '<div class="empty">None</div>'}</div></div>
+      <div><h3 style="margin-bottom:10px">Sensitive files</h3><div class="list">${(d.sensitive || []).map(f => fileRow({ ...f, tier: "Sensitive" }, { meta: (f.types || []).map(t => `<span class="tok">${esc(t)}</span>`).join(" ") || bytes(f.size) })).join("") || '<div class="empty small">Nothing sensitive found.</div>'}</div></div>
+    </div>
+    <div style="margin-top:16px">${scanCard("Scan another folder", "Add more places, or rescan to pick up changes. Unchanged files are skipped.")}</div>`;
+  loadSuggestions(d);
+}
+async function loadSuggestions(d) {
+  const out = [];
+  try {
+    const un = await api("/api/unnamed");
+    if (un.count) out.push({ t: `${un.count} files have names like “IMG_2041” or “Untitled”.`, a: "Suggest better names", fn: "go('tidy')" });
+  } catch (_) {}
+  if (!d.dup_groups) out.push({ t: "Duplicate copies haven't been checked yet.", a: "Look for duplicates", fn: "go('storage',{tab:'dups'})" });
+  else out.push({ t: `${d.dup_groups} sets of identical files are using ${bytes(d.dup_waste)}.`, a: "Review duplicates", fn: "go('storage',{tab:'dups'})" });
+  if (d.junk_count) out.push({ t: `${num(d.junk_count)} temporary or cache files found.`, a: "Review leftovers", fn: "go('storage',{tab:'junk'})" });
+  if ((d.sensitive || []).length) out.push({ t: "Some files contain ID numbers, bank or login details.", a: "See what's protected", fn: "go('privacy')" });
+  try {
+    if (!S.insights) S.insights = await api("/api/insights", {});
+    ((S.insights.data || {}).insights || []).forEach(i => { if (!/scan first/i.test(i.title)) out.push({ t: `${i.title}. ${i.detail || ""}` }); });
+  } catch (_) {}
+  const el = $("#sugg"); if (!el) return;
+  el.innerHTML = out.length ? `<div class="stack">${out.slice(0, 5).map(s => `<div><div>${esc(s.t)}</div>${s.a ? `<button class="link small" onclick="${s.fn}">${esc(s.a)}</button>` : ""}</div>`).join("")}</div>` : '<p class="faint">Everything looks tidy.</p>';
+}
+
+/* =====================================================================
+   SEARCH
+   ===================================================================== */
+const EXAMPLES = ["notes about recursion", "bank statement from last year", "photos from december", "my resume", "python code for data cleaning", "invoices"];
+function vSearch(params) {
+  S.searchQ = params.q || "";
+  view().innerHTML = `
+    <div class="head"><h1>Search by meaning</h1><p>Describe what you're looking for in your own words. Aegis matches topics, file types and dates — you don't need the exact file name.</p></div>
+    <div class="bigsearch">${icon("search")}<input id="bigQ" value="${esc(S.searchQ)}" placeholder="e.g. lecture notes on inheritance from last semester" autocomplete="off"></div>
+    <div class="row wrap" style="margin:12px 0 22px">${EXAMPLES.map(x => `<button class="chip" onclick='runSearch(${attr(x)})'>${esc(x)}</button>`).join("")}</div>
+    <div id="results"></div>`;
+  const inp = $("#bigQ");
+  let t;
+  inp.oninput = () => { clearTimeout(t); t = setTimeout(() => doSearch(inp.value), 350); };
+  inp.onkeydown = e => { if (e.key === "Enter") { clearTimeout(t); runSearch(inp.value); } };
+  inp.focus();
+  if (S.searchQ) doSearch(S.searchQ);
+}
+function runSearch(q) { q = (q || "").trim(); if (!q) return; history.replaceState(null, "", "#/search?q=" + encodeURIComponent(q)); $$("#nav a").forEach(a => a.classList.toggle("on", a.dataset.r === "search")); if (!$("#bigQ")) return vSearch({ q }); $("#bigQ").value = q; doSearch(q); }
+function hl(text, terms) {
+  let s = esc(text);
+  (terms || []).filter(t => t && t.length > 2).forEach(t => {
+    const re = new RegExp("(" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\w*)", "gi");
+    s = s.replace(re, "<mark>$1</mark>");
+  });
+  return s;
+}
+let searchSeq = 0;
+async function doSearch(q) {
+  q = (q || "").trim();
+  const box = $("#results"); if (!box) return;
+  if (!q) { box.innerHTML = ""; return; }
+  const seq = ++searchSeq;
+  box.innerHTML = loading("Searching…");
+  let r, d = S.dash;
+  try { [r, d] = await Promise.all([api("/api/search?limit=40&q=" + encodeURIComponent(q)), d || api("/api/dashboard")]); } catch (e) { box.innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  S.dash = d;
+  if (seq !== searchSeq) return;
+  if (!d.indexed) { box.innerHTML = needsScan(); return; }
+  const it = r.intent || {};
+  const bits = [];
+  if ((it.topic || []).length) bits.push(`about <b>${esc(it.topic.join(", "))}</b>`);
+  if ((it.kinds || []).length) bits.push(`kind: <b>${esc(it.kinds.join(", "))}</b>`);
+  if (it.time) bits.push(`from <b>${esc(it.time)}</b>`);
+  if ((it.related || []).length) bits.push(`also looking for <span class="muted">${esc(it.related.slice(0, 5).join(", "))}</span>`);
+  const folders = (r.folders || []).length ? `<div class="row wrap" style="margin-bottom:14px"><span class="small faint">Folders:</span>${r.folders.map(f => `<button class="chip" onclick='go("files",{path:${attr(f.path)}})'>${icon("folder")}${esc(f.name)}</button>`).join("")}</div>` : "";
+  const results = r.results || [];
+  box.innerHTML = `
+    <div class="small muted" style="margin-bottom:12px">${bits.length ? "Understood as " + bits.join(" · ") + " · " : ""}${results.length} result${results.length === 1 ? "" : "s"} in ${r.ms} ms</div>
+    ${folders}
+    ${results.length ? `<div class="list">${results.map(x => `
+      <div class="result" onclick='preview(${attr(x.path)})'>
+        <div class="row"><span class="ic faint">${icon(kindIcon(x.name))}</span><span class="nm grow">${hl(x.name, x.terms)}</span>${tierTag(x.tier)}<span class="small faint">${bytes(x.size)} · ${when(x.mtime)}</span></div>
+        ${(x.why || []).length ? `<div class="why">${esc(x.why.join(" · "))}</div>` : ""}
+        ${x.passage ? `<div class="passage">${hl(x.passage, x.terms)}</div>` : ""}
+        <div class="path">${esc(x.folder)}</div>
+      </div>`).join("")}</div>`
+    : `<div class="card empty"><h3>Nothing matched.</h3><p>Try fewer words, or describe the topic differently. If the file lives somewhere Aegis hasn't scanned, add that folder on the Overview page.</p></div>`}`;
+}
+$("#topSearch").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.value.trim()) { const q = e.target.value.trim(); e.target.value = ""; e.target.blur(); go("search", { q }); }
+});
+
+/* =====================================================================
+   FILES (explorer)
+   ===================================================================== */
+const netSaved = () => { try { return JSON.parse(localStorage.getItem("aegis.net") || "[]"); } catch (_) { return []; } };
+function saveNet(p) { const l = netSaved().filter(x => x !== p); l.unshift(p); localStorage.setItem("aegis.net", JSON.stringify(l.slice(0, 6))); }
+
+async function vFiles(params) {
+  if (!S.drives) { try { S.drives = await api("/api/drives"); } catch (e) { return fail(e); } }
+  S.cwd = params.path || S.cwd || S.drives.home;
+  S.selected = null; S.filter = "";
+  const d = S.drives;
+  const place = (label, path, ic) => `<a class="${S.cwd === path ? "on" : ""}" onclick='go("files",{path:${attr(path)}})'>${icon(ic)}${esc(label)}</a>`;
+  view().innerHTML = `
+    <div class="explorer">
+      <div class="places">
+        <h4>Places</h4>
+        ${place("Home", d.home, "home")}
+        ${d.specials.map(s => place(s.label, s.path, "folder")).join("")}
+        <h4>Drives</h4>
+        ${d.drives.map(x => place(x, x, "disk")).join("")}
+        <h4>Network</h4>
+        ${netSaved().map(p => place(base(p) || p, p, "net")).join("")}
+        <a onclick="addNetwork()">${icon("plus")}Connect to a share…</a>
+      </div>
+      <div>
+        <div class="row">
+          <button class="btn ghost" title="Up one level" onclick="upDir()">${icon("up")}</button>
+          <input id="pathBox" class="grow mono" value="${esc(S.cwd)}" spellcheck="false">
+          <button class="btn" onclick='go("files",{path:$("#pathBox").value.trim()})'>Go</button>
+        </div>
+        <div class="crumbs" id="crumbs"></div>
+        <div class="row wrap" style="margin-bottom:12px">
+          <input id="fFilter" placeholder="Filter this folder" style="width:220px">
+          <label class="check" title="Show hidden and system files (read-only)"><input type="checkbox" id="powerT" ${S.power ? "checked" : ""}> Show hidden &amp; system files</label>
+          <span class="grow"></span>
+          <span id="fsActions"></span>
+        </div>
+        <div id="fsNote"></div>
+        <div id="fsList">${loading()}</div>
+      </div>
     </div>`;
-    document.getElementById('dscan').innerHTML = (window._quickDash || []).map(c => `<button class="btn-pri" onclick="quickScan('${qesc(c.path)}')">Scan ${esc(c.label)}</button>`).join('');
-    return;
-  }
-
-  m.innerHTML = `
-    <div class="stats">
-      <div class="stat"><b>${fmt(d.total)}</b><span>TOTAL INDEXED</span><small>${d.files} files locally indexed</small></div>
-      <div class="stat"><b>${fmt(d.reclaimable)}</b><span>RECOVERABLE</span><small>${d.dup_groups} duplicate groups · ${d.junk_count} junk</small></div>
-      <div class="stat"><b>${d.sensitive}</b><span>SENSITIVE FILES</span><small>Auto-withheld from any egress</small></div>
-      <div class="stat"><b>${(d.bytes_sent / 1024).toFixed(1)} KB</b><span>CLOUD EGRESS</span><small>${d.entities} local PII tokens guarded</small></div>
-    </div>
-
-    <div class="grid2">
-      <div class="glass">
-        <h3 style="margin:0 0 10px">Space Distribution</h3>
-        <div>
-          ${(d.by_category || []).map(([cat, sz]) => `
-            <div style="margin-bottom:10px">
-              <div class="row" style="justify-content:space-between;font-size:12.5px;font-weight:500">
-                <span>📁 ${esc(cat)}</span><span class="dim">${fmt(sz)}</span>
-              </div>
-              <div class="bar"><i style="width:${Math.min(100, Math.round(100 * sz / (d.total || 1)))}%"></i></div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="glass">
-        <div class="row" style="justify-content:space-between;margin-bottom:12px">
-          <h3 style="margin:0">Largest Files</h3>
-          <button class="btn-ghost" style="padding:4px 9px;font-size:11px" onclick="tab('storage')">Storage Hub →</button>
-        </div>
-        ${(d.largest || []).map(f => `
-          <div class="frow xrow" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview · Double-click to open in Windows" style="cursor:pointer">
-            <span class="n" style="flex:1">📄 <b>${esc(f.name)}</b></span>
-            <span class="tier ${f.tier}">${f.tier}</span>
-            <span class="s">${fmt(f.size)}</span>
-            <div class="row" style="gap:4px">
-              <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
-              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
-              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(f.path)}'), '_blank')">Tab ↗</button>
-              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <div class="row" style="gap:8px">
-          <span style="font-size:18px">🛡</span>
-          <h3 style="margin:0">Privacy Shield & Local Guard</h3>
-        </div>
-        <button class="btn-pri" style="padding:5px 12px;font-size:12px" onclick="tab('ledger')">Open Privacy Shield →</button>
-      </div>
-      <p class="dim small" style="margin:0 0 12px">Every file is scanned for PII (Aadhaar, PAN, Passport, Bank, Cards) on-device. Sensitive files never leave this machine.</p>
-      <div class="row" style="gap:8px;flex-wrap:wrap">
-        ${(d.sensitive || []).slice(0, 6).map(f => `
-          <div class="file-card" onclick="${f.path ? `quickLook('${qesc(f.path)}')` : ''}" ondblclick="${f.path ? `op('${qesc(f.path)}')` : ''}" title="Click to preview file · Double-click to open in Windows" style="cursor:pointer">
-            <span class="icon">🔒</span>
-            <div class="info">
-              <div class="title">${esc(f.name)}</div>
-              <div class="sub">${(f.types || []).join(', ') || 'Sensitive'}</div>
-            </div>
-            ${f.path ? `
-              <div class="row" style="gap:4px">
-                <button class="btn-pri" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">👁️</button>
-                <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();op('${qesc(f.path)}')">🚀</button>
-                <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">📂</button>
-              </div>
-            ` : ''}
-          </div>
-        `).join('') || '<span class="dim small">No sensitive files found on this machine.</span>'}
-      </div>
-    </div>
-  `;
+  $("#pathBox").onkeydown = e => { if (e.key === "Enter") go("files", { path: e.target.value.trim() }); };
+  $("#fFilter").oninput = e => { S.filter = e.target.value.toLowerCase(); drawList(); };
+  $("#powerT").onchange = e => { S.power = e.target.checked; loadDir(); };
+  renderCrumbs();
+  loadDir();
 }
-
-/* -------------------------------------------------------------
- * VIEW: NATURAL LANGUAGE & SEMANTIC SEARCH
- * ------------------------------------------------------------- */
-function vSearch() {
-  document.getElementById('main').innerHTML = `
-    <div class="glass">
-      <div class="row" style="gap:10px">
-        <input id="q" size="48" style="font-size:14px;padding:9px 14px" placeholder='Natural language: "Find my notes about inheritance and polymorphism"' onkeydown="if(event.key==='Enter')doSearch()">
-        <button class="btn-pri" id="sbtn" onclick="doSearch()">Search</button>
-      </div>
-      <div class="row" style="margin-top:10px;gap:6px">
-        <span class="dim small">Examples:</span>
-        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('Find my notes about inheritance and polymorphism')">Inheritance & Polymorphism</button>
-        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('rent agreement last semester')">Rent Agreement</button>
-        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('kickoff meeting presentation')">Meeting Notes</button>
-        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('bank account statement')">Bank Statement</button>
-      </div>
-      <div id="searchIntent" style="margin-top:12px"></div>
-    </div>
-    <div id="searchResults"></div>
-  `;
+function addNetwork() {
+  promptText("Network share path (e.g. \\\\192.168.1.20\\shared)", "\\\\", v => { saveNet(v); go("files", { path: v }); });
 }
-
-function setQ(v) {
-  const el = document.getElementById('q');
-  if (el) { el.value = v; doSearch(); }
-}
-
-async function doSearch() {
-  const qi = document.getElementById('q');
-  if (!qi) return;
-  const q = qi.value.trim();
-  if (!q) return;
-
-  const btn = document.getElementById('sbtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>';
-  const out = document.getElementById('searchResults');
-  const intentBox = document.getElementById('searchIntent');
-  out.innerHTML = '<div class="glass skel" style="height:70px"></div><div class="glass skel" style="height:70px"></div>';
-
-  try {
-    const res = await api('GET', '/api/search?q=' + encodeURIComponent(q));
-    const intent = res.intent || {};
-
-    // Render Intent Breakdown
-    if (intent.topic && intent.topic.length) {
-      intentBox.innerHTML = `
-        <div class="row" style="gap:6px;font-size:11.5px;background:rgba(255,255,255,0.035);padding:8px 12px;border-radius:10px;border:1px solid var(--line)">
-          <span class="badge info">Meaning Understood</span>
-          ${intent.concepts && intent.concepts.length ? `<span class="badge ok">Concept: ${intent.concepts.join(', ')}</span>` : ''}
-          ${intent.kinds && intent.kinds.length ? `<span class="badge">Kind: ${intent.kinds.join(', ')}</span>` : ''}
-          ${intent.time ? `<span class="badge warn">Time: ${intent.time}</span>` : ''}
-          ${intent.related && intent.related.length ? `<span class="dim">Expanded: ${intent.related.slice(0, 4).join(', ')}</span>` : ''}
-        </div>
-      `;
-    }
-
-    let h = '';
-    // Matching Folders
-    if (res.folders && res.folders.length) {
-      h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Folders (${res.folders.length})</div>`;
-      h += res.folders.map(f => `
-        <div class="frow xrow" onclick="goTree('${qesc(f.path)}'); tab('explorer');" ondblclick="rev('${qesc(f.path)}')" title="Click to open in Explorer, double-click to reveal in Windows">
-          <span style="font-size:18px">📁</span>
-          <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.path)}</span></span>
-          <div class="row" style="gap:6px">
-            <button class="btn-pri" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();goTree('${qesc(f.path)}'); tab('explorer');">Open 📂</button>
-            <button class="btn-ghost" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal in Windows ↗</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Matching Files
-    const results = res.results || [];
-    if (results.length) {
-      h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Files (${results.length} found in ${res.ms}ms)</div>`;
-      h += results.map(r => `
-        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="quickLook('${qesc(r.path)}')" ondblclick="op('${qesc(r.path)}')" title="Click to preview file · Double-click to open in Windows">
-          <div class="row" style="justify-content:space-between;margin-bottom:6px">
-            <div class="row" style="gap:8px">
-              <span class="tier ${r.tier}">${r.tier}</span>
-              <span class="badge ${r.match === 'Best match' ? 'ok' : 'info'}">${r.match}</span>
-              <b style="font-size:14.5px">${esc(r.name)}</b>
-            </div>
-            <div class="row" style="gap:6px">
-              <button class="btn-pri" style="padding:4px 11px;font-size:11.5px;font-weight:600" onclick="event.stopPropagation();quickLook('${qesc(r.path)}')">Preview 👁️</button>
-              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();op('${qesc(r.path)}')">Launch 🚀</button>
-              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(r.path)}'), '_blank')">Tab ↗</button>
-              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();rev('${qesc(r.path)}')">Reveal 📁</button>
-              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 Explorer</button>
-            </div>
-          </div>
-          <div class="dim small" style="margin-bottom:8px">📁 ${esc(r.folder)} · ${fmt(r.size)} · ${dt(r.mtime)}</div>
-          ${r.why && r.why.length ? `<div class="row" style="gap:6px;margin-bottom:8px">${r.why.map(w => `<span class="badge" style="font-size:10.5px">✓ ${esc(w)}</span>`).join('')}</div>` : ''}
-          ${r.passage ? `<div style="background:rgba(0,0,0,0.35);padding:10px 12px;border-radius:9px;font-size:12.5px;color:rgba(255,255,255,0.85);line-height:1.5">${highlightTerms(esc(r.passage), r.terms)}</div>` : ''}
-        </div>
-      `).join('');
-    } else if (!res.folders || !res.folders.length) {
-      h = `<div class="glass" style="text-align:center;padding:36px"><h3>No Matching Files</h3><p class="dim">Try searching for other concept words or verify that the folder has been scanned.</p></div>`;
-    }
-
-    out.innerHTML = h;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Search';
-  }
-}
-
-function highlightTerms(text, terms) {
-  if (!terms || !terms.length) return text;
-  let res = text;
-  terms.forEach(t => {
-    if (t.length > 2) {
-      const reg = new RegExp(`(${t})`, 'gi');
-      res = res.replace(reg, '<mark class="hl">$1</mark>');
-    }
+function upDir() { const p = dirname(S.cwd); if (p && p !== S.cwd) go("files", { path: /^[A-Za-z]:$/.test(p) ? p + "\\" : p }); }
+function renderCrumbs() {
+  const p = S.cwd, unc = isNetwork(p);
+  const parts = p.split(/[\\/]+/).filter(Boolean);
+  let acc = unc ? "\\\\" : (p.startsWith("/") ? "/" : ""), html = [];
+  parts.forEach((seg, i) => {
+    acc += (i === 0 ? seg : (acc.endsWith("\\") || acc.endsWith("/") ? "" : "\\") + seg);
+    const target = (i === 0 && /^[A-Za-z]:$/.test(seg)) ? seg + "\\" : acc;
+    html.push(`<a onclick='go("files",{path:${attr(target)}})'>${esc(seg)}</a>`);
   });
-  return res;
+  $("#crumbs").innerHTML = html.join('<span class="sep">/</span>');
 }
-
-/* -------------------------------------------------------------
- * VIEW: EXPLORER (With Direct File Actions & Confirmation)
- * ------------------------------------------------------------- */
-async function vExplorer() {
-  const d = await api('GET', '/api/drives');
-  document.getElementById('main').innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:10px">
-        <div class="row" style="gap:6px">
-          ${d.drives.map(x => `<button class="btn-ghost" onclick="goTree('${qesc(x)}')">${esc(x)}</button>`).join('')}
-          <input id="pathbar" size="46" style="margin-left:6px" placeholder="Path…">
-          <button class="btn-ghost" onclick="goTree(document.getElementById('pathbar').value)">Go</button>
-        </div>
-        <div class="row" style="gap:6px">
-          <button class="btn-pri" onclick="promptNewFolder()">+ New Folder</button>
-        </div>
-      </div>
-      <div id="crumbs" class="crumbs"></div>
-      <div class="row small" style="gap:14px;margin-top:6px">
-        <label class="dim"><input type="checkbox" id="clean" checked onchange="state.clean=this.checked;lsCur()"> Clean View</label>
-        <label class="dim">Sort: <select id="sort" onchange="state.sort=this.value;lsCur()"><option value="name">Name</option><option value="size">Size</option><option value="modified">Modified</option></select></label>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <div class="glass" style="max-height:68vh;overflow-y:auto">
-        <div style="font-weight:700;margin-bottom:8px">Directories</div>
-        <div id="tree" class="tree"></div>
-      </div>
-      <div class="glass" style="max-height:68vh;overflow-y:auto">
-        <div class="row" style="justify-content:space-between;margin-bottom:8px">
-          <div style="font-weight:700">Contents</div>
-          <span class="dim small" id="lscount"></span>
-        </div>
-        <div id="ls"></div>
-      </div>
-    </div>
-  `;
-  goTree(state.treePath || d.drives[0] || '/');
-}
-
-async function goTree(p, pushHistory = true) {
-  if (!p) return;
-  state.treePath = p;
-  const pb = document.getElementById('pathbar');
-  if (pb) pb.value = p;
-  renderCrumbs(p);
-  if (pushHistory) {
-    navPush({ tab: 'explorer', path: p });
-  }
-  const t = await api('GET', '/api/tree?path=' + encodeURIComponent(p));
-  const treeEl = document.getElementById('tree');
-  if (treeEl) {
-    treeEl.innerHTML = (t.children || []).map(c => `
-      <div onclick="goTree('${qesc(c.path)}')">📁 ${esc(c.name)}${c.has_children ? ' ▸' : ''}</div>
-    `).join('') || '<span class="dim">Empty / no access</span>';
-  }
-  lsCur();
-}
-
-function renderCrumbs(p) {
-  const c = document.getElementById('crumbs');
-  if (!c) return;
-  const parts = p.split(/[\\/]/).filter(Boolean);
-  let cur = '';
-  c.innerHTML = parts.map((pt, i) => {
-    cur += (i === 0 && p.includes(':') ? pt + '\\' : (i === 0 ? '/' + pt : '/' + pt));
-    const target = cur;
-    return `<a href="#" onclick="goTree('${qesc(target)}');return false">${esc(pt)}</a> / `;
-  }).join('');
-}
-
-async function lsCur() {
-  const p = state.treePath;
-  const box = document.getElementById('ls');
-  if (!p || !box) return;
-  box.innerHTML = '<div class="frow skel" style="height:40px"></div><div class="frow skel" style="height:40px"></div>';
-  const r = await api('GET', '/api/ls?path=' + encodeURIComponent(p) + '&power=' + state.power);
+let dirItems = [];
+async function loadDir() {
+  const list = $("#fsList"); if (!list) return;
+  list.innerHTML = loading();
+  let r;
+  try { r = await api(`/api/ls?power=${S.power}&path=` + encodeURIComponent(S.cwd)); } catch (e) { list.innerHTML = `<div class="card empty">${esc(e.message)}</div>`; return; }
   if (r.error) {
-    box.innerHTML = `<span class="dim">${esc(r.error)}</span>`;
+    list.innerHTML = `<div class="card empty"><h3>Can't open this folder.</h3><p class="small">${esc(r.error)}</p></div>`;
     return;
   }
-  const items = r.items || [];
-  const dirs = items.filter(x => x.is_dir);
-  const files = items.filter(x => !x.is_dir);
+  dirItems = r.items || [];
+  const ro = isNetwork(S.cwd);
+  $("#fsNote").innerHTML = ro ? `<div class="note" style="margin-bottom:12px">${icon("lock")} This is a network share. Aegis opens it read-only — you can browse, preview and open files, but nothing here will be changed.</div>`
+    : S.power ? `<div class="note" style="margin-bottom:12px">Hidden and system files are visible. System locations are protected — Aegis won't move or delete anything in them.</div>` : "";
+  $("#fsActions").innerHTML = ro ? "" : `<button class="btn sm" onclick="newFolder()">${icon("plus")}New folder</button>`;
+  drawList();
+}
+function drawList() {
+  const list = $("#fsList"); if (!list) return;
+  const items = dirItems.filter(x => !S.filter || x.name.toLowerCase().includes(S.filter));
+  const ro = isNetwork(S.cwd);
+  if (!items.length) { list.innerHTML = `<div class="card empty">${S.filter ? "No matches." : "This folder is empty."}</div>`; return; }
+  const nd = dirItems.filter(x => x.is_dir).length, nf = dirItems.length - nd;
+  list.innerHTML = `<div class="list">
+    <div class="list-head"><span style="width:16px"></span><span class="grow">${nd} folder${nd === 1 ? "" : "s"}, ${nf} file${nf === 1 ? "" : "s"}</span><span style="width:110px;text-align:right">Modified</span><span style="width:80px;text-align:right">Size</span><span style="width:${ro ? 70 : 140}px"></span></div>
+    ${items.map(x => `
+      <div class="item clickable" data-path="${esc(x.path)}" onclick='rowClick(this, ${attr(x.path)}, ${x.is_dir})' ondblclick='rowOpen(${attr(x.path)}, ${x.is_dir})'>
+        <span class="ic">${icon(kindIcon(x.name, x.is_dir))}</span>
+        <div class="grow"><div class="nm" style="${x.hidden ? "opacity:.6" : ""}">${esc(x.name)} ${x.is_dir ? "" : tierTag(x.tier)}</div></div>
+        <div class="meta" style="width:110px">${when(x.mtime)}</div>
+        <div class="meta" style="width:80px">${x.is_dir ? (x.size ? bytes(x.size) : "—") : bytes(x.size)}</div>
+        <div class="acts" style="width:${ro ? 70 : 140}px;justify-content:flex-end">
+          ${x.is_dir ? "" : `<button class="btn ghost sm" title="Preview" onclick='event.stopPropagation();preview(${attr(x.path)})'>${icon("eye")}</button>`}
+          <button class="btn ghost sm" title="Open" onclick='event.stopPropagation();openPath(${attr(x.path)})'>${icon("open")}</button>
+          ${ro ? "" : `<button class="btn ghost sm" title="Rename" onclick='event.stopPropagation();renameOne(${attr(x.path)},${attr(x.name)})'>${icon("pen")}</button>
+          <button class="btn ghost sm" title="Move to Bin" onclick='event.stopPropagation();trash([${attr(x.path)}])'>${icon("trash")}</button>`}
+        </div>
+      </div>`).join("")}
+  </div>`;
+}
+function rowClick(el, path, isDir) {
+  if (isDir) return go("files", { path });
+  $$("#fsList .item.sel").forEach(e => e.classList.remove("sel"));
+  el.classList.add("sel"); S.selected = path;
+  preview(path);
+}
+function rowOpen(path, isDir) { if (isDir) go("files", { path }); else openPath(path); }
+function newFolder() { promptText("New folder name", "New folder", v => change("mkdir", { parent: S.cwd, name: v })); }
 
-  let h = '';
-  if (dirs.length) {
-    h += `<div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;margin:8px 0 4px">Folders (${dirs.length})</div>`;
-    h += dirs.map(renderFileRow).join('');
+/* =====================================================================
+   STORAGE
+   ===================================================================== */
+async function vStorage(params) {
+  if (params.tab) S.storageTab = params.tab;
+  view().innerHTML = loading();
+  let ov;
+  try { ov = await api("/api/storage/overview"); } catch (e) { return fail(e); }
+  if (!ov.count) { view().innerHTML = `<div class="head"><h1>Storage</h1></div>` + needsScan(); return; }
+  const cats = ov.by_category || [], max = Math.max(1, ...cats.map(c => c[1]));
+  view().innerHTML = `
+    <div class="head"><h1>Storage</h1><p>${bytes(ov.total)} across ${num(ov.count)} files. About <b>${bytes(ov.reclaimable)}</b> looks safe to clear — review before anything is moved, and everything goes to the Bin first.</p></div>
+    <div class="grid2">
+      <div class="card"><h3>By kind</h3><div class="bars">${cats.map(([c, b]) => `<div class="b"><span>${esc(c)}</span><div class="track"><div class="fill" style="width:${(b / max * 100).toFixed(1)}%"></div></div><span>${bytes(b)}</span></div>`).join("")}</div></div>
+      <div class="card"><h3>Biggest file types</h3><div class="bars">${(ov.top_exts || []).slice(0, 7).map(([e, v]) => `<div class="b"><span class="mono">${esc(e)}</span><div class="track"><div class="fill" style="width:${(v.size / Math.max(1, ov.top_exts[0][1].size) * 100).toFixed(1)}%;background:var(--ink3)"></div></div><span>${bytes(v.size)}</span></div>`).join("")}</div></div>
+    </div>
+    <div class="tabs" style="margin-top:22px">
+      ${[["largest", "Largest files"], ["stale", "Large & untouched"], ["junk", "Leftovers & caches"], ["dups", "Duplicates"]].map(([k, l]) => `<button class="${S.storageTab === k ? "on" : ""}" onclick="S.storageTab='${k}';storageTab()">${l}</button>`).join("")}
+    </div>
+    <div id="stBody"></div>`;
+  storageTab();
+}
+function selBar(label) {
+  return `<div class="row" style="margin-bottom:10px"><label class="check"><input type="checkbox" onchange="$$('#stBody .pick').forEach(c=>c.checked=this.checked);selCount()"> Select all</label><span class="small faint" id="selInfo"></span><span class="grow"></span><button class="btn danger sm" onclick="trashPicked()">${icon("trash")}${label}</button></div>`;
+}
+function selCount() { const n = picked($("#stBody")).length; const el = $("#selInfo"); if (el) el.textContent = n ? n + " selected" : ""; }
+function trashPicked() { const p = picked($("#stBody")); if (!p.length) return toast("Select some files first."); trash(p, () => storageTab()); }
+async function storageTab() {
+  $$(".tabs button").forEach((b, i) => b.classList.toggle("on", ["largest", "stale", "junk", "dups"][i] === S.storageTab));
+  const box = $("#stBody"); if (!box) return;
+  box.innerHTML = loading();
+  try {
+    if (S.storageTab === "largest") {
+      const l = await api("/api/storage/largest?n=60");
+      box.innerHTML = selBar("Move to Bin") + `<div class="list">${l.map(f => fileRow(f, { check: true, meta: `${bytes(f.size)}<div class="small faint">${when(f.mtime)}</div>` })).join("")}</div>`;
+    } else if (S.storageTab === "stale") {
+      const l = await api("/api/storage/stale");
+      box.innerHTML = l.length ? `<p class="muted small">Files over 50 MB that haven't changed in six months.</p>` + selBar("Move to Bin") + `<div class="list">${l.map(f => fileRow(f, { check: true, meta: `${bytes(f.size)}<div class="small faint">last changed ${when(f.mtime)}</div>` })).join("")}</div>`
+        : `<div class="card empty">No large, long-untouched files. Nice.</div>`;
+    } else if (S.storageTab === "junk") {
+      const l = await api("/api/storage/junk");
+      const tot = l.reduce((a, f) => a + f.size, 0);
+      box.innerHTML = l.length ? `<p class="muted small">${num(l.length)} temporary, backup and cache files (${bytes(tot)}). Apps recreate these when needed.</p>` + selBar("Move to Bin") + `<div class="list">${l.slice(0, 300).map(f => fileRow(f, { check: true, sub: dirname(f.path) })).join("")}</div>`
+        : `<div class="card empty">No leftovers found.</div>`;
+    } else {
+      await dupsView(box);
+    }
+    $$("#stBody .pick").forEach(c => c.addEventListener("change", selCount));
+  } catch (e) { box.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+async function dupsView(box) {
+  const s = await api("/api/dups/status");
+  if (s.running) {
+    box.innerHTML = loading(`Comparing files — ${s.phase}…`);
+    setTimeout(() => { if (S.storageTab === "dups" && $("#stBody")) storageTab(); }, 1200);
+    return;
   }
-  if (files.length) {
-    h += `<div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;margin:12px 0 4px">Files (${files.length})</div>`;
-    h += files.map(renderFileRow).join('');
+  const groups = s.groups || [];
+  if (!s.done && !groups.length) {
+    box.innerHTML = `<div class="card empty"><h3>Find identical copies</h3><p>Aegis compares file sizes, then fingerprints the contents. Only exact copies are shown.</p><button class="btn primary" onclick="api('/api/dups/start',{}).then(storageTab)">Look for duplicates</button></div>`;
+    return;
   }
-  if (!h) h = '<div class="dim" style="padding:16px 0">Folder is empty.</div>';
-  box.innerHTML = h;
-  const cnt = document.getElementById('lscount');
-  if (cnt) cnt.textContent = `${items.length} items`;
+  if (!groups.length) { box.innerHTML = `<div class="card empty"><h3>No duplicates.</h3><button class="btn" onclick="api('/api/dups/start',{}).then(storageTab)">Check again</button></div>`; return; }
+  const waste = groups.reduce((a, g) => a + g.waste, 0);
+  box.innerHTML = `
+    <div class="row" style="margin-bottom:12px"><span class="muted small">${groups.length} sets of copies · ${bytes(waste)} could be freed. The first copy in each set is kept.</span><span class="grow"></span>
+      <button class="btn sm" onclick="$$('#stBody .pick.extra').forEach(c=>c.checked=true);selCount()">Select all extra copies</button>
+      <button class="btn danger sm" onclick="trashPicked()">${icon("trash")}Move selected to Bin</button>
+      <button class="btn ghost sm" onclick="api('/api/dups/start',{}).then(storageTab)">Re-check</button></div>
+    <span class="small faint" id="selInfo"></span>
+    ${groups.slice(0, 80).map(g => `
+      <div class="list" style="margin-bottom:12px">
+        <div class="list-head"><span class="grow">${g.files.length} copies of <b style="color:var(--ink)">${esc(base(g.files[0].path))}</b></span><span>${bytes(g.files[0].size)} each</span></div>
+        ${g.files.map((f, i) => `<div class="item clickable" onclick='preview(${attr(f.path)})'>
+          <input type="checkbox" class="pick ${i ? "extra" : ""}" value="${esc(f.path)}" onclick="event.stopPropagation()">
+          <span class="ic">${icon(kindIcon(f.path))}</span>
+          <div class="grow"><div class="sub" style="color:var(--ink2)">${esc(f.path)}</div></div>
+          ${i === 0 ? '<span class="tag ok">keep</span>' : ""}
+        </div>`).join("")}
+      </div>`).join("")}`;
 }
 
-function renderFileRow(x) {
-  const isSelected = state.highlightPath && (x.path === state.highlightPath);
-  return `
-    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" onclick="selectRow('${qesc(x.path)}')" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double-click to open folder"` : `ondblclick="quickLook('${qesc(x.path)}')" title="Click to select · Double-click or Spacebar to Quick Look preview"`}>
-      <span style="font-size:16px;cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();quickLook('${qesc(x.path)}');"`}>${x.is_dir ? '📁' : '📄'}</span>
-      <span class="n" style="cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();quickLook('${qesc(x.path)}');"`} title="${x.is_dir ? 'Open folder' : 'Click to preview file'}">${esc(x.name)}</span>
-      ${x.tier && x.tier !== 'Public' ? `<span class="tier ${x.tier}">${x.tier}</span>` : ''}
-      <span class="s">${x.is_dir ? '' : fmt(x.size) + ' · '}${dt(x.mtime)}</span>
-      <div class="row" style="gap:4px">
-        ${x.is_dir ? `
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px;font-weight:600" onclick="event.stopPropagation();goTree('${qesc(x.path)}')">Open 📂</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
-        ` : `
-          <button class="btn-pri" style="padding:2px 9px;font-size:11px;font-weight:600" onclick="event.stopPropagation();quickLook('${qesc(x.path)}')">Preview 👁️</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Launch 🚀</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(x.path)}'), '_blank')" title="Open raw file in a new tab">Tab ↗</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal 📁</button>
-        `}
-        <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptRename('${qesc(x.path)}', '${qesc(x.name)}')">Rename</button>
-        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
+/* =====================================================================
+   TIDY UP (unnamed files, organize, history)
+   ===================================================================== */
+let unnamedItems = [], plan = null;
+async function vTidy() {
+  view().innerHTML = `
+    <div class="head"><h1>Tidy up</h1><p>Give vague file names a meaningful one, and sort a messy folder into sensible groups. You'll see every change before it happens, and can undo it afterwards.</p></div>
+    <div class="card"><div class="row"><h3 class="grow" style="margin:0">Files with vague names</h3><button class="btn primary sm" onclick="applyRenames()">Rename selected</button></div>
+      <p class="muted small" style="margin:6px 0 14px">Names like “IMG_2041”, “Untitled (3)” or “scan0001”. Suggestions come from each file's contents, read on this computer. Edit any suggestion before applying.</p>
+      <div id="unBox">${loading()}</div></div>
+    <div class="card"><h3>Organise a folder</h3>
+      <p class="muted small" style="margin:-4px 0 14px">Aegis proposes a structure (Finance, College, Travel, Images…). Sensitive files are planned locally and filed into a Private_Vault folder — they are never shown to an AI service.</p>
+      <div class="row wrap"><input id="orgPath" class="grow mono" placeholder="${esc((S.drives && S.drives.specials.find(s => s.label === "Downloads") || {}).path || "C:\\Users\\you\\Downloads")}" style="min-width:260px">
+        <label class="check"><input type="checkbox" id="orgRec"> Include subfolders</label>
+        <button class="btn primary" onclick="buildPlan()">Suggest a plan</button></div>
+      <div id="planBox" style="margin-top:14px"></div></div>
+    <div class="card"><h3>Recent changes</h3><div id="histBox">${loading()}</div></div>`;
+  if (!S.drives) api("/api/drives").then(d => { S.drives = d; const p = (d.specials.find(s => s.label === "Downloads") || {}).path; if (p && $("#orgPath")) $("#orgPath").placeholder = p; }).catch(() => {});
+  loadUnnamed(); loadHistory();
+}
+async function loadUnnamed() {
+  const box = $("#unBox"); if (!box) return;
+  try { const r = await api("/api/unnamed"); unnamedItems = r.items || []; } catch (e) { box.innerHTML = esc(e.message); return; }
+  if (!unnamedItems.length) { box.innerHTML = `<div class="empty small">No vaguely named files found in the scanned folders.</div>`; return; }
+  box.innerHTML = `<div class="list"><div class="list-head"><input type="checkbox" checked onchange="$$('#unBox .pick').forEach(c=>c.checked=this.checked)"><span style="width:38%">Current name</span><span class="grow">Suggested name</span></div>
+    ${unnamedItems.map((x, i) => `<div class="item">
+      <input type="checkbox" class="pick" value="${i}" checked>
+      <div style="width:38%;min-width:0"><div class="nm" style="font-weight:400"><button class="link" style="color:var(--ink);text-decoration:none" onclick='preview(${attr(x.path)})'>${esc(x.name)}</button></div><div class="sub">${esc(x.folder)}</div></div>
+      <input class="grow mono un-name" data-i="${i}" value="${esc(x.suggested_name)}">
+      ${tierTag(x.tier)}
+    </div>`).join("")}</div>`;
+}
+function applyRenames() {
+  const items = $$("#unBox .pick:checked").map(c => { const i = +c.value; return { path: unnamedItems[i].path, new_name: $(`#unBox .un-name[data-i="${i}"]`).value.trim() }; }).filter(x => x.new_name);
+  if (!items.length) return toast("Select at least one file.");
+  change("renames", { items }, () => { loadUnnamed(); loadHistory(); });
+}
+async function buildPlan() {
+  const baseDir = $("#orgPath").value.trim() || $("#orgPath").placeholder;
+  const box = $("#planBox");
+  box.innerHTML = loading("Planning…");
+  try { plan = await api("/api/organize/plan", { base: baseDir, recursive: $("#orgRec").checked }); } catch (e) { box.innerHTML = `<div class="note warn">${esc(e.message)}</div>`; return; }
+  if (!plan.ok) { box.innerHTML = `<div class="note warn">${esc(plan.error === "refusing system location / drive root" ? "That's a system or top-level folder. Pick a folder inside it, like Downloads\\Old stuff." : plan.error)}</div>`; return; }
+  const moves = plan.moves || [];
+  const byFolder = {};
+  moves.forEach(m => (byFolder[m.folder] = byFolder[m.folder] || []).push(m));
+  box.innerHTML = `
+    <div class="note" style="margin-bottom:12px">${plan.source === "cloud" ? "Planned with your AI provider using redacted names only." : "Planned entirely on this computer."}
+      ${plan.withheld.length ? ` ${plan.withheld.length} sensitive file(s) were kept private and filed locally.` : ""}</div>
+    ${(plan.insights || []).length ? `<ul class="small muted" style="margin:0 0 12px;padding-left:18px">${plan.insights.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}
+    ${Object.entries(byFolder).map(([f, ms]) => `<div class="group"><div class="gh row"><label class="check"><input type="checkbox" checked onchange="this.closest('.group').querySelectorAll('.pmove').forEach(c=>c.checked=this.checked)"></label>${icon("folder")}<b style="color:var(--ink)">${esc(f)}</b><span class="faint">· ${ms.length} file${ms.length === 1 ? "" : "s"}</span></div>
+      ${ms.map(m => `<div class="gi"><input type="checkbox" class="pmove" value="${esc(m.id)}" checked><span class="grow">${esc(base(m.old))}${m.new_name !== base(m.old) ? ` <span class="faint">→</span> <b>${esc(m.new_name)}</b>` : ""}</span>${tierTag(m.tier)}<span class="small faint">${esc(m.reason)}</span></div>`).join("")}</div>`).join("")}
+    <div class="row" style="margin-top:12px"><span class="grow"></span><button class="btn primary" onclick="applyPlan()">Review &amp; apply</button></div>`;
+}
+function applyPlan() {
+  const selected = $$("#planBox .pmove:checked").map(c => c.value);
+  if (!selected.length) return toast("Nothing selected.");
+  change("organize", { batch: plan.batch, selected }, () => { $("#planBox").innerHTML = '<div class="note">Done. You can undo this under Recent changes.</div>'; loadHistory(); });
+}
+async function loadHistory() {
+  const box = $("#histBox"); if (!box) return;
+  let r; try { r = await api("/api/history"); } catch (e) { box.innerHTML = esc(e.message); return; }
+  const b = (r.batches || []).slice(0, 12);
+  box.innerHTML = b.length ? `<div class="list">${b.map(x => `<div class="item"><div class="grow"><div class="nm" style="font-weight:400">${esc(x.title)}</div><div class="sub">${when(x.ts)}${x.bytes ? " · " + bytes(x.bytes) : ""}</div></div>
+    ${x.undone ? '<span class="small faint">undone</span>' : x.reversible ? `<button class="btn sm" onclick='undo(${attr(x.batch)})'>Undo</button>` : '<span class="small faint">permanent</span>'}</div>`).join("")}</div>`
+    : `<div class="empty small">No changes yet.</div>`;
+}
+
+/* =====================================================================
+   PRIVACY
+   ===================================================================== */
+const SAMPLE = `Name: Priya Sharma
+PAN ABCDE1234F, Aadhaar 2345 6789 0123
+Account No 123456789012, IFSC HDFC0001234
+Reach me at priya.s@gmail.com or 98765 43210
+password: hunter2`;
+const TYPE_NAMES = { AADHAAR: "Aadhaar number", PAN: "PAN", IFSC: "IFSC code", ACCOUNT_NO: "Bank account", CARD: "Card number", UPI: "UPI ID", EMAIL: "Email", PHONE_IN: "Phone", PASSPORT: "Passport", DOB: "Date of birth", IPV4: "IP address", SECRET: "API key", PASSWORD: "Password", PRIVATE_KEY: "Private key", PERSON: "Name" };
+async function vPrivacy() {
+  view().innerHTML = loading();
+  let t, l;
+  try { [t, l] = await Promise.all([api("/api/privacy/tiers"), api("/api/ledger?limit=40")]); } catch (e) { return fail(e); }
+  const st = l.stats || {}, sm = t.summary;
+  view().innerHTML = `
+    <div class="head"><h1>Privacy</h1><p>Aegis reads your files on this computer. Before anything could reach an AI service, personal details are found and swapped for placeholders like <span class="tok">[PAN_1]</span>. The real values never leave — they're put back only when the answer comes home.</p></div>
+    <div class="stats">
+      <div class="stat"><b>${num(st.entities_redacted)}</b><span>details replaced with placeholders</span></div>
+      <div class="stat"><b>${num(st.withheld)}</b><span>sensitive files withheld entirely</span></div>
+      <div class="stat"><b>${num(st.cloud_requests)}</b><span>requests to a cloud service</span></div>
+      <div class="stat"><b>${st.bytes_sent ? bytes(st.bytes_sent) : "0 B"}</b><span>total data sent</span></div>
+    </div>
+    <div class="grid3">
+      ${[["Sensitive", "Never sent anywhere. Filed locally.", "Sensitive"], ["Internal", "Sent only after redaction.", "Personal"], ["Public", "Ordinary files.", "Ordinary"]].map(([k, d, label]) => `
+        <div class="card"><div class="row"><h3 class="grow" style="margin:0">${label}</h3><span class="tag ${k === "Public" ? "ok" : k}">${num(sm[k].count)}</span></div><p class="small muted" style="margin:6px 0 0">${d} ${bytes(sm[k].bytes)}.</p></div>`).join("")}
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><h3>What Aegis found in your files</h3>
+        ${(t.entity_types || []).length ? `<div class="bars">${t.entity_types.map(([k, n]) => `<div class="b"><span>${esc(TYPE_NAMES[k] || k)}</span><div class="track"><div class="fill" style="width:${(n / t.entity_types[0][1] * 100).toFixed(0)}%;background:var(--danger)"></div></div><span>${num(n)} file${n === 1 ? "" : "s"}</span></div>`).join("")}</div>` : '<p class="faint small">No personal details detected yet.</p>'}
+      </div>
+      <div class="card"><h3>Sensitive files</h3>
+        ${(t.sensitive_files || []).length ? `<div class="list">${t.sensitive_files.slice(0, 8).map(f => fileRow(f, { meta: (f.pii || "").split(",").filter(Boolean).slice(0, 2).map(x => `<span class="tok">${esc(x)}</span>`).join(" ") || bytes(f.size) })).join("")}</div>` : '<p class="faint small">None found.</p>'}
       </div>
     </div>
-  `;
-}
-
-function selectRow(path) {
-  state.highlightPath = path;
-  document.querySelectorAll('#ls .frow').forEach(r => {
-    if (r.dataset.path === path) r.classList.add('highlight');
-    else r.classList.remove('highlight');
-  });
-}
-
-/* -------------------------------------------------------------
- * Action Prompts (Connecting UI actions to Confirmation Sheet)
- * ------------------------------------------------------------- */
-function promptRename(path, currentName) {
-  const newName = prompt(`Rename “${currentName}” to:`, currentName);
-  if (!newName || newName === currentName) return;
-  requestChange('rename', { path, new_name: newName }, () => lsCur());
-}
-
-function promptTrash(path) {
-  requestChange('trash', { paths: [path] }, () => lsCur());
-}
-
-function promptNewFolder() {
-  if (!state.treePath) return;
-  const name = prompt('New Folder Name:', 'Untitled Folder');
-  if (!name) return;
-  requestChange('mkdir', { parent: state.treePath, name }, () => lsCur());
-}
-
-async function op(p) {
-  if (!p) return;
-  const fileName = p.split(/[\\/]/).pop() || 'file';
-  toast(`Opening ${fileName}…`);
-  const r = await api('POST', '/api/open', { path: p });
-  if (!r.ok) {
-    toast(`Cannot open: ${r.error || 'Unknown error'}`);
-  }
-}
-
-async function rev(p) {
-  if (!p) return;
-  const fileName = p.split(/[\\/]/).pop() || 'item';
-  toast(`Revealing ${fileName} in Windows Explorer…`);
-  const r = await api('POST', '/api/reveal', { path: p });
-  if (r && !r.ok) {
-    toast(`Cannot reveal: ${r.error || 'Unknown error'}`);
-  }
-}
-
-/* -------------------------------------------------------------
- * APPLE QUICK LOOK & IN-BROWSER FILE VIEWER ENGINE
- * ------------------------------------------------------------- */
-let currentPreviewPath = '';
-let currentPreviewData = null;
-
-async function quickLook(path) {
-  if (!path) return;
-  currentPreviewPath = path;
-  state.highlightPath = path;
-  
-  // Highlight row in Explorer if present
-  document.querySelectorAll('#ls .frow').forEach(r => {
-    if (r.dataset.path === path) r.classList.add('highlight');
-    else r.classList.remove('highlight');
-  });
-
-  const overlay = document.getElementById('quickLookOverlay');
-  const title = document.getElementById('qlTitle');
-  const meta = document.getElementById('qlMeta');
-  const tier = document.getElementById('qlTier');
-  const pii = document.getElementById('qlPii');
-  const icon = document.getElementById('qlIcon');
-  const content = document.getElementById('qlContent');
-  const status = document.getElementById('qlStatus');
-  const copyBtn = document.getElementById('qlCopyContentBtn');
-
-  const filename = path.split(/[\\/]/).pop() || path;
-  title.textContent = filename;
-  meta.textContent = 'Loading file preview…';
-  content.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--dim);gap:14px">
-      <div style="font-size:32px">❖</div>
-      <div style="font-size:13px">Reading file securely on-device…</div>
+    <div class="card" style="margin-top:16px"><h3>Try it yourself</h3>
+      <p class="muted small" style="margin:-4px 0 12px">Type or paste anything. This runs on your computer and shows exactly what an AI service would receive.</p>
+      <textarea id="rtIn" rows="5">${esc(SAMPLE)}</textarea>
+      <div class="row" style="margin:10px 0 14px"><button class="btn primary" onclick="redactTest()">Show what would be sent</button></div>
+      <div id="rtOut"></div>
     </div>
-  `;
-  status.textContent = path;
-  if (copyBtn) copyBtn.style.display = 'none';
-
-  if (overlay) overlay.classList.add('open');
-
-  try {
-    const res = await api('GET', `/api/file/read?path=${encodeURIComponent(path)}`);
-    if (!res.ok) {
-      meta.textContent = 'Error opening file';
-      content.innerHTML = `
-        <div style="padding:48px 24px;text-align:center;color:var(--red)">
-          <h3>Cannot Preview File</h3>
-          <p class="dim" style="margin:8px 0 20px">${esc(res.error || 'Unknown error occurred')}</p>
-          <div class="row" style="justify-content:center;gap:10px">
-            <button class="btn-pri" onclick="op('${qesc(path)}')">Open in Windows App 🚀</button>
-            <button class="btn-ghost" onclick="rev('${qesc(path)}')">Reveal in Explorer 📂</button>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    currentPreviewData = res;
-    meta.textContent = `${fmt(res.size)} · ${dt(res.mtime)} · ${res.mime}`;
-    tier.textContent = res.tier || 'Public';
-    tier.className = `tier ${res.tier || 'Public'}`;
-
-    if (res.pii) {
-      pii.textContent = res.pii;
-      pii.style.display = 'inline-block';
-    } else {
-      pii.style.display = 'none';
-    }
-
-    // Set Icon
-    if (res.is_image) icon.textContent = '🖼️';
-    else if (res.is_pdf) icon.textContent = '📑';
-    else if (res.is_audio) icon.textContent = '🎵';
-    else if (res.is_video) icon.textContent = '🎬';
-    else if (res.is_text) icon.textContent = '📝';
-    else icon.textContent = '📦';
-
-    // Render Preview Content
-    const rawUrl = `/api/file/raw?path=${encodeURIComponent(path)}`;
-
-    if (res.is_image) {
-      content.innerHTML = `
-        <div class="ql-image-container">
-          <img src="${rawUrl}" alt="${esc(res.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'dim\\'>Cannot render image preview</div>'">
-        </div>
-      `;
-      status.textContent = `${res.name} · ${fmt(res.size)} · Image`;
-    } else if (res.is_pdf) {
-      content.innerHTML = `
-        <div class="ql-iframe-container">
-          <iframe src="${rawUrl}" title="${esc(res.name)}"></iframe>
-        </div>
-      `;
-      status.textContent = `${res.name} · ${fmt(res.size)} · PDF Document`;
-    } else if (res.is_audio) {
-      content.innerHTML = `
-        <div class="ql-media-container">
-          <div style="font-size:56px">🎵</div>
-          <h3 style="margin:0">${esc(res.name)}</h3>
-          <audio controls autoplay src="${rawUrl}" style="width:min(440px, 90%)"></audio>
-        </div>
-      `;
-      status.textContent = `${res.name} · Audio Player`;
-    } else if (res.is_video) {
-      content.innerHTML = `
-        <div class="ql-media-container" style="padding:10px">
-          <video controls autoplay src="${rawUrl}" style="max-width:100%;max-height:100%;border-radius:10px"></video>
-        </div>
-      `;
-      status.textContent = `${res.name} · Video Player`;
-    } else if (res.is_text) {
-      if (copyBtn) copyBtn.style.display = 'inline-flex';
-      const lines = (res.content || '').split('\n');
-      const lineCount = lines.length;
-      status.textContent = `${lineCount} lines · ${(res.content || '').length} chars ${res.truncated ? '· (preview truncated to 300KB)' : ''}`;
-
-      let codeHtml = '<div style="display:flex;min-width:100%"><div style="padding:16px 10px;text-align:right;user-select:none;color:var(--faint);font-family:monospace;font-size:12px;border-right:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25)">';
-      codeHtml += lines.map((_, i) => `<div>${i + 1}</div>`).join('');
-      codeHtml += `</div><div class="ql-code-container" style="flex:1">${esc(res.content || '(empty file)')}</div></div>`;
-      content.innerHTML = codeHtml;
-    } else {
-      // Binary or other file
-      content.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center">
-          <div style="font-size:64px;margin-bottom:16px">📦</div>
-          <h3 style="margin:0 0 8px">${esc(res.name)}</h3>
-          <p class="dim" style="max-width:440px;margin:0 0 20px">${esc(res.mime)} · ${fmt(res.size)}<br>This is a binary or executable file. Use the buttons below to open or inspect it.</p>
-          <div class="row" style="gap:10px">
-            <button class="btn-pri" onclick="qlOpenNative()">Open in Windows App 🚀</button>
-            <button class="btn-ghost" onclick="qlOpenNewTab()">Open in Browser Tab ↗</button>
-            <button class="btn-ghost" onclick="qlReveal()">Reveal in Explorer 📂</button>
-          </div>
-        </div>
-      `;
-      status.textContent = `${res.name} · ${fmt(res.size)} · Binary`;
-    }
-  } catch (err) {
-    content.innerHTML = `<div style="padding:36px;text-align:center;color:var(--red)">Failed to load preview: ${esc(err.message)}</div>`;
-  }
+    <div style="margin-top:16px"><div class="row" style="margin-bottom:10px"><h3 class="grow">Ledger</h3><span class="small faint">Every AI request — local or cloud — is recorded here.</span></div>
+      <div class="list">${(l.rows || []).length ? l.rows.map(ledgerRow).join("") : '<div class="empty small">No requests yet. Suggestions, insights and organise plans will appear here.</div>'}</div>
+    </div>`;
+  redactTest();
+}
+function ledgerRow(r) {
+  const spans = (r.entities && r.entities.spans) || [];
+  return `<details class="ledger-row"><summary>
+    <span class="grow"><b style="font-weight:500">${esc(r.purpose)}</b> <span class="small faint">· ${esc(r.provider)} · ${when(r.ts)}</span></span>
+    ${r.egress ? `<span class="tag Internal">sent ${bytes(r.bytes_sent)}</span>` : '<span class="tag ok">stayed on device</span>'}
+    ${spans.length ? `<span class="tag Sensitive">${spans.length} redacted</span>` : ""}
+    ${r.files_withheld ? `<span class="tag">${r.files_withheld} withheld</span>` : ""}
+    ${r.ok ? "" : '<span class="tag Sensitive">failed</span>'}
+  </summary>
+  <div class="cmp"><div><div class="pane-label">On your computer</div><pre>${esc((r.original || "").slice(0, 3000))}</pre></div>
+  <div><div class="pane-label">${r.egress ? "What was sent" : "Nothing was sent"}</div><pre>${r.egress ? tokens(esc((r.sent || "").slice(0, 3000))) : "—"}</pre></div></div></details>`;
+}
+const tokens = s => s.replace(/\[([A-Z_]+_\d+|MASKED(?:_PATH|_USER)?)\]/g, '<span class="tok">[$1]</span>');
+async function redactTest() {
+  const text = $("#rtIn").value;
+  let r; try { r = await api("/api/redact-test", { text }); } catch (e) { return fail(e); }
+  let marked = "", last = 0;
+  (r.spans || []).forEach(s => { marked += esc(text.slice(last, s.start)) + `<mark class="pii" title="${esc(TYPE_NAMES[s.type] || s.type)}">${esc(text.slice(s.start, s.end))}</mark>`; last = s.end; });
+  marked += esc(text.slice(last));
+  $("#rtOut").innerHTML = `<div class="grid3">
+    <div><div class="pane-label">1 · Found on your computer</div><div class="pane">${marked}</div></div>
+    <div><div class="pane-label">2 · What would be sent</div><div class="pane">${tokens(esc(r.guarded))}</div></div>
+    <div><div class="pane-label">3 · Restored when the answer returns</div><div class="pane">${esc(r.rehydrated)}</div></div>
+  </div>
+  <p class="small muted" style="margin:10px 0 0">${(r.spans || []).length} detail${(r.spans || []).length === 1 ? "" : "s"} replaced${r.residual ? `, plus ${r.residual} leftover pattern(s) masked by the safety check` : ""}. ${r.roundtrip_ok ? "Restored text matches the original exactly." : ""}</p>`;
 }
 
-function closeQuickLook() {
-  const overlay = document.getElementById('quickLookOverlay');
-  if (overlay) overlay.classList.remove('open');
-  const content = document.getElementById('qlContent');
-  if (content) content.innerHTML = '';
-  currentPreviewPath = '';
-  currentPreviewData = null;
-}
-
-function qlOpenNative() {
-  if (currentPreviewPath) op(currentPreviewPath);
-}
-
-function qlOpenNewTab() {
-  if (currentPreviewPath) {
-    window.open(`/api/file/raw?path=${encodeURIComponent(currentPreviewPath)}`, '_blank');
-  }
-}
-
-function qlReveal() {
-  if (currentPreviewPath) rev(currentPreviewPath);
-}
-
-function qlCopyPath() {
-  if (currentPreviewPath) {
-    navigator.clipboard.writeText(currentPreviewPath);
-    toast('Copied full path to clipboard!');
-  }
-}
-
-function qlCopyContent() {
-  if (currentPreviewData && currentPreviewData.content) {
-    navigator.clipboard.writeText(currentPreviewData.content);
-    toast('Copied file content to clipboard!');
-  }
-}
-
-// Global Keyboard Handler for Spacebar (Quick Look) and Escape
-window.addEventListener('keydown', (e) => {
-  const ql = document.getElementById('quickLookOverlay');
-  const isQLOpen = ql && ql.classList.contains('open');
-
-  if (e.key === 'Escape') {
-    if (isQLOpen) {
-      closeQuickLook();
-      e.preventDefault();
-    } else if (document.getElementById('confirmSheet')?.classList.contains('open')) {
-      closeSheet();
-      e.preventDefault();
-    }
-  } else if (e.key === ' ' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
-    if (isQLOpen) {
-      closeQuickLook();
-      e.preventDefault();
-    } else if (state.highlightPath) {
-      quickLook(state.highlightPath);
-      e.preventDefault();
-    }
-  }
-});
-
-/* -------------------------------------------------------------
- * VIEW: RECYCLE BIN (macOS-Styled)
- * ------------------------------------------------------------- */
+/* =====================================================================
+   BIN
+   ===================================================================== */
 async function vBin() {
-  const m = document.getElementById('main');
-  m.innerHTML = `<div class="glass skel" style="height:120px"></div><div class="glass skel" style="height:200px"></div>`;
-  const b = await api('GET', '/api/bin');
-
-  m.innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between">
-        <div class="row" style="gap:10px">
-          <span style="font-size:26px">🗑</span>
-          <div>
-            <h2 style="margin:0">Recycle Bin</h2>
-            <div class="dim small">${b.count} quarantined item${b.count !== 1 ? 's' : ''} · ${fmt(b.bytes)} space used</div>
-          </div>
-        </div>
-        <div class="row" style="gap:8px">
-          ${b.count > 0 ? `<button class="btn-ghost" onclick="restoreAllBin()">Put All Back</button>` : ''}
-          ${b.count > 0 ? `<button class="btn-pri danger" onclick="emptyBinPrompt()">Empty Recycle Bin</button>` : ''}
-        </div>
-      </div>
-    </div>
-
-    <div class="glass">
-      ${b.items && b.items.length ? `
-        <table>
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Original Location</th>
-              <th>Date Trashed</th>
-              <th>Size</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${b.items.map(it => `
-              <tr>
-                <td><b>${esc(it.name)}</b></td>
-                <td class="dim small">${esc(it.from)}</td>
-                <td class="small">${dt(it.ts)}</td>
-                <td class="small">${fmt(it.size)}</td>
-                <td>
-                  <div class="row" style="gap:6px">
-                    <button class="btn-pri" style="padding:4px 10px;font-size:11.5px" onclick="restoreBinItem(${it.id})">Put Back</button>
-                    <button class="btn-ghost danger" style="padding:4px 8px;font-size:11.5px" onclick="purgeBinItem(${it.id})">Delete Forever</button>
-                  </div>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      ` : `
-        <div style="text-align:center;padding:40px 10px">
-          <div style="font-size:38px;margin-bottom:8px">✨</div>
-          <h3>Recycle Bin is Empty</h3>
-          <p class="dim small">Deleted items are moved here first. You can safely restore them anytime.</p>
-        </div>
-      `}
-    </div>
-  `;
+  view().innerHTML = loading();
+  let b; try { b = await api("/api/bin"); } catch (e) { return fail(e); }
+  setBinCount(b.count);
+  view().innerHTML = `
+    <div class="head"><h1>Bin</h1><p>Anything Aegis removes lands here first. Put it back any time — files are only erased when you empty the Bin.</p></div>
+    ${b.count ? `<div class="row" style="margin-bottom:12px"><span class="muted small">${b.count} item${b.count === 1 ? "" : "s"} · ${bytes(b.bytes)}</span><span class="grow"></span>
+      <button class="btn sm" onclick="restoreSelected()">Put back selected</button>
+      <button class="btn sm" onclick='change("restore",{})'>Put back all</button>
+      <button class="btn danger sm" onclick='change("purge",{})'>Empty Bin</button></div>
+    <div class="list">${b.items.map(x => `<div class="item">
+      <input type="checkbox" class="bpick" value="${x.id}">
+      <span class="ic">${icon(kindIcon(x.name, x.is_dir))}</span>
+      <div class="grow"><div class="nm">${esc(x.name)}</div><div class="sub">from ${esc(x.from)} · removed ${when(x.ts)}</div></div>
+      <div class="meta">${bytes(x.size)}</div>
+      <button class="btn ghost sm" onclick='change("restore",{ids:[${x.id}]})'>Put back</button>
+      <button class="btn ghost sm" style="color:var(--danger)" onclick='change("purge",{ids:[${x.id}]})'>Delete forever</button>
+    </div>`).join("")}</div>` : `<div class="card empty"><h3>The Bin is empty.</h3></div>`}`;
 }
+function restoreSelected() { const ids = $$(".bpick:checked").map(c => +c.value); if (!ids.length) return toast("Select items first."); change("restore", { ids }); }
+function setBinCount(n) { $("#binCount").textContent = n ? n : ""; }
+async function refreshBin() { try { setBinCount((await api("/api/bin")).count); } catch (_) {} }
 
-function restoreBinItem(id) {
-  requestChange('restore', { ids: [id] }, () => vBin());
-}
-
-function restoreAllBin() {
-  requestChange('restore', {}, () => vBin());
-}
-
-function purgeBinItem(id) {
-  requestChange('purge', { ids: [id] }, () => vBin());
-}
-
-function emptyBinPrompt() {
-  requestChange('purge', {}, () => vBin());
-}
-
-/* -------------------------------------------------------------
- * VIEW: ORGANIZE & UNNAMED SMART SUGGESTIONS
- * ------------------------------------------------------------- */
-async function vOrganize() {
-  const m = document.getElementById('main');
-  m.innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:10px">
-        <div>
-          <h2 style="margin:0 0 4px">Intelligent Organizer & Name Suggestions</h2>
-          <div class="dim small">AI-guided file organization and automatic name suggestions for generic/unnamed files. All changes require your visual confirmation.</div>
-        </div>
-      </div>
-      <div class="row" style="margin-top:12px;gap:8px">
-        <input id="obase" size="44" placeholder="Folder to organize (leave blank for index)">
-        <label class="small dim"><input type="checkbox" id="orec"> Recursive</label>
-        <button class="btn-pri" onclick="buildOrganizePlan()">Build Organization Plan</button>
-        <button class="btn-ghost" onclick="loadUnnamedFiles()">Detect Unnamed Files & Suggest Names</button>
-      </div>
-    </div>
-    <div id="organizeOutput"></div>
-  `;
-  loadUnnamedFiles();
-}
-
-async function loadUnnamedFiles() {
-  const out = document.getElementById('organizeOutput');
-  out.innerHTML = '<div class="glass skel" style="height:150px"></div>';
-  const un = await api('GET', '/api/unnamed');
-
-  if (!un.items || !un.items.length) {
-    out.innerHTML = `
-      <div class="glass" style="text-align:center;padding:34px">
-        <h3>✨ All Filenames Look Great</h3>
-        <p class="dim small">No generic filenames (like Untitled, IMG_1234, Screenshot) found needing attention.</p>
-      </div>
-    `;
-    return;
-  }
-
-  window._unnamedItems = un.items;
-  out.innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <div>
-          <h3 style="margin:0">Generic & Unnamed Files (${un.items.length} detected)</h3>
-          <div class="dim small">Smart suggestions derived from document titles, concepts, and date context.</div>
-        </div>
-        <button class="btn-pri" onclick="applyBatchRenames()">Rename Selected (With Confirmation)</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th width="30"><input type="checkbox" checked onchange="toggleAllUnnamed(this.checked)"></th>
-            <th>Current Filename</th>
-            <th>Content Preview / Context</th>
-            <th>Smart Suggested Name</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${un.items.map((it, idx) => `
-            <tr>
-              <td><input type="checkbox" class="uchk" data-idx="${idx}" checked></td>
-              <td>
-                <b style="cursor:pointer;color:var(--acc)" onclick="quickLook('${qesc(it.path)}')" ondblclick="op('${qesc(it.path)}')" title="Click to preview file · Double-click to open in Windows">${esc(it.name)} 👁️</b>
-                <div class="dim small truncate" style="max-width:220px">${esc(it.folder)}</div>
-              </td>
-              <td class="dim small" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.snippet || 'Context based naming')}</td>
-              <td>
-                <input id="sug_${idx}" value="${esc(it.suggested_name)}" style="width:240px;font-weight:600">
-              </td>
-              <td>
-                <div class="row" style="gap:4px">
-                  <button class="btn-pri" style="padding:3px 8px;font-size:11px" onclick="quickLook('${qesc(it.path)}')">Preview 👁️</button>
-                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="op('${qesc(it.path)}')">Launch 🚀</button>
-                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="rev('${qesc(it.path)}')">Reveal</button>
-                  <button class="btn-pri" style="padding:3px 9px;font-size:11px" onclick="renameSingleUnnamed(${idx})">Rename</button>
-                </div>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function toggleAllUnnamed(on) {
-  document.querySelectorAll('.uchk').forEach(c => c.checked = on);
-}
-
-function renameSingleUnnamed(idx) {
-  const it = window._unnamedItems[idx];
-  const newName = document.getElementById(`sug_${idx}`).value;
-  requestChange('rename', { path: it.path, new_name: newName }, () => loadUnnamedFiles());
-}
-
-function applyBatchRenames() {
-  const checked = [...document.querySelectorAll('.uchk:checked')];
-  if (!checked.length) {
-    toast('No files selected');
-    return;
-  }
-  const items = checked.map(c => {
-    const idx = +c.dataset.idx;
-    const it = window._unnamedItems[idx];
-    const newName = document.getElementById(`sug_${idx}`).value;
-    return { path: it.path, new_name: newName };
-  });
-
-  requestChange('renames', { items }, () => loadUnnamedFiles());
-}
-
-async function buildOrganizePlan() {
-  const base = document.getElementById('obase').value;
-  const rec = document.getElementById('orec').checked;
-  const out = document.getElementById('organizeOutput');
-  out.innerHTML = '<div class="glass skel" style="height:150px"></div>';
-
-  const r = await api('POST', '/api/organize/plan', { base, recursive: rec });
-  if (!r.ok) {
-    out.innerHTML = `<div class="glass"><span class="dim">Error: ${esc(r.error)}</span></div>`;
-    return;
-  }
-
-  state.plan = r;
-  out.innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:12px">
-        <div>
-          <h3 style="margin:0">Organization Plan (${r.moves.length} moves)</h3>
-          <div class="dim small">Source: ${esc(r.source)} · Withheld: ${r.withheld.length} Sensitive files</div>
-        </div>
-        <button class="btn-pri" onclick="applyOrganizePlan()">Apply Plan (With Confirmation)</button>
-      </div>
-      <table>
-        <thead><tr><th>Current File</th><th>➔ Proposed Folder / New Name</th><th>Reason</th></tr></thead>
-        <tbody>
-          ${r.moves.map(m => `
-            <tr>
-              <td><b style="cursor:pointer;color:var(--acc)" onclick="quickLook('${qesc(m.old)}')" ondblclick="op('${qesc(m.old)}')" title="Click to preview file · Double-click to open in Windows">${esc(m.old.split(/[\\/]/).pop())} 👁️</b></td>
-              <td><b>${esc(m.folder)}</b> / ${esc(m.new_name)}</td>
-              <td class="small dim">${esc(m.reason)}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function applyOrganizePlan() {
-  if (!state.plan) return;
-  requestChange('organize', { batch: state.plan.batch, selected: state.plan.moves.map(m => m.id) }, () => vOrganize());
-}
-
-/* -------------------------------------------------------------
- * VIEW: PRIVACY SHIELD & SENSITIVE TIERS
- * ------------------------------------------------------------- */
-async function vLedger() {
-  const m = document.getElementById('main');
-  m.innerHTML = `<div class="stats">${'<div class="stat skel" style="height:90px"></div>'.repeat(4)}</div>
-  <div class="glass skel" style="height:250px"></div>`;
-
-  const [tInfo, lInfo] = await Promise.all([
-    api('GET', '/api/privacy/tiers'),
-    api('GET', '/api/ledger?limit=30')
-  ]);
-
-  const s = lInfo.stats || {};
-  const sum = tInfo.summary || {};
-
-  m.innerHTML = `
-    <div class="stats">
-      <div class="stat"><b style="color:var(--red)">${sum.Sensitive ? sum.Sensitive.count : 0}</b><span>SENSITIVE FILES</span><small>Auto-withheld from any egress</small></div>
-      <div class="stat"><b style="color:var(--peach)">${sum.Internal ? sum.Internal.count : 0}</b><span>INTERNAL FILES</span><small>Protected by local masking</small></div>
-      <div class="stat"><b style="color:var(--mint)">${sum.Public ? sum.Public.count : 0}</b><span>PUBLIC FILES</span><small>Safe for search & organization</small></div>
-      <div class="stat"><b>${s.entities_redacted || 0}</b><span>PII DETECTIONS</span><small>Vault tokens reversible in RAM</small></div>
-    </div>
-
-    <!-- Interactive Tokenization Sandbox -->
-    <div class="glass">
-      <div class="row" style="justify-content:space-between;margin-bottom:10px">
-        <h3 style="margin:0">Local Detection & Reversible Tokenization Test</h3>
-        <span class="badge ok">100% On-Device Proof</span>
-      </div>
-      <div class="row" style="gap:8px">
-        <input id="rtIn" style="flex:1" value="Patient Aadhaar is 2345 6789 0123, PAN ABCDE1234F, email alex@gmail.com">
-        <button class="btn-pri" onclick="testRedaction()">Inspect Tokenization</button>
-      </div>
-      <div id="rtOut" style="margin-top:12px"></div>
-    </div>
-
-    <!-- Sensitive Tiers Grouping -->
-    <div class="glass">
-      <h3 style="margin:0 0 10px">Sensitive Tier Breakdown by Entity Type</h3>
-      <div class="row" style="gap:8px;margin-bottom:14px">
-        ${(tInfo.entity_types || []).map(([typ, cnt]) => `
-          <div class="badge warn" style="font-size:12px;padding:6px 12px">
-            <b>${esc(typ)}</b>: ${cnt} instances
-          </div>
-        `).join('') || '<span class="dim small">No confidential entities detected.</span>'}
-      </div>
-
-      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Click to preview · Double-click to open in Windows)</div>
-      ${(tInfo.sensitive_files || []).map(f => `
-        <div class="frow xrow" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview file · Double-click to open in Windows" style="cursor:pointer">
-          <span style="font-size:16px">🔒</span>
-          <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.folder)}</span></span>
-          <span class="tier Sensitive">Sensitive</span>
-          ${f.pii ? `<span class="ptag">${esc(f.pii)}</span>` : ''}
-          <span class="s">${fmt(f.size)}</span>
-          <div class="row" style="gap:4px">
-            <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
-            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
-            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(f.path)}'), '_blank')">Tab ↗</button>
-            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
-            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();jumpToExplorer('${qesc(f.path)}')">Explorer</button>
-          </div>
-        </div>
-      `).join('') || '<div class="dim small">Zero sensitive files found.</div>'}
-    </div>
-
-    <!-- Live Ledger Audit -->
-    <div class="glass">
-      <h3 style="margin:0 0 12px">Audit Ledger (Verified Zero Egress)</h3>
-      ${(lInfo.rows || []).map(r => `
-        <div class="diff-card" style="margin-bottom:10px">
-          <div class="row" style="justify-content:space-between;margin-bottom:6px">
-            <span style="font-weight:600">#${r.id} ${esc(r.purpose)}</span>
-            <span class="badge ${r.egress ? 'warn' : 'ok'}">${r.egress ? `☁ Cloud (${r.bytes_sent} B)` : '✓ Local Only (0 B sent)'}</span>
-            <span class="dim small">${new Date(r.ts * 1000).toLocaleTimeString()}</span>
-          </div>
-          <div class="dim small" style="margin-bottom:6px">Withheld: ${r.files_withheld} sensitive files · Masked residual: ${r.residual}</div>
-          <pre style="margin:0;max-height:100px">${esc(r.sent || '— No payload left this machine —')}</pre>
-        </div>
-      `).join('') || '<span class="dim small">No requests in ledger yet.</span>'}
-    </div>
-  `;
-  testRedaction();
-}
-
-async function testRedaction() {
-  const text = document.getElementById('rtIn')?.value;
-  if (!text) return;
-  const res = await api('POST', '/api/redact-test', { text });
-  const out = document.getElementById('rtOut');
-  if (!out) return;
-  out.innerHTML = `
-    <div class="grid2">
-      <div>
-        <div class="diff-label">Egress Guarded Payload (Tokens Replace Real Data)</div>
-        <pre>${esc(res.guarded)}</pre>
-      </div>
-      <div>
-        <div class="diff-label">Local Rehydration Check (Restored in RAM: ${res.roundtrip_ok ? '✓ Exact Match' : 'Mismatch'})</div>
-        <pre>${esc(res.rehydrated)}</pre>
-      </div>
-    </div>
-  `;
-}
-
-/* -------------------------------------------------------------
- * VIEW: STORAGE INTELLIGENCE
- * ------------------------------------------------------------- */
-async function vStorage() {
-  const m = document.getElementById('main');
-  m.innerHTML = `<div class="glass skel" style="height:120px"></div><div class="stats">${'<div class="stat skel" style="height:90px"></div>'.repeat(4)}</div>`;
-  const o = await api('GET', '/api/storage/overview');
-
-  m.innerHTML = `
-    <div class="glass">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <h2 style="margin:0 0 4px">You can safely reclaim ${fmt(o.reclaimable)}</h2>
-          <div class="dim small">${o.junk_count} junk files (${fmt(o.junk_bytes)}) · ${o.dup_groups} duplicate groups (${fmt(o.dup_waste)})</div>
-        </div>
-        <button class="btn-pri" onclick="scanDuplicates()">Find Duplicates</button>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><b>${o.count}</b><span>INDEXED FILES</span></div>
-      <div class="stat"><b>${fmt(o.total)}</b><span>TOTAL USED</span></div>
-      <div class="stat"><b>${o.dup_groups}</b><span>DUP GROUPS</span></div>
-      <div class="stat"><b>${fmt(o.dup_waste)}</b><span>WASTED IN COPIES</span></div>
-    </div>
-
-    <div class="grid2">
-      <div class="glass">
-        <h3 style="margin:0 0 10px">Largest Stale Files (>50MB, >6mo)</h3>
-        <div id="staleBox"></div>
-      </div>
-      <div class="glass">
-        <h3 style="margin:0 0 10px">Duplicate File Groups</h3>
-        <div id="dupBox"></div>
-      </div>
-    </div>
-  `;
-  loadStorageDetails();
-}
-
-async function loadStorageDetails() {
-  const [stale, dup] = await Promise.all([
-    api('GET', '/api/storage/stale'),
-    api('GET', '/api/dups/status')
-  ]);
-
-  const sBox = document.getElementById('staleBox');
-  if (sBox) {
-    sBox.innerHTML = (stale || []).slice(0, 8).map(x => `
-      <div class="frow xrow" onclick="quickLook('${qesc(x.path)}')" ondblclick="op('${qesc(x.path)}')" title="Click to preview · Double-click to open in Windows" style="cursor:pointer">
-        <span class="n">📄 <b>${esc(x.name)}</b></span>
-        <span class="s">${fmt(x.size)}</span>
-        <div class="row" style="gap:4px">
-          <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(x.path)}')">Preview 👁️</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Launch 🚀</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
-          <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
-        </div>
-      </div>
-    `).join('') || '<span class="dim small">No stale files found.</span>';
-  }
-
-  const dBox = document.getElementById('dupBox');
-  if (dBox) {
-    const groups = dup.groups || [];
-    dBox.innerHTML = groups.slice(0, 6).map((g, i) => `
-      <div class="diff-card">
-        <div class="row" style="justify-content:space-between;margin-bottom:6px">
-          <b>Group ${i + 1} (${g.files.length} copies)</b>
-          <span class="badge warn">Wastes ${fmt(g.waste)}</span>
-        </div>
-        ${g.files.map((f, fi) => `
-          <div class="row" style="justify-content:space-between;font-size:12px;padding:3px 0">
-            <span class="truncate" style="flex:1;cursor:pointer" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview · Double-click to open in Windows">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
-            <div class="row" style="gap:4px">
-              <button class="btn-pri" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
-              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
-              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
-              ${fi > 0 ? `<button class="btn-ghost danger" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();promptTrash('${qesc(f.path)}')">Trash copy</button>` : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `).join('') || '<div class="dim small">Click "Find Duplicates" to scan for identical files.</div>';
-  }
-}
-
-async function scanDuplicates() {
-  toast('Scanning for duplicates…');
-  await api('POST', '/api/dups/start');
-  setTimeout(loadStorageDetails, 2000);
-}
-
-/* -------------------------------------------------------------
- * VAULT AGENT (With Clickable Explorer Links)
- * ------------------------------------------------------------- */
-const AWSUG = [
-  "Find my notes about inheritance and polymorphism",
-  "What files can I delete?",
-  "Suggest names for unnamed files",
-  "Is my data private?"
-];
-
-function awToggle() {
-  const p = document.getElementById('awpanel');
-  p.classList.toggle('open');
-  if (p.classList.contains('open')) {
-    setTimeout(() => document.getElementById('awin').focus(), 140);
-    if (!document.getElementById('awlog').children.length) {
-      awSay('a', "Hey! I'm the Vault Agent. I read your local index and give clickable results taking you straight to files in Explorer.");
-      document.getElementById('awchips').innerHTML = AWSUG.map(s => `<button onclick="awAsk('${qesc(s)}')">${esc(s)}</button>`).join('');
-    }
-  }
-}
-
-function awSay(who, text, items = []) {
-  const l = document.getElementById('awlog');
-  const d = document.createElement('div');
-  d.className = 'msg ' + who;
-
-  let content = esc(text);
-  if (items && items.length) {
-    content += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">`;
-    items.forEach(it => {
-      content += `
-        <div class="file-card" onclick="${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `quickLook('${qesc(it.path)}')`}" ondblclick="${it.is_dir ? `rev('${qesc(it.path)}')` : `op('${qesc(it.path)}')`}" title="${it.is_dir ? 'Click to open in Explorer · Double-click to reveal' : 'Click to preview · Double-click to open in Windows'}" style="cursor:pointer">
-          <span class="icon">${it.is_dir ? '📁' : '📄'}</span>
-          <div class="info">
-            <div class="title">${esc(it.name)}</div>
-            <div class="sub">${esc(it.badge || '')} · ${fmt(it.size || 0)}</div>
-          </div>
-          <div class="row" style="gap:4px">
-            <button class="btn-pri" style="padding:2px 8px;font-size:10.5px" onclick="event.stopPropagation();${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `quickLook('${qesc(it.path)}')`}">${it.is_dir ? 'Browse 📂' : 'Preview 👁️'}</button>
-            ${!it.is_dir ? `<button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();op('${qesc(it.path)}')">Launch 🚀</button>` : ''}
-            <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(it.path)}')">Reveal</button>
-          </div>
-        </div>
-      `;
-    });
-    content += `</div>`;
-  }
-
-  d.innerHTML = content;
-  l.appendChild(d);
-  l.scrollTop = l.scrollHeight;
-}
-
-function awThinking() {
-  const l = document.getElementById('awlog');
-  const d = document.createElement('div');
-  d.className = 'msg a tdots';
-  d.innerHTML = '<span></span><span></span><span></span>';
-  l.appendChild(d);
-  l.scrollTop = l.scrollHeight;
-  return d;
-}
-
-function awAsk(s) {
-  const p = document.getElementById('awpanel');
-  if (!p.classList.contains('open')) awToggle();
-  document.getElementById('awin').value = s;
-  awSubmit(null);
-}
-
-async function awSubmit(e) {
-  if (e) e.preventDefault();
-  const inp = document.getElementById('awin');
-  const t = inp.value.trim();
-  if (!t) return;
-  inp.value = '';
-
-  awSay('u', t);
-  const tp = awThinking();
-
-  try {
-    const r = await api('POST', '/api/agent', { text: t });
-    tp.remove();
-    awSay('a', r.reply || 'Here is what I found:', r.items || []);
-    if (r.tab && r.tab !== state.tab) {
-      tab(r.tab, null, true);
-    }
-    if (r.focus_path) {
-      highlightItem(r.focus_path);
-    }
-  } catch (err) {
-    tp.remove();
-    awSay('a', 'Backend unreachable — verify python app.py is running.');
-  }
-}
-
-/* -------------------------------------------------------------
- * SETTINGS
- * ------------------------------------------------------------- */
+/* =====================================================================
+   SETTINGS + OFFLINE
+   ===================================================================== */
 async function openSettings() {
-  try {
-    const s = await api('GET', '/api/settings');
-    document.getElementById('s_provider').value = s.provider || 'local-rules';
-    document.getElementById('s_model').value = s.model || '';
-    document.getElementById('s_base').value = s.base_url || '';
-    document.getElementById('s_ollama').value = s.ollama_url || '';
-    document.getElementById('s_omodel').value = s.ollama_model || '';
-    document.getElementById('s_status').textContent = 'Mode: ' + (s.offline ? 'OFFLINE (Zero Egress)' : 'Online Enabled');
-  } catch (e) {}
-  document.getElementById('settings').style.display = 'flex';
+  let s; try { s = await api("/api/settings"); } catch (e) { return fail(e); }
+  $("#sProvider").value = s.provider; $("#sModel").value = s.model || ""; $("#sBase").value = s.base_url || "";
+  $("#sKey").value = ""; $("#sKey").placeholder = s.api_key ? "a key is set — paste to replace" : "paste to set";
+  $("#sOllamaUrl").value = s.ollama_url || ""; $("#sOllamaModel").value = s.ollama_model || "";
+  syncSettingsFields();
+  $("#settings").classList.add("open");
 }
-
-function closeSettings() {
-  document.getElementById('settings').style.display = 'none';
-}
-
+function syncSettingsFields() { const p = $("#sProvider").value; $$("#settings [data-for]").forEach(el => el.classList.toggle("hidden", !el.dataset.for.split(" ").includes(p))); }
+$("#sProvider").onchange = syncSettingsFields;
 async function saveSettings() {
-  const b = {
-    provider: document.getElementById('s_provider').value,
-    model: document.getElementById('s_model').value,
-    base_url: document.getElementById('s_base').value,
-    ollama_url: document.getElementById('s_ollama').value,
-    ollama_model: document.getElementById('s_omodel').value
-  };
-  const k = document.getElementById('s_key').value;
-  if (k) b.api_key = k;
-  await api('POST', '/api/settings', b);
-  document.getElementById('s_key').value = '';
-  closeSettings();
-  toast('Settings updated in RAM');
+  const body = { provider: $("#sProvider").value, model: $("#sModel").value.trim(), base_url: $("#sBase").value.trim(), ollama_url: $("#sOllamaUrl").value.trim(), ollama_model: $("#sOllamaModel").value.trim() };
+  const k = $("#sKey").value.trim(); if (k) body.api_key = k;
+  try { await api("/api/settings", body); closeModal("settings"); toast("Saved."); syncStatus(); } catch (e) { fail(e); }
 }
-
-async function clearKey() {
-  await api('POST', '/api/settings', { clear_key: true });
-  closeSettings();
-  toast('API Key erased from memory');
-}
-
-async function setOffline(on) {
-  await api('POST', '/api/offline', { on });
-  toast(on ? 'Offline mode enabled · Zero egress guaranteed' : 'Online mode active');
-}
-
-/* -------------------------------------------------------------
- * APP BOOTSTRAP
- * ------------------------------------------------------------- */
-async function boot() {
+async function clearKey() { try { await api("/api/settings", { clear_key: true }); toast("Key forgotten."); $("#sKey").placeholder = "paste to set"; } catch (e) { fail(e); } }
+$("#offlineToggle").onchange = async e => { try { await api("/api/offline", { on: e.target.checked }); syncStatus(); toast(e.target.checked ? "Offline: nothing will be sent anywhere." : "Online features enabled."); } catch (err) { fail(err); } };
+async function syncStatus() {
   try {
-    await api('GET', '/api/health');
-    await loadQuick();
-    await updateBinBadge();
-    navPush({ tab: 'dashboard' });
-    vDashboard();
-  } catch (e) {
-    document.getElementById('main').innerHTML = `
-      <div class="glass" style="text-align:center;padding:48px">
-        <h2>Aegis Server Not Found</h2>
-        <p class="dim">Run <kbd>python app.py</kbd> in your aegis directory.</p>
-        <button class="btn-pri" onclick="boot()">Retry Connection</button>
-      </div>
-    `;
+    const h = await api("/api/health");
+    $("#offlineToggle").checked = !!h.offline;
+    const local = h.offline || h.provider === "local-rules";
+    $("#egressDot").className = "dot" + (local ? "" : " warn");
+    $("#egressText").textContent = local ? "Nothing leaves this computer" : `Redacted requests go to ${h.provider}`;
+  } catch (_) {
+    $("#egressDot").className = "dot warn"; $("#egressText").textContent = "Can't reach the Aegis service";
   }
 }
 
-/* -------------------------------------------------------------
- * PWA & WEB APPLICATION SUPPORT
- * ------------------------------------------------------------- */
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const btn = document.getElementById('pwaInstallBtn');
-  if (btn) btn.style.display = 'inline-flex';
-});
-
-async function installPWA() {
-  if (!deferredPrompt) {
-    toast('To install Aegis Web App: click the Install icon (⊕) in your browser address bar.');
-    return;
-  }
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  const btn = document.getElementById('pwaInstallBtn');
-  if (btn) btn.style.display = 'none';
-  if (outcome === 'accepted') {
-    toast('Aegis Web App installed successfully!');
+/* =====================================================================
+   ASSISTANT
+   ===================================================================== */
+function toggleAsk() {
+  const el = $("#ask"); el.classList.toggle("open");
+  if (el.classList.contains("open")) {
+    if (!$("#askLog").children.length) botSay({ reply: "Hi. I can find files, point out what's safe to delete, and show what's private.", items: [] }, ["What can I delete?", "Show duplicates", "Find my notes", "Is my data private?"]);
+    $("#askInput").focus();
   }
 }
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+function botSay(r, chips = []) {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+  div.innerHTML = esc(r.reply || "") + (r.items || []).slice(0, 7).map(x => `<div class="it" onclick='${x.is_dir ? `go("files",{path:${attr(x.path)}})` : `preview(${attr(x.path)})`}'>${icon(kindIcon(x.name, x.is_dir), "faint")}<span class="grow">${esc(x.name)}</span><span class="small faint">${esc(x.badge || "")}</span></div>`).join("")
+    + (chips.length ? `<div class="row wrap" style="margin-top:8px">${chips.map(c => `<button class="chip" onclick='askSend(${attr(c)})'>${esc(c)}</button>`).join("")}</div>` : "")
+    + (r.tab && ROUTES[{ ledger: "privacy", organize: "tidy", dashboard: "home", explorer: "files" }[r.tab] || r.tab] ? `<div style="margin-top:6px"><button class="link small" onclick="go('${{ ledger: "privacy", organize: "tidy", dashboard: "home", explorer: "files" }[r.tab] || r.tab}')">Open ${esc({ ledger: "Privacy", organize: "Tidy up", dashboard: "Overview", explorer: "Files", storage: "Storage" }[r.tab] || r.tab)}</button></div>` : "");
+  $("#askLog").appendChild(div); $("#askLog").scrollTop = 1e9;
 }
+async function askSend(text) {
+  const me = document.createElement("div"); me.className = "msg me"; me.innerHTML = `<span>${esc(text)}</span>`;
+  $("#askLog").appendChild(me);
+  const wait = document.createElement("div"); wait.className = "msg bot"; wait.innerHTML = '<span class="spinner"></span>'; $("#askLog").appendChild(wait);
+  $("#askLog").scrollTop = 1e9;
+  try { const r = await api("/api/agent", { text }); wait.remove(); botSay(r); } catch (e) { wait.remove(); botSay({ reply: "Sorry — " + e.message }); }
+}
+function askSubmit(e) { e.preventDefault(); const v = $("#askInput").value.trim(); if (!v) return; $("#askInput").value = ""; askSend(v); }
 
-boot();
+/* ---------- boot ---------- */
+syncStatus(); refreshBin(); pollScan(); render();
 </script>
 </body>
 </html>
