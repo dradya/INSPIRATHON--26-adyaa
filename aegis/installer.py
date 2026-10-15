@@ -386,7 +386,7 @@ class AegisInstallerApp(tk.Tk):
             widget.destroy()
 
         self.lbl_status = tk.Label(
-            self.container, text="Preparing installation…",
+            self.container, text="Starting installation…",
             font=("Segoe UI", 11, "bold"), bg=COLOR_BG, fg=COLOR_TXT
         )
         self.lbl_status.pack(anchor="w", pady=(0, 8))
@@ -396,6 +396,8 @@ class AegisInstallerApp(tk.Tk):
             orient="horizontal", mode="determinate", maximum=100
         )
         self.prog_bar.pack(fill="x", pady=(0, 14))
+        self.prog_bar["value"] = 5
+        self.update_idletasks()
 
         # Log Console Box
         log_frame = tk.Frame(self.container, bg=COLOR_CARD, bd=1, relief="solid")
@@ -424,6 +426,10 @@ class AegisInstallerApp(tk.Tk):
                 self.prog_bar["value"] = percent
             if status and hasattr(self, "lbl_status") and self.lbl_status.winfo_exists():
                 self.lbl_status.config(text=status)
+            try:
+                self.update_idletasks()
+            except Exception:
+                pass
         self.after(0, _update)
 
     def start_installation(self):
@@ -445,23 +451,23 @@ class AegisInstallerApp(tk.Tk):
         try:
             src_dir = self.base_source_dir
 
-            self.set_progress(5, "Initializing installation environment…")
+            self.set_progress(10, "Initializing installation environment…")
             self.log(f"Target folder: {target_dir}")
             self.log(f"Source folder: {src_dir}")
             target_dir.mkdir(parents=True, exist_ok=True)
 
             # 1. Discover Python & Pythonw
+            self.set_progress(20, "Detecting Python runtime components…")
             python_exe = find_python_executable()
             pythonw_exe = find_pythonw_executable()
             self.log(f"Detected host Python:  {python_exe}")
             self.log(f"Detected windowless:   {pythonw_exe}")
 
             # 2. Copy Aegis Application Assets
-            # 2. Copy Aegis Application Assets
-            self.set_progress(20, "Deploying Aegis application files…")
+            self.set_progress(35, "Deploying core Aegis modules…")
             deploy_items = ["aegis", "frontend", "desktop.py", "app.py", "requirements.txt", "requirements-optional.txt", "aegis.ico", "README.md"]
             copied_count = 0
-            for name in deploy_items:
+            for i, name in enumerate(deploy_items):
                 src_item = src_dir / name
                 if src_item.exists():
                     dst_item = target_dir / name
@@ -474,6 +480,7 @@ class AegisInstallerApp(tk.Tk):
                             pass
                     copied_count += 1
                     self.log(f"✓ Copied: {name}")
+                self.set_progress(35 + int((i + 1) / len(deploy_items) * 25))
 
             # Ensure high-res icon is in target
             target_ico = target_dir / "aegis.ico"
@@ -481,44 +488,58 @@ class AegisInstallerApp(tk.Tk):
                 shutil.copy2(self.ico_path, target_ico)
                 self.log("✓ Copied: aegis.ico")
 
-            # 3. Verify & Install Python Dependencies
+            # 3. Verify & Install Python Dependencies (Instant local check first)
             if do_deps:
-                self.set_progress(45, "Verifying and installing Python dependencies…")
-                self.log("\nChecking Python dependencies (FastAPI, PyWebView, NumPy, PyPDF)...")
-                req_file = target_dir / "requirements.txt"
-                if req_file.exists() and python_exe:
-                    cmd = [python_exe, "-m", "pip", "install", "-r", str(req_file), "-q"]
-                    flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
-                    p = subprocess.run(cmd, capture_output=True, text=True, creationflags=flags)
-                    if p.returncode == 0:
-                        self.log("✓ Python dependencies installed and verified successfully.")
-                    else:
-                        self.log(f"Pip note: {p.stderr.strip()[:160] if p.stderr else 'Completed'}")
+                self.set_progress(65, "Verifying Python dependencies…")
+                self.log("\nVerifying Python dependencies (FastAPI, PyWebView, NumPy, PyPDF)...")
 
-                # Quick import verification
-                self.set_progress(60, "Verifying module readiness…")
-                verify_script = (
-                    "mods = ['fastapi', 'uvicorn', 'webview', 'numpy', 'pypdf']\n"
-                    "for m in mods:\n"
+                required_pkgs = {
+                    "fastapi": "fastapi",
+                    "uvicorn": "uvicorn",
+                    "webview": "pywebview",
+                    "numpy": "numpy",
+                    "pypdf": "pypdf",
+                }
+                verify_code = (
+                    "for m in ['fastapi', 'uvicorn', 'webview', 'numpy', 'pypdf']:\n"
                     "    try:\n"
                     "        __import__(m)\n"
-                    "        print(f'✓ {m}: ready')\n"
-                    "    except ImportError as e:\n"
-                    "        print(f'! {m}: not installed ({e})')\n"
+                    "        print('OK:' + m)\n"
+                    "    except ImportError:\n"
+                    "        print('MISSING:' + m)\n"
                 )
+                missing = []
                 try:
-                    p = subprocess.run(
-                        [python_exe, "-c", verify_script],
+                    p_check = subprocess.run(
+                        [python_exe, "-c", verify_code],
                         capture_output=True, text=True,
                         creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
                     )
-                    for line in p.stdout.strip().splitlines():
-                        self.log(line)
+                    for line in p_check.stdout.splitlines():
+                        if line.startswith("OK:"):
+                            self.log(f"✓ {line.split(':')[1]}: satisfied")
+                        elif line.startswith("MISSING:"):
+                            mod_missing = line.split(":")[1]
+                            missing.append(required_pkgs.get(mod_missing, mod_missing))
                 except Exception:
                     pass
 
+                # Only run pip if packages are genuinely missing
+                if missing:
+                    self.set_progress(75, f"Installing {len(missing)} missing package(s)…")
+                    self.log(f"Installing missing: {', '.join(missing)}...")
+                    cmd = [python_exe, "-m", "pip", "install", *missing, "--prefer-binary", "--timeout", "15", "-q"]
+                    flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+                    p = subprocess.run(cmd, capture_output=True, text=True, creationflags=flags)
+                    if p.returncode == 0:
+                        self.log("✓ All missing dependencies installed successfully.")
+                    else:
+                        self.log(f"Note: {p.stderr.strip()[:140] if p.stderr else 'Finished'}")
+                else:
+                    self.log("✓ All dependencies are already satisfied! (Zero network wait)")
+
             # 4. Generate Launchers
-            self.set_progress(70, "Generating zero-console native launchers…")
+            self.set_progress(82, "Generating zero-console native launchers…")
             desktop_py = target_dir / "desktop.py"
 
             # VBS silent launcher (absolutely zero console window popup)
