@@ -22,7 +22,8 @@ JUNK_NAMES = {"node_modules", "__pycache__", ".cache", "temp", "tmp",
 
 TEXT_EXTS = {".txt", ".md", ".csv", ".json", ".js", ".jsx", ".ts", ".py",
              ".java", ".c", ".cpp", ".html", ".css", ".xml", ".yml", ".yaml",
-             ".log", ".ini", ".toml", ".rs", ".go"}
+             ".log", ".ini", ".toml", ".rs", ".go", ".ipynb", ".tex", ".sql",
+             ".kt", ".cs", ".rb", ".php", ".sh", ".h", ".hpp", ".rst"}
 
 MAX_SNIPPET_FILE = 5 * 1024 * 1024     # don't read content past this
 SNIPPET_LEN = 240                      # redacted snippet length for cloud

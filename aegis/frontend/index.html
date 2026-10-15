@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aegis — privacy-first file manager</title>
+<title>Aegis — Private AI File Manager</title>
 <style>
-/* self-hosted fonts: zero network needed, works fully offline */
+/* Self-hosted fonts: 100% offline, zero network requests */
 @font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
 @font-face{font-family:Inter;font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format("woff2")}
 @font-face{font-family:Inter;font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
@@ -13,592 +13,2130 @@
 @font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/space-grotesk-500.woff2) format("woff2")}
 @font-face{font-family:"Space Grotesk";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/space-grotesk-600.woff2) format("woff2")}
 @font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/space-grotesk-700.woff2) format("woff2")}
-:root{--bg:#0a0a1b;--line:rgba(255,255,255,.09);--txt:#fff;--dim:rgba(255,255,255,.5);
---faint:rgba(255,255,255,.35);--acc:#7c6cff;--mint:#3ddc97;--peach:#ffb86b;--red:#ff6b7a}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5;
-background:radial-gradient(900px 500px at 10% -5%,rgba(124,108,255,.35),transparent 60%),
-radial-gradient(800px 500px at 90% 10%,rgba(61,220,151,.20),transparent 60%),
-radial-gradient(700px 600px at 50% 110%,rgba(255,184,107,.13),transparent 60%),#0a0a1b}
-h1,h2,.disp{font-family:"Space Grotesk",Inter,sans-serif}
-#top{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);
-background:rgba(10,10,27,.75);backdrop-filter:blur(16px);padding:10px 18px}
-#toprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.logo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-family:"Space Grotesk";font-weight:700;
-font-size:19px;color:#0a0a1b;background:linear-gradient(135deg,#a99bff,#7c6cff 50%,#3ddc97 130%);box-shadow:0 0 30px -6px rgba(124,108,255,.7)}
-.brand b{font-family:"Space Grotesk";font-size:17px}.brand span{display:block;font-size:11px;color:var(--dim)}
-nav{display:flex;gap:2px;margin:0 auto;flex-wrap:wrap}
-nav button{border:0;background:none;color:var(--dim);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer}
-nav button:hover{color:#fff;background:rgba(255,255,255,.06)}
-nav button.on{color:#fff;background:rgba(255,255,255,.09)}
-input,select,button,textarea{font:inherit;color:var(--txt)}
-input,select,textarea{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:7px 11px}
-input:focus{outline:none;border-color:rgba(124,108,255,.7)}
-button{cursor:pointer}
-.btn-pri{background:linear-gradient(135deg,#a99bff,#7c6cff 45%,#3ddc97 130%);border:0;color:#0a0a1b;
-font-weight:700;border-radius:11px;padding:8px 16px}
-.btn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:11px;padding:8px 14px}
-button.danger{border:1px solid rgba(255,107,122,.5);color:var(--red);background:none;border-radius:11px;padding:8px 14px}
-button:disabled{opacity:.45}
-.badge{font-size:11px;font-weight:700;background:rgba(255,255,255,.07);padding:4px 10px;border-radius:99px;color:var(--dim);white-space:nowrap}
-.badge.ok{background:rgba(61,220,151,.15);color:var(--mint)}
-.badge.warn{background:rgba(255,184,107,.15);color:var(--peach)}
-#quickrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:12px}
-#quickrow button{font-size:12px;padding:5px 10px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:99px;color:var(--dim)}
-#quickrow button:hover{color:#fff}
-#prog{font-size:12px;color:var(--dim)}
-#main{max-width:1180px;margin:0 auto;padding:20px 18px 90px}
-.glass{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
-border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;backdrop-filter:blur(14px)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
-.stat{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid var(--line);
-border-radius:18px;padding:16px 18px}
-.stat b{font-family:"Space Grotesk";font-size:30px;display:block;line-height:1.1}
-.stat span{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--dim)}
-.stat small{display:block;font-size:11px;color:var(--faint);margin-top:2px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:850px){.grid2{grid-template-columns:1fr}nav{order:3;width:100%}}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.dim{color:var(--dim)}.small{font-size:12px}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}
-th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.tier{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap}
-.tier.Public{background:rgba(61,220,151,.15);color:var(--mint)}
-.tier.Internal{background:rgba(255,184,107,.18);color:var(--peach)}
-.tier.Sensitive{background:rgba(255,107,122,.16);color:var(--red)}
-.ptag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(255,107,122,.16);color:#ff9aa4;white-space:nowrap}
-.bar{height:9px;background:rgba(255,255,255,.08);border-radius:99px;margin-top:6px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7c6cff,#a99bff);border-radius:99px}
-.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--dim);margin-top:10px}
-.legend i{width:9px;height:9px;border-radius:99px;display:inline-block;margin-right:4px}
-.frow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.05);
-border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13px}
-.frow .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.frow .s{font-size:12px;color:var(--dim);white-space:nowrap;font-weight:600}
-pre{white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.4);border:1px solid var(--line);
-border-radius:10px;padding:10px;font-size:12px;max-height:300px;overflow:auto}
-mark.pii{background:rgba(255,107,122,.35);color:#ffdfe3;border-radius:4px;padding:0 3px}
-.tok{background:#5a0f16;color:#ff9aa4;border:1px solid #8a1f2a;border-radius:4px;
-padding:0 5px;font-family:monospace;font-size:12px;white-space:nowrap}
-.tree{font-size:13px}.tree div{padding:3px 0;cursor:pointer;color:var(--dim)}.tree div:hover{color:#fff}
-.crumbs{font-size:13px;margin:8px 0 0}.crumbs a{color:var(--txt)}
-a{color:#b9b2ff}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:90}
-.modal>div{background:#141428;border:1px solid var(--line);border-radius:14px;padding:20px;width:min(480px,92vw)}
-.modal label{display:block;font-size:12px;color:var(--dim);margin:8px 0 3px}
-.modal input,.modal select{width:100%}
-#toasts{position:fixed;bottom:16px;left:16px;z-index:99;display:flex;flex-direction:column;gap:8px}
-.toast{background:#141428;border:1px solid var(--acc);border-radius:10px;padding:9px 14px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
-/* agent widget */
-#awbtn{position:fixed;right:22px;bottom:22px;z-index:80;width:58px;height:58px;border-radius:18px;border:0;
-background:linear-gradient(135deg,#a99bff,#7c6cff 50%,#3ddc97 130%);box-shadow:0 0 34px -6px rgba(124,108,255,.8);
-display:grid;place-items:center;cursor:pointer}
-#awpanel{position:fixed;right:22px;bottom:92px;z-index:80;width:min(384px,calc(100vw - 44px));height:490px;
-display:flex;flex-direction:column;overflow:hidden;border-radius:18px;opacity:0;visibility:hidden;
-transform:scale(.96) translateY(10px);transform-origin:bottom right;pointer-events:none;
-transition:opacity .2s ease,transform .2s ease,visibility .2s;
-background:linear-gradient(180deg,rgba(30,30,60,.97),rgba(16,16,36,.98));border:1px solid var(--line);
-box-shadow:0 24px 70px rgba(0,0,0,.6)}
-#awpanel.open{opacity:1;visibility:visible;transform:none;pointer-events:auto}
-#awlog{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:9px}
-.msg{max-width:88%;border-radius:14px;padding:9px 13px;font-size:13px;line-height:1.55;white-space:pre-line}
-.msg.u{align-self:flex-end;background:linear-gradient(135deg,#7c6cff,#5a4fe0);color:#fff}
-.msg.a{align-self:flex-start;background:rgba(255,255,255,.07)}
-#awchips{display:flex;gap:6px;overflow:auto;padding:0 12px 8px}
-#awchips button{flex-shrink:0;font-size:11px;padding:5px 10px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--dim)}
-#awform{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
-#awform input{flex:1}
-/* ---------- polish: motion, hover, focus ---------- */
-*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
-::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:99px}::-webkit-scrollbar-track{background:transparent}
-::selection{background:rgba(124,108,255,.5)}
-#main>*{animation:fadeUp .28s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.glass,.stat{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.glass:hover{border-color:rgba(255,255,255,.16)}
-.stat:hover{transform:translateY(-2px);border-color:rgba(124,108,255,.45);box-shadow:0 12px 34px -12px rgba(124,108,255,.5)}
-.stat b{font-variant-numeric:tabular-nums}
-nav button{transition:all .15s ease}nav button:hover{transform:translateY(-1px)}
-.btn-pri,.btn-ghost,.danger{transition:transform .12s ease,filter .15s ease,border-color .15s ease,background .15s ease}
-.btn-pri:hover{transform:translateY(-1px);filter:brightness(1.07)}
-.btn-pri:active,.btn-ghost:active{transform:scale(.97)}
-.btn-ghost:hover{border-color:rgba(124,108,255,.6);background:rgba(124,108,255,.12)}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #a99bff;outline-offset:2px}
-input:focus{box-shadow:0 0 0 3px rgba(124,108,255,.22)}
-table tr{transition:background .12s ease}table tbody tr:hover,table tr:hover{background:rgba(255,255,255,.035)}
-.frow{transition:transform .14s ease,border-color .14s ease}
-.frow:hover{transform:translateX(3px);border-color:rgba(255,255,255,.15)}
-.tree div{transition:all .12s ease;border-radius:6px;padding:3px 6px;margin-left:-6px}
-.tree div:hover{background:rgba(255,255,255,.06);transform:translateX(2px)}
-#quickrow button{transition:all .14s ease}#quickrow button:hover{transform:translateY(-1px);color:#fff;border-color:rgba(124,108,255,.5)}
-.tilebtn{display:block;width:100%;text-align:left;margin-bottom:8px;background:rgba(255,255,255,.045);
-border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;transition:all .15s ease}
-.tilebtn:hover{transform:translateY(-1px);border-color:rgba(124,108,255,.5);background:rgba(124,108,255,.08)}
-.bar i{transition:width .8s cubic-bezier(.2,.7,.2,1)}
-svg.donut{animation:pop .5s ease;transform-origin:center}
-@keyframes pop{from{opacity:0;transform:scale(.92)}}
-.skel{border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.11),rgba(255,255,255,.05));background-size:200% 100%;animation:sh 1.2s infinite}
-@keyframes sh{to{background-position:-200% 0}}
-.toast{animation:tin .22s ease}@keyframes tin{from{opacity:0;transform:translateX(-12px)}}
-.tdots span{width:6px;height:6px;border-radius:99px;background:var(--dim);display:inline-block;margin-right:3px;animation:bl 1s infinite}
-.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
-@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-/* clean file views */
-html{scroll-behavior:smooth}
-#main{min-height:60vh}
-.ghead{font-size:11px;font-weight:700;letter-spacing:.09em;color:var(--dim);text-transform:uppercase;margin:14px 0 6px}
-.frow{background:rgba(255,255,255,.05)}
-.frow .s{font-variant-numeric:tabular-nums}
-.xrow{cursor:pointer}
-.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#0a0a1b;border-radius:99px;display:inline-block;animation:sp .7s linear infinite;vertical-align:-2px}
-@keyframes sp{to{transform:rotate(360deg)}}
-select{cursor:pointer}
-/* sleek charts */
-.donut-wrap{filter:drop-shadow(0 10px 28px rgba(124,108,255,.22))}
-svg.donut circle.seg{transition:opacity .18s ease,stroke-width .18s ease;cursor:pointer}
-svg.donut circle.seg:hover{stroke-width:29}
-.lpill{cursor:default;transition:background .14s ease;padding:3px 9px;border-radius:99px}
-.lpill:hover{background:rgba(255,255,255,.1);color:#fff}
-.brow{padding:8px 10px;border-radius:12px;transition:background .14s ease,transform .14s ease}
-.brow:hover{background:rgba(255,255,255,.045);transform:translateX(2px)}
-.rank{width:22px;height:22px;border-radius:8px;background:rgba(124,108,255,.18);color:#c9c2ff;
-font-size:11px;font-weight:700;display:inline-grid;place-items:center;flex-shrink:0}
-.brow:first-child .rank{background:linear-gradient(135deg,#a99bff,#3ddc97);color:#0a0a1b}
-.bar{box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
-.bar i{box-shadow:0 0 12px rgba(124,108,255,.55)}
-/* insight tooltips */
-#tip{position:fixed;z-index:120;max-width:310px;background:#16162e;border:1px solid rgba(124,108,255,.45);
-border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.55;pointer-events:none;opacity:0;
-transition:opacity .12s ease;box-shadow:0 14px 44px rgba(0,0,0,.6)}
-#tip.show{opacity:1}
-#tip .tt{font-weight:700;margin-bottom:2px;word-break:break-word}
-#tip .tk{color:var(--dim);word-break:break-word}
-#tip .tier{font-size:10px}
+
+:root {
+  --bg: #070714;
+  --panel: rgba(18, 18, 38, 0.72);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.08);
+  --txt: #f5f5f7;
+  --dim: rgba(245, 245, 247, 0.55);
+  --faint: rgba(245, 245, 247, 0.35);
+  --acc: #8075ff;
+  --acc-glow: rgba(128, 117, 255, 0.35);
+  --mint: #30d158;
+  --mint-bg: rgba(48, 209, 88, 0.15);
+  --peach: #ff9f0a;
+  --peach-bg: rgba(255, 159, 10, 0.16);
+  --red: #ff453a;
+  --red-bg: rgba(255, 69, 58, 0.16);
+  --blue: #0a84ff;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; margin: 0; }
+body {
+  margin: 0;
+  color: var(--txt);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.45;
+  background:
+    radial-gradient(1100px 500px at 15% -5%, rgba(128, 117, 255, 0.28), transparent 65%),
+    radial-gradient(900px 500px at 85% 10%, rgba(48, 209, 88, 0.15), transparent 60%),
+    radial-gradient(800px 600px at 50% 110%, rgba(255, 159, 10, 0.10), transparent 65%),
+    #070714;
+  background-attachment: fixed;
+}
+
+h1, h2, h3, .disp { font-family: "Space Grotesk", -apple-system, Inter, sans-serif; letter-spacing: -0.02em; }
+
+/* Unified Apple Toolbar */
+#top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--line);
+  background: rgba(11, 11, 28, 0.78);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  padding: 8px 18px;
+}
+#toprow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-family: "Space Grotesk";
+  font-weight: 700;
+  font-size: 17px;
+  color: #070714;
+  background: linear-gradient(135deg, #c4b5fd, #8075ff 50%, #30d158 135%);
+  box-shadow: 0 0 24px -4px rgba(128, 117, 255, 0.7);
+}
+.brand b { font-family: "Space Grotesk"; font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
+.brand span { display: block; font-size: 10.5px; color: var(--dim); letter-spacing: 0.02em; }
+
+/* Apple-style History Nav Cluster */
+.nav-cluster {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 1px;
+}
+.nav-hist-btn {
+  border: 0;
+  background: transparent;
+  color: var(--txt);
+  width: 28px;
+  height: 26px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.nav-hist-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+.nav-hist-btn:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+/* macOS Segmented Tab Bar */
+nav.segmented {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 3px;
+  gap: 2px;
+  margin: 0 auto;
+}
+nav.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--dim);
+  padding: 6px 13px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+nav.segmented button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+nav.segmented button.on {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+}
+.nav-count {
+  font-size: 10px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 99px;
+  padding: 1px 6px;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Search and Quick action bar */
+#quickrow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 12px;
+}
+input, select, button, textarea { font: inherit; color: var(--txt); }
+input, select, textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 11px;
+  transition: all 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(128, 117, 255, 0.8);
+  box-shadow: 0 0 0 3px rgba(128, 117, 255, 0.22);
+}
+button { cursor: pointer; }
+
+.btn-pri {
+  background: linear-gradient(135deg, #a78bfa, #8075ff 45%, #30d158 140%);
+  border: 0;
+  color: #070714;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 7px 15px;
+  box-shadow: 0 2px 14px -3px var(--acc-glow);
+  transition: transform 0.12s ease, filter 0.15s ease;
+}
+.btn-pri:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn-pri:active { transform: scale(0.97); }
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.btn-ghost:active { transform: scale(0.97); }
+
+button.danger {
+  border: 1px solid rgba(255, 69, 58, 0.45);
+  background: rgba(255, 69, 58, 0.12);
+  color: var(--red);
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+button.danger:hover {
+  background: rgba(255, 69, 58, 0.22);
+  border-color: var(--red);
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 3px 9px;
+  border-radius: 99px;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.badge.ok { background: var(--mint-bg); color: var(--mint); }
+.badge.warn { background: var(--peach-bg); color: var(--peach); }
+.badge.danger { background: var(--red-bg); color: var(--red); }
+.badge.info { background: rgba(10, 132, 255, 0.16); color: var(--blue); }
+
+.tier {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.tier.Public { background: var(--mint-bg); color: var(--mint); }
+.tier.Internal { background: var(--peach-bg); color: var(--peach); }
+.tier.Sensitive { background: var(--red-bg); color: var(--red); }
+.ptag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--red-bg);
+  color: #ff9fa7;
+  white-space: nowrap;
+}
+
+#main {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 22px 20px 100px;
+  min-height: 65vh;
+}
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.18s ease;
+}
+.glass:hover { border-color: rgba(255, 255, 255, 0.14); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  backdrop-filter: blur(14px);
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.stat:hover {
+  transform: translateY(-2px);
+  border-color: rgba(128, 117, 255, 0.4);
+}
+.stat b {
+  font-family: "Space Grotesk";
+  font-size: 29px;
+  display: block;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.stat span {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+}
+.stat small { display: block; font-size: 11px; color: var(--faint); margin-top: 3px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) {
+  .grid2 { grid-template-columns: 1fr; }
+  nav.segmented { order: 3; width: 100%; justify-content: center; }
+}
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dim { color: var(--dim); }
+.small { font-size: 12px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle; }
+th { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+/* File rows & cards */
+.frow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+.frow:hover {
+  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.frow.highlight {
+  background: rgba(128, 117, 255, 0.18);
+  border-color: var(--acc);
+  box-shadow: 0 0 20px -4px var(--acc-glow);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+@keyframes pulse-glow {
+  0%, 100% { border-color: var(--acc); }
+  50% { border-color: rgba(128, 117, 255, 0.4); }
+}
+
+.frow .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.frow .s { font-size: 12px; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Interactive File Cards for Agent & Search */
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.file-card:hover {
+  background: rgba(128, 117, 255, 0.14);
+  border-color: var(--acc);
+  transform: translateY(-1px);
+}
+.file-card .icon { font-size: 18px; }
+.file-card .info { flex: 1; min-width: 0; }
+.file-card .title { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-card .sub { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Apple-style Visual Confirmation Sheet Modal */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.18s ease;
+}
+.sheet-overlay.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet {
+  background: #14142b;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 24px;
+  width: min(620px, 94vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp { from { transform: scale(0.96) translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.sheet-icon-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  background: rgba(128, 117, 255, 0.16);
+  border: 1px solid rgba(128, 117, 255, 0.3);
+  color: var(--acc);
+}
+.sheet-icon-bubble.danger {
+  background: rgba(255, 69, 58, 0.16);
+  border-color: rgba(255, 69, 58, 0.3);
+  color: var(--red);
+}
+.sheet-title-group h2 { margin: 0 0 4px; font-size: 18px; }
+.sheet-title-group p { margin: 0; font-size: 13px; color: var(--dim); }
+
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  margin: 12px 0;
+  padding-right: 4px;
+}
+
+/* Visual change diff cards */
+.diff-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+.diff-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.diff-from, .diff-to {
+  flex: 1;
+  min-width: 0;
+}
+.diff-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--dim); font-weight: 700; margin-bottom: 3px; }
+.diff-val { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-arrow { font-size: 16px; color: var(--acc); }
+
+.sheet-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+}
+
+/* Agent floating widget */
+#awbtn {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 80;
+  width: 54px;
+  height: 54px;
+  border-radius: 17px;
+  border: 0;
+  background: linear-gradient(135deg, #c4b5fd, #8075ff 50%, #30d158 135%);
+  box-shadow: 0 0 32px -4px rgba(128, 117, 255, 0.7);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+#awbtn:hover { transform: scale(1.05); }
+
+#awpanel {
+  position: fixed;
+  right: 22px;
+  bottom: 86px;
+  z-index: 80;
+  width: min(410px, calc(100vw - 36px));
+  height: 540px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.96) translateY(12px);
+  transform-origin: bottom right;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+  background: rgba(18, 18, 40, 0.94);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+}
+#awpanel.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
+#awlog { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.msg {
+  max-width: 90%;
+  border-radius: 15px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+  word-break: break-word;
+}
+.msg.u { align-self: flex-end; background: linear-gradient(135deg, #8075ff, #6455f0); color: #fff; }
+.msg.a { align-self: flex-start; background: rgba(255, 255, 255, 0.075); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+#awchips { display: flex; gap: 6px; overflow-x: auto; padding: 0 12px 8px; scrollbar-width: none; }
+#awchips::-webkit-scrollbar { display: none; }
+#awchips button {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  color: var(--dim);
+}
+#awchips button:hover { color: #fff; border-color: rgba(255, 255, 255, 0.2); }
+
+#awform { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); background: rgba(0, 0, 0, 0.18); }
+#awform input { flex: 1; border-radius: 10px; }
+
+/* Modals & Toasts */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 95;
+}
+.modal > div {
+  background: #14142b;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  width: min(500px, 92vw);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.modal label { display: block; font-size: 11.5px; font-weight: 600; color: var(--dim); margin: 10px 0 4px; }
+.modal input, .modal select { width: 100%; }
+
+#toasts { position: fixed; bottom: 18px; left: 18px; z-index: 110; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: #181836;
+  border: 1px solid var(--acc);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: toastIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes toastIn { from { transform: translateX(-16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #070714;
+  border-radius: 99px;
+  display: inline-block;
+  animation: sp 0.7s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes sp { to { transform: rotate(360deg); } }
+
+/* Tree & Explorer */
+.tree { font-size: 13px; }
+.tree div {
+  padding: 4px 8px;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--dim);
+  transition: all 0.12s ease;
+}
+.tree div:hover { color: #fff; background: rgba(255, 255, 255, 0.06); transform: translateX(2px); }
+.tree div.on { color: #fff; background: rgba(128, 117, 255, 0.16); font-weight: 600; }
+
+.crumbs { font-size: 12.5px; margin: 8px 0; color: var(--dim); }
+.crumbs a { color: var(--txt); text-decoration: none; font-weight: 500; }
+.crumbs a:hover { text-decoration: underline; }
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px;
+  font-size: 12px;
+  max-height: 280px;
+  overflow: auto;
+}
+.tok {
+  background: #5a0f16;
+  color: #ff9aa4;
+  border: 1px solid #8a1f2a;
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-family: monospace;
+  font-size: 12px;
+}
+mark.pii {
+  background: rgba(255, 69, 58, 0.35);
+  color: #ffe6e8;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+mark.hl {
+  background: rgba(128, 117, 255, 0.38);
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.skel {
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+  background-size: 200% 100%;
+  animation: sh 1.3s infinite;
+}
+@keyframes sh { to { background-position: -200% 0; } }
+
+.tdots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--dim);
+  display: inline-block;
+  margin-right: 3px;
+  animation: bl 1s infinite;
+}
+.tdots span:nth-child(2) { animation-delay: 0.15s; }
+.tdots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bl { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+/* Charts */
+.bar { height: 8px; background: rgba(255, 255, 255, 0.07); border-radius: 99px; margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8075ff, #c4b5fd); border-radius: 99px; transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--dim); margin-top: 10px; }
+.legend i { width: 9px; height: 9px; border-radius: 99px; display: inline-block; margin-right: 4px; }
+.tilebtn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: all 0.15s ease;
+}
+.tilebtn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(128, 117, 255, 0.5);
+  background: rgba(128, 117, 255, 0.08);
+}
 </style>
 </head>
 <body>
+
+<!-- Unified Apple Toolbar -->
 <div id="top">
   <div id="toprow">
-    <span class="logo">V</span>
-    <span class="brand"><b>Aegis</b><span>private files, understood.</span></span>
-    <nav id="nav">
-      <button data-t="dashboard" class="on" onclick="tab('dashboard',this)">Dashboard</button>
-      <button data-t="search" onclick="tab('search',this)">Search</button>
-      <button data-t="explorer" onclick="tab('explorer',this)">Explorer</button>
-      <button data-t="storage" onclick="tab('storage',this)">Storage</button>
-      <button data-t="organize" onclick="tab('organize',this)">Organize</button>
-      <button data-t="ledger" onclick="tab('ledger',this)">Ledger</button>
+    <div class="logo-group">
+      <span class="logo">A</span>
+      <span class="brand"><b>Aegis</b><span>private files, understood.</span></span>
+    </div>
+
+    <!-- Back / Forward Navigation Cluster -->
+    <div class="nav-cluster">
+      <button class="nav-hist-btn" id="btnBack" onclick="navBack()" title="Back (Alt+Left)" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="nav-hist-btn" id="btnFwd" onclick="navForward()" title="Forward (Alt+Right)" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Segmented Control for Views -->
+    <nav class="segmented" id="nav">
+      <button data-t="dashboard" class="on" onclick="navTab('dashboard', this)">❖ Dashboard</button>
+      <button data-t="search" onclick="navTab('search', this)">⌕ Search</button>
+      <button data-t="explorer" onclick="navTab('explorer', this)">🗂 Explorer</button>
+      <button data-t="storage" onclick="navTab('storage', this)">💽 Storage</button>
+      <button data-t="bin" onclick="navTab('bin', this)">🗑 Bin <span id="binCountBadge" class="nav-count" style="display:none">0</span></button>
+      <button data-t="organize" onclick="navTab('organize', this)">✦ Organize</button>
+      <button data-t="ledger" onclick="navTab('ledger', this)">🛡 Privacy Shield</button>
     </nav>
-    <span class="badge" id="vaultbadge">○ no scan</span>
-    <label class="small dim"><input type="checkbox" id="power" onchange="state.power=this.checked;lsCur()"> Power</label>
-    <label class="small dim"><input type="checkbox" id="offline" onchange="setOffline(this.checked)"> Offline</label>
+
+    <span class="badge ok" id="vaultbadge">● on-device</span>
+    <label class="small dim" title="Reveal hidden and system files"><input type="checkbox" id="power" onchange="state.power=this.checked;lsCur()"> Power</label>
+    <label class="small dim" title="Force zero egress offline"><input type="checkbox" id="offline" onchange="setOffline(this.checked)"> Offline</label>
     <button class="btn-ghost" onclick="openSettings()">Settings</button>
   </div>
+
   <div id="quickrow">
-    <input id="scanpaths" size="34" placeholder="Scan path(s), comma separated — blank = home">
+    <input id="scanpaths" size="32" placeholder="Scan folder (e.g. C:\Users\... blank = home)">
     <button class="btn-pri" id="scanbtn" onclick="startScan()">Scan</button>
     <button id="cancel" class="btn-ghost" style="display:none" onclick="stopScan()">Cancel</button>
-    <span id="prog"></span>
+    <span id="prog" class="dim small"></span>
     <span id="quick" class="row" style="gap:6px"></span>
-    <input id="topq" size="20" placeholder="Search files…  ( / )" onkeydown="if(event.key==='Enter')topSearch()">
+    <input id="topq" size="24" placeholder="Search by meaning… ( / )" onkeydown="if(event.key==='Enter')topSearch()">
   </div>
 </div>
+
+<!-- Main App Body -->
 <div id="main"></div>
-<div class="modal" id="settings"><div>
-  <h3 style="margin:0">Settings <span class="dim small">(key stays in server RAM only)</span></h3>
-  <label>Provider</label>
-  <select id="s_provider"><option>local-rules</option><option>anthropic</option><option>openai</option><option>ollama</option></select>
-  <label>API key (blank = keep, never shown back)</label><input id="s_key" type="password" placeholder="sk-...">
-  <label>Model</label><input id="s_model" placeholder="e.g. claude-sonnet-4-20250514 / gpt-4o-mini">
-  <label>Base URL (OpenAI-compatible)</label><input id="s_base" placeholder="https://api.openai.com/v1">
-  <label>Ollama URL / model</label>
-  <div class="row"><input id="s_ollama" style="flex:1" placeholder="http://127.0.0.1:11434"><input id="s_omodel" style="flex:1" placeholder="llama3.1"></div>
-  <div class="row" style="margin-top:12px"><button class="btn-pri" onclick="saveSettings()">Save</button>
-  <button class="btn-ghost" onclick="clearKey()">Forget key</button><button class="btn-ghost" onclick="closeSettings()">Close</button></div>
-  <p class="small dim" id="s_status"></p>
-</div></div>
-<div id="tip"></div>
+
+<!-- Visual Confirmation Sheet (Apple Sheet Modal) -->
+<div class="sheet-overlay" id="confirmSheet">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="row" style="gap:14px">
+        <div class="sheet-icon-bubble" id="sheetIcon">✦</div>
+        <div class="sheet-title-group">
+          <h2 id="sheetTitle">Confirm Changes</h2>
+          <p id="sheetSub">Please review the proposed file changes before applying.</p>
+        </div>
+      </div>
+      <button class="btn-ghost" style="padding:4px 9px" onclick="closeSheet()">✕</button>
+    </div>
+
+    <!-- Reversibility status pill -->
+    <div id="sheetStatusPill" style="margin-bottom:12px"></div>
+
+    <div class="sheet-body" id="sheetBody">
+      <!-- Dynamic Diff Cards & Visual Groupings -->
+    </div>
+
+    <div class="sheet-foot">
+      <button class="btn-ghost" onclick="closeSheet()">Cancel</button>
+      <button class="btn-pri" id="sheetActionBtn" onclick="commitSheet()">Apply Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settings">
+  <div>
+    <h3 style="margin:0 0 8px">Settings <span class="dim small">(RAM-only, zero-disk storage for keys)</span></h3>
+    <label>Provider</label>
+    <select id="s_provider"><option>local-rules</option><option>anthropic</option><option>openai</option><option>ollama</option></select>
+    <label>API Key (never leaked back)</label>
+    <input id="s_key" type="password" placeholder="sk-...">
+    <label>Model</label>
+    <input id="s_model" placeholder="e.g. claude-sonnet-4-20250514 / gpt-4o-mini">
+    <label>Base URL (OpenAI-compatible)</label>
+    <input id="s_base" placeholder="https://api.openai.com/v1">
+    <label>Ollama URL & Model</label>
+    <div class="row"><input id="s_ollama" style="flex:1" placeholder="http://127.0.0.1:11434"><input id="s_omodel" style="flex:1" placeholder="llama3.1"></div>
+    <div class="row" style="margin-top:16px;justify-content:space-between">
+      <button class="btn-ghost danger" onclick="clearKey()">Forget Key</button>
+      <div class="row">
+        <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
+        <button class="btn-pri" onclick="saveSettings()">Save Preferences</button>
+      </div>
+    </div>
+    <p class="small dim" id="s_status" style="margin-top:10px"></p>
+  </div>
+</div>
+
+<!-- Toasts Container -->
 <div id="toasts"></div>
-<button id="awbtn" onclick="awToggle()" title="Ask the vault agent"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0a0a1b" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1.2" fill="#0a0a1b"/><circle cx="14.5" cy="14" r="1.2" fill="#0a0a1b"/><path d="M12 9V5M9 5h6"/></svg></button>
+
+<!-- Vault Agent Floating Widget -->
+<button id="awbtn" onclick="awToggle()" title="Ask Vault Agent (Clickable results in Explorer)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#070714" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1.2" fill="#070714"/><circle cx="14.5" cy="14" r="1.2" fill="#070714"/><path d="M12 9V5M9 5h6"/></svg></button>
+
 <div id="awpanel">
-  <div class="row" style="padding:12px 14px;border-bottom:1px solid var(--line);justify-content:space-between">
-    <div class="row"><span class="logo" style="width:30px;height:30px;font-size:15px;border-radius:9px">V</span>
-    <div><div style="font-weight:700">Vault Agent</div><div class="small" style="color:var(--mint)">● online · reads your index</div></div></div>
-    <button class="btn-ghost" style="padding:5px 10px" onclick="awToggle()">✕</button>
+  <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--line);justify-content:space-between">
+    <div class="row" style="gap:10px">
+      <span class="logo" style="width:28px;height:28px;font-size:14px;border-radius:8px">A</span>
+      <div>
+        <div style="font-weight:700;font-size:13.5px">Vault Agent</div>
+        <div class="small" style="color:var(--mint);font-size:11px">● reads local index · gives clickable results</div>
+      </div>
+    </div>
+    <button class="btn-ghost" style="padding:4px 8px;font-size:12px" onclick="awToggle()">✕</button>
   </div>
   <div id="awlog"></div>
   <div id="awchips"></div>
-  <form id="awform" onsubmit="awSubmit(event)"><input id="awin" placeholder="Ask or command…" autocomplete="off" onkeydown="if(event.key==='Escape')awToggle()"><button class="btn-pri">➤</button></form>
+  <form id="awform" onsubmit="awSubmit(event)">
+    <input id="awin" placeholder="Ask or search (e.g. Find my notes on inheritance)…" autocomplete="off" onkeydown="if(event.key==='Escape')awToggle()">
+    <button class="btn-pri" style="padding:7px 13px">➤</button>
+  </form>
 </div>
 
 <script>
-const state={power:false,tab:'dashboard',treePath:'',lsPath:'',plan:null,sel:new Set(),clean:true,sort:'name'};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const qesc=s=>String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-const fmt=n=>n>=1073741824?(n/1073741824).toFixed(1)+' GB':n>=1048576?(n/1048576).toFixed(1)+' MB':n>=1024?(n/1024).toFixed(0)+' KB':(n||0)+' B';
-const dt=t=>t?new Date(t*1000).toLocaleString():'—';
-const PAL=['#7c6cff','#3ddc97','#ffb86b','#38bdf8','#f472b6','#a3e635','#facc15','#94a3b8'];
-async function api(m,u,b){const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});return r.json();}
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2800);}
-function age(t){if(!t)return'—';const d=Math.floor(Date.now()/1000-t);const days=Math.floor(d/86400);
-if(days<0)return'in the future';if(days===0)return'today';if(days<30)return days+(days>1?' days ago':' day ago');
-if(days<365){const m=Math.floor(days/30);return m+(m>1?' mos ago':' mo ago');}return (days/365).toFixed(1)+' yrs ago';}
-function tierTip(t){return t==='Sensitive'?'Withheld from every cloud call · filed to Private_Vault':t==='Internal'?'Has identifiers · leaves only as [TOKENS]':'No identifiers found';}
-function tipShow(html,x,y){const t=document.getElementById('tip');if(!t)return;t.innerHTML=html;t.classList.add('show');tipMove(x,y);}
-function tipMove(x,y){const t=document.getElementById('tip');if(!t||!t.classList.contains('show'))return;
-const w=320,h=t.offsetHeight||120;let lx=x+16,ly=y+16;
-if(lx+w>innerWidth)lx=x-w-10;if(ly+h>innerHeight)ly=y-h-10;
-t.style.left=Math.max(8,lx)+'px';t.style.top=Math.max(8,ly)+'px';}
-function tipHide(){const t=document.getElementById('tip');if(t)t.classList.remove('show');}
-document.addEventListener('mouseover',e=>{const el=e.target&&e.target.closest?e.target.closest('[data-tip]'):null;
-if(el)tipShow(el.getAttribute('data-tip'),e.clientX,e.clientY);});
-document.addEventListener('mousemove',e=>{tipMove(e.clientX,e.clientY);});
-document.addEventListener('mouseout',e=>{if(e.target&&e.target.closest&&e.target.closest('[data-tip]'))tipHide();});
-function lsGet(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;}}
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-function tab(t,el){try{state.tab=t;document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));
-const b=el||document.querySelector(`[data-t=${t}]`);if(b)b.classList.add('on');
-({dashboard:vDashboard,search:vSearch,explorer:vExplorer,storage:vStorage,organize:vOrganize,ledger:vLedger})[t]();}
-catch(e){toast('tab failed: '+e.message);}}
-function dead(msg){document.getElementById('main').innerHTML=`<div class="glass" style="text-align:center;padding:44px">
-<div style="font-size:42px">◈</div><h2>Backend not reachable</h2>
-<p class="dim">${esc(msg)}<br>Start it with <kbd>python app.py</kbd> in the <kbd>aegis</kbd> folder, then retry.</p>
-<button class="btn-pri" onclick="boot()">Retry</button></div>`;}
+/* -------------------------------------------------------------
+ * Application State & History Navigation Stack (Back / Forward)
+ * ------------------------------------------------------------- */
+const state = {
+  power: false,
+  tab: 'dashboard',
+  treePath: '',
+  lsPath: '',
+  highlightPath: '',
+  plan: null,
+  sel: new Set(),
+  clean: true,
+  sort: 'name',
+  activeToken: null
+};
 
-/* ---------- scan / quick ---------- */
-async function startScan(){const v=document.getElementById('scanpaths').value;
-const rec=lsGet('aegis-recent',[]);if(v.trim()&&!rec.includes(v.trim()))lsSet('aegis-recent',[v.trim(),...rec].slice(0,5));
-const paths=v.split(',').map(s=>s.trim()).filter(Boolean);
-document.getElementById('scanbtn').disabled=true;
-try{await api('POST','/api/scan',{paths});}catch(e){toast('scan failed: backend unreachable');document.getElementById('scanbtn').disabled=false;return;}
-loadQuick();pollProg();}
-async function stopScan(){try{await api('POST','/api/scan/stop');}catch(e){}toast('stopping scan…');}
-async function pollProg(){let p;try{p=await api('GET','/api/scan/progress');}catch(e){return;}
-document.getElementById('prog').textContent=p.running?`scanning ${p.phase} · ${p.seen} files`:(p.done?(p.error?'scan error':'scan done · '+p.seen+' files'):'');
-document.getElementById('cancel').style.display=p.running?'':'none';
-const vb=document.getElementById('vaultbadge');
-if(p.running){vb.textContent='◌ scanning…';vb.className='badge warn';}
-if(!p.running){document.getElementById('scanbtn').disabled=false;
-if(state.tab==='storage')vStorage();else if(state.tab==='dashboard')vDashboard();}
-if(p.running)setTimeout(pollProg,1500);}
-async function loadQuick(){try{const d=await api('GET','/api/drives');window._home=d.home;
-const chips=[{label:'Home',path:d.home},...(d.specials||[]).filter(s=>/downloads|documents|desktop/i.test(s.label))];
-window._quickDash=chips.slice(0,3);
-const rec=lsGet('aegis-recent',[]);
-document.getElementById('quick').innerHTML='<span class="dim small">quick:</span>'+chips.map(c=>`<button onclick="quickScan('${qesc(c.path)}')" title="${esc(c.path)}">${esc(c.label)}</button>`).join('')+rec.map(p=>`<button onclick="quickScan('${qesc(p)}')" title="recent: ${esc(p)}">🕘 ${esc(String(p).split(/[\\/]/).filter(Boolean).pop())}</button>`).join('');
-const vb=document.getElementById('vaultbadge');}catch(e){}}
-function quickScan(p){if(!p)return;document.getElementById('scanpaths').value=p;startScan();}
-function topSearch(){const v=document.getElementById('topq').value;if(!v.trim())return;tab('search',null);
-setTimeout(()=>{const q=document.getElementById('q');if(q){q.value=v;doSearch();}},80);}
-let _st=null;function qType(){clearTimeout(_st);_st=setTimeout(doSearch,350);}
-document.addEventListener('keydown',e=>{const a=document.activeElement;
-const typing=a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName);
-if(e.key==='Escape'){closeSettings();return;}
-if(typing||e.metaKey||e.ctrlKey||e.altKey)return;
-if(e.key==='/'){e.preventDefault();const t=document.getElementById('topq');if(t)t.focus();}});
+// Navigation History Stack
+const navHistory = [];
+let navIndex = -1;
+let isNavigatingHistory = false;
 
-/* ---------- charts ---------- */
-let _did=0;
-function donut(segs){const total=Math.max(1,segs.reduce((a,s)=>a+s[1],0));
-const R=70,C=2*Math.PI*R,GAP=segs.length>1?4:0;let off=0;const id=++_did;
-const arcs=segs.map(([l,v],i)=>{if(v<=0)return '';const frac=v/total;let len=frac*C-GAP;if(len<1)len=1;
-const s=`<circle class="seg" data-i="${i}" cx="90" cy="90" r="${R}" fill="none" stroke="${PAL[i%PAL.length]}" stroke-width="24" stroke-dasharray="${len.toFixed(1)} ${(C-len).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 90 90)" onmouseenter="dH(${id},${i})" onmouseleave="dR(${id})"><title>${esc(l)} — ${fmt(v)}</title></circle>`;off+=frac*C;return s;}).join('');
-window['_donut'+id]={segs:segs.map(([l,v])=>[l,v]),total};
-return `<div class="donut-wrap"><svg class="donut" viewBox="0 0 180 180" style="width:200px;display:block;margin:6px auto">${arcs}
-<text id="dc-${id}" x="90" y="86" text-anchor="middle" fill="#fff" font-size="20" font-weight="700" font-family="Space Grotesk">${fmt(total)}</text>
-<text id="ds-${id}" x="90" y="106" text-anchor="middle" fill="rgba(255,255,255,.45)" font-size="11">total</text></svg>
-<div class="legend">${segs.map(([l,v],i)=>`<span class="lpill" onmouseenter="dH(${id},${i})" onmouseleave="dR(${id})"><i style="background:${PAL[i%PAL.length]}"></i>${esc(l)} · ${fmt(v)} · ${Math.round(100*v/total)}%</span>`).join('')}</div></div>`;}
-function dH(id,i){const d=window['_donut'+id];if(!d||!d.segs[i])return;const s=d.segs[i];
-const a=document.getElementById('dc-'+id),b=document.getElementById('ds-'+id);
-if(a)a.textContent=fmt(s[1]);if(b)b.textContent=s[0];
-document.querySelectorAll('#main svg.donut circle.seg').forEach(c=>{c.style.opacity=(+c.dataset.i===i)?'1':'.3';});}
-function dR(id){const d=window['_donut'+id];if(!d)return;
-const a=document.getElementById('dc-'+id),b=document.getElementById('ds-'+id);
-if(a)a.textContent=fmt(d.total);if(b)b.textContent='total';
-document.querySelectorAll('#main svg.donut circle.seg').forEach(c=>{c.style.opacity='1';});}
-function bars(rows,mx){return rows.map((r,i)=>`<div class="brow" ${r.tip?`data-tip="${esc(r.tip)}"`:''}><div class="row" style="justify-content:space-between;gap:10px"><span class="row" style="gap:8px;min-width:0;flex:1"><span class="rank">${i+1}</span><span class="truncate">📁 ${esc(r.name)}</span></span><span class="dim small" style="white-space:nowrap">${r.sub||''}</span></div><div class="bar"><i data-w="${Math.max(2,Math.round(100*r.value/mx))}"></i></div></div>`).join('');}
-function animBars(){requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelectorAll('#main [data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});}));}
+function navPush(item) {
+  if (isNavigatingHistory) return;
+  // If we navigated back and then pushed a new state, drop forward states
+  if (navIndex < navHistory.length - 1) {
+    navHistory.splice(navIndex + 1);
+  }
+  navHistory.push(item);
+  navIndex = navHistory.length - 1;
+  updateNavButtons();
+}
 
-/* ---------- DASHBOARD ---------- */
-async function vDashboard(){const m=document.getElementById('main');
-m.innerHTML=`<div class="stats">${'<div class="stat skel" style="height:102px"></div>'.repeat(4)}</div>
-<div class="grid2"><div class="glass skel" style="height:300px"></div><div class="glass skel" style="height:300px"></div></div>`;
-let d;try{d=await api('GET','/api/dashboard');}catch(e){dead('dashboard fetch failed');return;}
-const vb=document.getElementById('vaultbadge');
-if(!d.indexed){vb.textContent='○ no scan';vb.className='badge';
-m.innerHTML=`<div class="glass" style="text-align:center;padding:40px">
-<div style="font-size:42px">◈</div><h2 style="margin:8px 0">Welcome to Aegis</h2>
-<p class="dim" style="max-width:520px;margin:0 auto">Your private file manager. Scan a folder to unlock search, cleanup, organizing and the privacy ledger — everything runs on this machine.</p>
-<div class="row" style="justify-content:center;margin-top:14px" id="dscan"></div>
-<div class="row" style="justify-content:center;margin-top:10px"><input id="dpath" size="42" placeholder="…or paste any folder / drive path"><button class="btn-pri" onclick="quickScan(document.getElementById('dpath').value)">Scan it</button></div></div>`;
-document.getElementById('dscan').innerHTML=(window._quickDash||[]).map(c=>`<button class="btn-pri" onclick="quickScan('${qesc(c.path)}')">Scan ${esc(c.label)}</button>`).join('');
-return;}
-vb.textContent='● vault loaded';vb.className='badge ok';
-const dupN=d.dup_groups;
-const folders=(d.top_folders||[]).map(f=>({name:(f.path||'').split(/[\\/]/).filter(Boolean).pop()||f.path,value:f.size,sub:`${fmt(f.size)} · ${f.count} files`,tip:`<div class="tt">${esc(f.path||'')}</div><div>${f.count} files · avg ${fmt(f.count?Math.round(f.size/f.count):0)} each</div>`}));
-const fmx=Math.max(1,...folders.map(f=>f.value));
-m.innerHTML=`
-<div class="stats">
-<div class="stat" data-tip="${esc(`<div class="tt">Storage used</div><div>${d.files} files across scanned roots.</div>`)}"><b>${fmt(d.total)}</b><span>TOTAL USED</span><small>${d.files} files</small></div>
-<div class="stat" data-tip="${esc(`<div class="tt">Recoverable breakdown</div><div>${fmt(d.reclaimable-d.dup_waste)} junk + ${fmt(d.dup_waste)} duplicates.</div><div class="tk">Open Storage → Cleanup queue.</div>`)}"><b>${fmt(d.reclaimable)}</b><span>RECOVERABLE</span><small>${d.dup_groups} duplicate groups</small></div>
-<div class="stat" data-tip="${esc(`<div class="tt">Identifier exposure</div><div>${d.sensitive} sensitive · ${d.internal} internal-tier files.</div><div class="tk">Hover Privacy watch rows for details.</div>`)}"><b>${d.sensitive}</b><span>PII-FLAGGED</span><small>names or content</small></div>
-<div class="stat" data-tip="${esc(`<div class="tt">Cloud egress</div><div>${d.cloud_requests} requests · ${d.withheld} files withheld entirely.</div><div class="tk">Ledger has per-request proof.</div>`)}"><b>${(d.bytes_sent/1024).toFixed(1)} KB</b><span>SENT TO CLOUD</span><small>${d.entities} entities redacted</small></div>
-</div>
-<div class="grid2">
-<div class="glass"><h3 style="margin:0 0 6px">Space by type</h3>${donut(d.by_category.map(([k,v])=>[k[0].toUpperCase()+k.slice(1),v]))}</div>
-<div class="glass"><h3 style="margin:0 0 6px">Top folders</h3>${folders.length?bars(folders,fmx):'<span class="dim">Scan your home dir for folder rollups.</span>'}
-<div class="row" style="margin-top:10px"><button class="btn-ghost" onclick="tab('storage',null)">Open storage →</button></div></div>
-</div>
-<div class="grid2">
-<div class="glass"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Largest files</h3><a href="#" class="small" onclick="tab('storage',null);return false">cleanup →</a></div>
-${(d.largest||[]).map(f=>{const tip=`<div class="tt">${esc(f.name)}</div><div>${fmt(f.size)} · ${age(f.mtime)} old</div><div><span class="tier ${f.tier}">${f.tier}</span> <span class="tk">${tierTip(f.tier)}</span></div><div class="tk">${esc(f.path||'')}</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(f.name)}</span><span class="s">${fmt(f.size)}</span></div>`;}).join('')}</div>
-<div class="glass"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🛡 Privacy watch</h3><a href="#" class="small" onclick="tab('ledger',null);return false">ledger →</a></div>
-${(d.sensitive||[]).map(f=>{const tip=`<div class="tt">${esc(f.name)}</div><div>Detected: ${(f.types||[]).join(', ')||'keywords'} — redacted on-device.</div><div class="tk">Withheld from every cloud call.</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(f.name)}</span>${(f.types||[]).map(t=>`<span class="ptag">${esc(t)}</span>`).join('')}</div>`;}).join('')||'<span class="dim">No sensitive files 🎉</span>'}
-<div class="row" style="margin-top:10px"><button class="btn-pri" style="flex:1" onclick="tab('organize',null)">Review organization →</button></div></div>
-</div>`;animBars();}
+function updateNavButtons() {
+  const btnB = document.getElementById('btnBack');
+  const btnF = document.getElementById('btnFwd');
+  if (btnB) btnB.disabled = navIndex <= 0;
+  if (btnF) btnF.disabled = navIndex >= navHistory.length - 1;
+}
 
-/* ---------- SEARCH ---------- */
-function vSearch(){document.getElementById('main').innerHTML=`<div class="glass"><div class="row">
-<input id="q" size="44" placeholder='Try: rent agreement last semester' onkeydown="if(event.key==='Enter')doSearch()" oninput="qType()">
-<button class="btn-pri" id="sbtn" onclick="doSearch()">Search</button><span class="dim small">hybrid FTS5 + meaning · time phrases boost · 100% local</span></div>
-<div id="recent" class="row" style="margin-top:8px;gap:6px"></div></div>
-<div id="res"></div><div id="prev"></div>`;renderRecent();}
-async function doSearch(){const qi=document.getElementById('q');if(!qi)return;const q=qi.value;if(!q.trim())return;
-const rec=lsGet('aegis-q',[]);lsSet('aegis-q',[q.trim(),...rec.filter(x=>x!==q.trim())].slice(0,8));renderRecent();
-const btn=document.getElementById('sbtn');const old=btn.innerHTML;btn.innerHTML='<span class="spin"></span>';btn.disabled=true;
-document.getElementById('res').innerHTML='<div class="glass skel" style="height:64px"></div><div class="glass skel" style="height:64px"></div>';
-try{const r=await api('GET','/api/search?q='+encodeURIComponent(q));
-document.getElementById('res').innerHTML=(r.results||[]).map(x=>{const tip=`<div class="tt">${esc(x.name)}</div><div class="tk">${esc(x.path)}</div><div>${esc((x.snippet||'').slice(0,150))}${(x.snippet||'').length>150?'…':''}</div>`;return `<div class="glass" style="cursor:pointer" data-tip="${esc(tip)}" onclick="preview(${x.id})">
-<span class="tier ${x.tier}">${x.tier}</span> <b>${esc(x.name)}</b> <span class="dim small">${esc(x.folder)} · ${fmt(x.size)} · ${dt(x.mtime)}</span><br>
-<span class="small dim">${esc(x.reason)} · score ${x.score}</span></div>`).join('')||'<div class="glass">No matches. Scan first (top bar).</div>';
-window._res=Object.fromEntries((r.results||[]).map(x=>[x.id,x]));}
-finally{btn.innerHTML=old;btn.disabled=false;}}
-function renderRecent(){const el=document.getElementById('recent');if(!el)return;const rec=lsGet('aegis-q',[]);
-el.innerHTML=(rec.length?'<span class="dim small">recent:</span>':'')+rec.map(q=>`<button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="document.getElementById('q').value='${qesc(q)}';doSearch()">${esc(q)}</button>`).join('');}
-function preview(id){const x=window._res[id];if(!x)return;
-document.getElementById('prev').innerHTML=`<div class="glass"><b>${esc(x.name)}</b> <span class="dim small">${esc(x.path)}</span>
-<div class="grid2" style="margin-top:8px"><div><div class="small dim">On-device text</div><pre>${esc(x.snippet)}</pre></div>
-<div><div class="small dim">What the cloud would see ${x.withheld?'· WITHHELD (Sensitive)':''}</div><pre>${esc(x.cloud_view)}</pre></div></div></div>`;
-window.scrollTo(0,document.body.scrollHeight);}
+function navBack() {
+  if (navIndex > 0) {
+    navIndex--;
+    applyHistoryState(navHistory[navIndex]);
+    updateNavButtons();
+  }
+}
 
-/* ---------- EXPLORER (read-only) ---------- */
-async function vExplorer(){const d=await api('GET','/api/drives');
-document.getElementById('main').innerHTML=`<div class="glass"><span class="badge">READ-ONLY</span>
-<span class="dim small"> never deletes or renames · Power reveals hidden/system</span>
-<div class="row" style="margin-top:8px">${d.drives.map(x=>`<button class="btn-ghost" onclick="goTree('${qesc(x)}')">${esc(x)}</button>`).join('')}
-<input id="unc" size="28" placeholder="\\\\server\\share or any path"><button class="btn-ghost" onclick="goTree(document.getElementById('unc').value)">Go</button></div>
-<div class="row" style="margin-top:8px"><input id="pathbar" size="58"><button class="btn-ghost" onclick="goTree(document.getElementById('pathbar').value)">Open</button></div>
-<div id="crumbs" class="crumbs"></div>
-<div class="row small" style="margin-top:8px;gap:12px"><label class="dim"><input type="checkbox" id="clean" checked onchange="state.clean=this.checked;lsCur()"> Clean view</label>
-<label class="dim">Sort <select id="sort" onchange="state.sort=this.value;lsCur()"><option value="name">Name</option><option value="size">Size</option><option value="modified">Modified</option></select></label>
-<span class="dim">double-click a folder to open</span></div></div>
-<div class="grid2"><div class="glass"><b>Folders</b><div id="tree" class="tree"></div></div>
-<div class="glass"><div class="row" style="justify-content:space-between"><b>Listing</b><span><button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="upOne()">⬆ up</button> <button class="btn-ghost" style="padding:4px 10px;font-size:12px" onclick="copyPath()">copy path</button></span></div>
-<span class="dim small" id="lscount"></span><div id="ls"></div></div></div>`;
-goTree((d.drives[0]||'/'));}
-async function goTree(p){if(!p)return;state.treePath=p;document.getElementById('pathbar').value=p;crumbs(p);
-const t=await api('GET','/api/tree?path='+encodeURIComponent(p));
-document.getElementById('tree').innerHTML=t.children.map(c=>`<div onclick="goTree('${qesc(c.path)}')">📁 ${esc(c.name)}${c.has_children?' ▸':''}${c.hidden?' <span class="dim">·hidden</span>':''}</div>`).join('')||'<span class="dim">empty / no access</span>';
-lsCur();}
-const JUNK_RE=/(\.(tmp|temp|log|bak|old|cache|orig|rej|swp)$|^thumbs\.db$|^desktop\.ini$|^~)/i;
-const JUNK_DIRS=new Set(['node_modules','__pycache__','.git','.venv','venv','.cache','$recycle.bin','system volume information']);
-function catOf(x){const e=(x.name.split('.').pop()||'').toLowerCase();
-if(x.is_dir)return 'Folders';
-if(['jpg','jpeg','png','gif','webp','heic','bmp','svg'].includes(e))return 'Images';
-if(['mp4','mkv','mov','avi','webm'].includes(e))return 'Videos';
-if(['mp3','wav','flac','ogg','m4a'].includes(e))return 'Audio';
-if(['pdf','doc','docx','txt','md','ppt','pptx','xls','xlsx','csv'].includes(e))return 'Documents';
-if(['zip','rar','tar','gz','7z'].includes(e))return 'Archives';
-if(['js','jsx','ts','py','java','c','cpp','html','css','json'].includes(e))return 'Code';
-if(['exe','msi','dmg','apk'].includes(e))return 'Apps';
-return 'Other';}
-function cleanHide(x){if(!state.clean)return false;
-if(x.is_dir)return JUNK_DIRS.has(x.name.toLowerCase());
-return JUNK_RE.test(x.name);}
-function fileTip(x){return `<div class="tt">${esc(x.name)}</div>`
-+`<div>${x.is_dir?'Folder':fmt(x.size)+' · '+dt(x.mtime)+' ('+age(x.mtime)+')'}</div>`
-+(x.is_dir?'':`<div><span class="tier ${x.tier}">${x.tier}</span> <span class="tk">${tierTip(x.tier)}</span></div>`)
-+`<div class="tk">${esc(x.path)}</div>`;}
-function fileRow(x){
-const act=x.is_dir?`<a href="#" onclick="goTree('${qesc(x.path)}');return false">open</a>`:`<a href="#" onclick="op('${qesc(x.path)}');return false">open</a> · <a href="#" onclick="rev('${qesc(x.path)}');return false">reveal</a>`;
-return `<div class="frow ${x.is_dir?'xrow':''}" data-tip="${esc(fileTip(x))}" ${x.is_dir?`ondblclick="goTree('${qesc(x.path)}')" title="double-click to open"`:''}>
-<span class="n">${x.is_dir?'📁':'📄'} ${esc(x.name)}${x.hidden?' <span class="dim">·h</span>':''}</span>
-${x.is_dir?'':`<span class="tier ${x.tier}">${x.tier}</span>`}
-<span class="s">${x.is_dir?'':fmt(x.size)+' · '}${dt(x.mtime)}</span>
-<span class="small">${act}</span></div>`;}
-async function lsCur(){const p=state.treePath;const box=document.getElementById('ls');if(!p||!box)return;state.lsPath=p;
-box.innerHTML='<div class="frow skel" style="height:44px"></div><div class="frow skel" style="height:44px"></div><div class="frow skel" style="height:44px"></div>';
-const r=await api('GET','/api/ls?path='+encodeURIComponent(p)+'&power='+state.power);
-if(r.error){box.innerHTML='<span class="dim">'+esc(r.error)+'</span>';return;}
-const total=r.items.length;
-const items=r.items.filter(x=>!cleanHide(x));
-const hidden=total-items.length;
-const key=state.sort||'name';
-const cmp=key==='size'?(a,b)=>b.size-a.size:key==='modified'?(a,b)=>b.mtime-a.mtime:(a,b)=>a.name.toLowerCase()<b.name.toLowerCase()?-1:1;
-const dirs=items.filter(x=>x.is_dir).sort(cmp);
-const files=items.filter(x=>!x.is_dir);
-let h='';
-if(dirs.length)h+=`<div class="ghead">Folders · ${dirs.length}</div>`+dirs.map(fileRow).join('');
-for(const g of ['Documents','Images','Videos','Audio','Archives','Code','Apps','Other']){
-const grp=files.filter(f=>catOf(f)===g).sort(cmp);
-if(grp.length)h+=`<div class="ghead">${g} · ${grp.length}</div>`+grp.map(fileRow).join('');}
-if(!h)h='<div class="glass" style="margin-top:8px">Empty folder.</div>';
-document.getElementById('lscount').textContent=`${items.length} shown${hidden?` · ${hidden} hidden by Clean view`:''}`;
-box.innerHTML=h;}
-async function op(p){const r=await api('POST','/api/open',{path:p});if(!r.ok)toast(r.error||'cannot open');}
-async function rev(p){await api('POST','/api/reveal',{path:p});}
+function navForward() {
+  if (navIndex < navHistory.length - 1) {
+    navIndex++;
+    applyHistoryState(navHistory[navIndex]);
+    updateNavButtons();
+  }
+}
 
-/* ---------- STORAGE ---------- */
-async function vStorage(){const o=await api('GET','/api/storage/overview');
-document.getElementById('main').innerHTML=`
-<div class="glass"><b class="disp" style="font-size:20px">You can reclaim ${fmt(o.reclaimable)}</b>
-<span class="dim"> — ${o.junk_count} junk files (${fmt(o.junk_bytes)}) + ${o.dup_groups} duplicate groups (${fmt(o.dup_waste)})</span>
-<div class="row" style="margin-top:8px"><button class="btn-pri" onclick="aiIns(this)">AI insights (aggregates only)</button><span id="ins" class="dim small"></span></div></div>
-<div class="stats"><div class="stat"><b>${o.count}</b><span>FILES INDEXED</span></div><div class="stat"><b>${fmt(o.total)}</b><span>TOTAL</span></div>
-<div class="stat"><b>${o.dup_groups}</b><span>DUP GROUPS</span></div><div class="stat"><b>${o.junk_count}</b><span>JUNK FILES</span></div></div>
-<div class="grid2"><div class="glass"><b>By category</b>${o.by_category.map(([k,v])=>`<div class="small" style="margin:4px 0">${esc(k)} — ${fmt(v)}</div>`).join('')}</div>
-<div class="glass"><b>Top extensions</b>${o.top_exts.map(([k,v])=>`<div class="small" style="margin:4px 0">${esc(k)} — ${fmt(v.size)} (${v.count})</div>`).join('')}</div></div>
-<div class="glass"><b>Treemap drill-down</b> <span class="dim small" id="crumb"></span><div id="tm"></div></div>
-<div class="grid2"><div class="glass"><b>Largest files</b><div id="lg"></div></div>
-<div class="glass"><b>Stale & large (&gt;50MB, 6mo+)</b><div id="st"></div></div></div>
-<div class="glass"><b>Duplicates</b> <span class="dim small" id="dstat"></span>
-<div class="row"><button class="btn-ghost" onclick="dupsGo(this)">Find duplicates</button>
-<button class="danger" onclick="qSel()">Quarantine selected</button><span class="dim small">quarantine is undoable · emptying is not</span></div>
-<div id="dups"></div></div>
-<div class="glass"><b>Quarantine</b><div class="row"><input id="qbatch" size="24" placeholder="batch id to undo">
-<button class="btn-ghost" onclick="qUndo()">Undo batch</button><button class="danger" onclick="qEmpty()">Empty quarantine</button></div><div id="qmsg" class="small dim"></div></div>`;
-treeMap('');loadLists();}
-async function treeMap(p){const t=await api('GET','/api/storage/treemap?path='+encodeURIComponent(p||''));
-if(!document.getElementById('tm'))return;
-document.getElementById('crumb').textContent=t.path;
-const mx=Math.max(1,...t.dirs.map(d=>d.size),...t.files.map(f=>f.size));
-document.getElementById('tm').innerHTML=(p?`<button class="btn-ghost" onclick="treeMap('${qesc(t.path.split(/[/\\\\]/).slice(0,-1).join('/')||'/')}')">⬆ up</button>`:'')+
-t.dirs.map(d=>{const tip=`<div class="tt">${esc(d.path)}</div><div>${d.count} files · avg ${fmt(d.count?Math.round(d.size/d.count):0)}</div><div class="tk">Click to drill in.</div>`;return `<button class="tilebtn" data-tip="${esc(tip)}" onclick="treeMap('${qesc(d.path)}')">📁 ${esc(d.name)} <span class="dim">· ${fmt(d.size)} · ${d.count}</span><span class="bar"><i data-w="${Math.max(2,Math.round(100*d.size/mx))}"></i></span></button>`;}).join('')+
-t.files.slice(0,10).map(f=>`<div class="small">📄 ${esc(f.name)} · ${fmt(f.size)}</div>`).join('');animBars();}
-async function loadLists(){if(!document.getElementById('lg'))return;
-const lg=await api('GET','/api/storage/largest?n=10');
-document.getElementById('lg').innerHTML=lg.map(x=>{const tip=`<div class="tt">${esc(x.name)}</div><div>${fmt(x.size)} · ${age(x.mtime)} old</div><div class="tk">${esc(x.path||'')}</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(x.name)}</span><span class="tier ${x.tier}">${x.tier}</span><span class="s">${fmt(x.size)}</span></div>`;}).join('')||'<span class="dim">—</span>';
-const st=await api('GET','/api/storage/stale');
-document.getElementById('st').innerHTML=st.slice(0,10).map(x=>`<label class="small" style="display:block;margin:5px 0" title="Untouched ${age(x.mtime)} · ${esc(x.path||'')}"><input type="checkbox" class="qchk" value="${esc(x.path)}"> ${esc(x.name)} · ${fmt(x.size)}</label>`).join('')||'<span class="dim">—</span>';}
-async function dupsGo(btn){if(btn)btn.disabled=true;try{await api('POST','/api/dups/start');}catch(e){}dPoll();}
-async function dPoll(){const s=await api('GET','/api/dups/status');
-if(!document.getElementById('dstat'))return;
-document.getElementById('dstat').textContent=s.running?('working: '+s.phase+'…'):(s.done?('done · '+s.groups.length+' groups'):'');
-if(s.groups&&s.groups.length){document.getElementById('dups').innerHTML=s.groups.slice(0,30).map((g,i)=>`<div class="glass"><b>group ${i+1}</b> <span class="dim small">frees ${fmt(g.waste)}</span>${g.files.map(f=>`<label class="small" style="display:block;margin:4px 0"><input type="checkbox" class="qchk" value="${esc(f.path)}"> ${esc(f.path)}</label>`).join('')}</div>`).join('');}
-if(s.running)setTimeout(dPoll,1500);}
-function selPaths(){return[...document.querySelectorAll('.qchk:checked')].map(x=>x.value);}
-async function qSel(){const p=selPaths();if(!p.length){toast('select files first');return;}
-const r=await api('POST','/api/quarantine',{paths:p});
-const qm=document.getElementById('qmsg');if(qm)qm.textContent='batch '+r.batch+': '+r.moved.filter(m=>m.ok).length+' quarantined, '+r.moved.filter(m=>!m.ok).length+' blocked — save the batch id to undo';}
-async function qUndo(){const b=document.getElementById('qbatch').value;if(!b)return;
-const r=await api('POST','/api/quarantine/undo',{batch:b});
-document.getElementById('qmsg').textContent='restored '+r.restored.filter(x=>x.ok).length+'/'+r.restored.length;}
-async function qEmpty(){if(!confirm('EMPTY QUARANTINE? This really deletes.'))return;
-const r=await api('POST','/api/quarantine/empty',{confirm:true});document.getElementById('qmsg').textContent='deleted '+r.deleted+' batches';}
-async function aiIns(btn){if(btn)btn.disabled=true;const el=document.getElementById('ins');el.textContent='reasoning…';
-try{const r=await api('POST','/api/insights');
-const ins=(r.data&&r.data.insights)||[];el.innerHTML='egress: '+(r.egress?'cloud':'none (local)')+' · ';
-el.innerHTML+=ins.map(i=>`<b>${esc(i.title)}</b> — ${esc(i.detail)}`).join('<br>');}catch(e){el.textContent='failed';}
-if(btn)btn.disabled=false;}
+function applyHistoryState(item) {
+  if (!item) return;
+  isNavigatingHistory = true;
+  try {
+    if (item.tab && item.tab !== state.tab) {
+      tab(item.tab, null, false);
+    }
+    if (item.tab === 'explorer' && item.path) {
+      goTree(item.path, false);
+      if (item.highlight) {
+        highlightItem(item.highlight);
+      }
+    }
+  } finally {
+    isNavigatingHistory = false;
+  }
+}
 
-/* ---------- ORGANIZE ---------- */
-function vOrganize(){document.getElementById('main').innerHTML=`<div class="glass"><b>AI organization assistant</b>
-<span class="dim small"> dry-run only · never auto-applies · Sensitive files withheld from cloud, filed locally</span>
-<div class="row" style="margin-top:8px"><input id="obase" size="44" placeholder="Folder to organize, e.g. Downloads path">
-<label class="small dim"><input type="checkbox" id="orec"> recursive</label>
-<button class="btn-pri" id="planbtn" onclick="mkPlan()">Build plan</button></div><div id="oinfo" class="small dim" style="margin-top:6px"></div></div><div id="oplan"></div>`;
-const last=lsGet('aegis-base','');if(last)document.getElementById('obase').value=last;}
-async function mkPlan(){const base=document.getElementById('obase').value;lsSet('aegis-base',base);
-document.getElementById('planbtn').disabled=true;
-try{const r=await api('POST','/api/organize/plan',{base:base,recursive:document.getElementById('orec').checked});
-if(!r.ok){document.getElementById('oinfo').textContent='error: '+r.error;return;}
-state.plan=r;state.sel=new Set(r.moves.map(m=>m.id));
-document.getElementById('oinfo').innerHTML=`source: <b>${r.source}</b> · cloud egress: ${r.ledger.egress?'yes':'NO — local only'} · entities: ${esc(JSON.stringify((r.ledger.entities||{}).counts||{}))} · residual masked: ${r.ledger.residual} · withheld sensitive: ${r.withheld.length} — see Privacy Ledger`;
-document.getElementById('oplan').innerHTML=`<div class="glass"><div class="row"><b>Dry run — ${r.moves.length} moves</b>
-<button class="btn-pri" onclick="applyPlan()">Apply selected</button><button class="btn-ghost" onclick="undoPlan()">Undo batch</button>
-<button class="btn-ghost" onclick="selAll(true)">all</button><button class="btn-ghost" onclick="selAll(false)">none</button></div>
-<table><tr><th></th><th>Old name</th><th>→ Folder / new name</th><th>Reason</th><th>Tier</th></tr>
-${r.moves.map(m=>`<tr><td><input type="checkbox" checked onchange="tglSel('${m.id}',this.checked)"></td>
-<td>${esc(m.old.split(/[/\\\\]/).pop())}</td><td><b>${esc(m.folder)}</b>/${esc(m.new_name)}</td>
-<td class="small">${esc(m.reason)}</td><td><span class="tier ${m.tier}">${m.tier}</span></td></tr>`).join('')}</table></div>
-${r.withheld.length?`<div class="glass"><b>Withheld from cloud (${r.withheld.length})</b><div class="small dim">${r.withheld.slice(0,20).map(esc).join('<br>')}</div></div>`:''}`;}
-finally{document.getElementById('planbtn').disabled=false;}}
-function selAll(on){if(!state.plan)return;state.sel=new Set(on?state.plan.moves.map(m=>m.id):[]);
-document.querySelectorAll('#oplan input[type=checkbox]').forEach(x=>x.checked=on);}
-function tglSel(id,on){on?state.sel.add(id):state.sel.delete(id);}
-async function applyPlan(){const r=await api('POST','/api/organize/apply',{batch:state.plan.batch,selected:[...state.sel]});
-toast('applied '+r.applied.filter(x=>x.ok).length+'/'+r.applied.length+' — batch '+r.batch);}
-async function undoPlan(){if(!state.plan)return;const r=await api('POST','/api/organize/undo',{batch:state.plan.batch});
-toast('undone '+r.undone.filter(x=>x.ok).length+'/'+r.undone.length);}
+// Global Keyboard Navigation (Alt+Left, Alt+Right)
+window.addEventListener('keydown', e => {
+  if (e.altKey && e.key === 'ArrowLeft') {
+    e.preventDefault();
+    navBack();
+  } else if (e.altKey && e.key === 'ArrowRight') {
+    e.preventDefault();
+    navForward();
+  }
+});
 
-/* ---------- LEDGER (showpiece) ---------- */
-function chipSent(s){return esc(s).replace(/\[([A-Z_]+)_\d+\]/g,'<span class="tok">[$1_■]</span>').replace(/\[MASKED(_[A-Z]+)?\]/g,'<span class="tok">[MASKED]</span>');}
-function hiOrig(orig,spans){let h='',last=0;for(const s of (spans||[]).slice(0,80)){h+=esc(orig.slice(last,s.start))+'<mark class="pii" title="'+esc(s.type)+'">'+esc(orig.slice(s.start,s.end))+'</mark>';last=s.end;}return h+esc(orig.slice(last));}
-async function vLedger(){const L=await api('GET','/api/ledger?limit=50');const s=L.stats;
-document.getElementById('main').innerHTML=`
-<div class="stats"><div class="stat" data-tip="Gateway calls that actually reached a cloud API. Local-rules and Ollama runs show 0 here."><b>${s.cloud_requests}</b><span>CLOUD REQUESTS</span></div>
-<div class="stat" data-tip="Total redacted payload bytes sent. Originals never leave — see each row below."><b>${(s.bytes_sent/1024).toFixed(1)} KB</b><span>BYTES SENT</span></div>
-<div class="stat" data-tip="Identifier spans replaced with [TYPE_N] tokens before any egress."><b>${s.entities_redacted}</b><span>ENTITIES REDACTED</span></div>
-<div class="stat" data-tip="Sensitive-tier files excluded from every cloud payload, planned locally instead."><b>${s.withheld}</b><span>SENSITIVE WITHHELD</span></div></div>
-<div class="glass"><b>Redaction tester</b> <span class="dim small">paste text → redacted + counts + rehydrate roundtrip</span>
-<div class="row" style="margin-top:6px"><input id="rt" size="56" placeholder="My PAN is ABCDE1234F, call 98765 43210"><button class="btn-pri" onclick="rTest()">Redact</button></div><div id="rtout"></div></div>
-${L.rows.map(r=>{let ent={};try{ent=JSON.parse(r.entities||'{}')}catch(e){}
-return `<div class="glass"><div class="row"><b>#${r.id} ${esc(r.purpose)}</b>
-<span class="badge">${esc(r.provider)}${r.model?' · '+esc(r.model):''}</span>
-<span class="badge ${r.egress?'warn':'ok'}">${r.egress?'☁ egress '+r.bytes_sent+' B':'✓ nothing left this device'}</span>
-<span class="dim small">${new Date(r.ts*1000).toLocaleString()} · files sent ${r.files_sent} · withheld ${r.files_withheld} · residual ${r.residual} · ${r.ok?'ok':'ERROR'}</span></div>
-${r.error?`<div class="small" style="color:var(--red)">${esc(r.error)}</div>`:''}
-<div class="grid2" style="margin-top:8px"><div><div class="small dim">Original (PII highlighted)</div><pre>${hiOrig(r.original,ent.spans)}</pre></div>
-<div><div class="small dim">Actually sent (tokens = dark chips)</div><pre>${r.sent?chipSent(r.sent):'<span class="dim">— nothing sent —</span>'}</pre></div></div>
-<div class="small dim">entities: ${esc(JSON.stringify(ent.counts||{}))}</div></div>`}).join('')||'<div class="glass">No gateway calls yet. Run an organize plan, AI insights, or the tester.</div>'}`;}
-async function rTest(){const r=await api('POST','/api/redact-test',{text:document.getElementById('rt').value});
-document.getElementById('rtout').innerHTML=`<div class="grid2" style="margin-top:8px"><div><div class="small dim">Redacted (+guard)</div><pre>${chipSent(r.guarded)}</pre></div>
-<div><div class="small dim">Counts: ${esc(JSON.stringify(r.counts))} · residual: ${r.residual} · roundtrip ${r.roundtrip_ok?'✓':'✗'}</div><pre>${esc(r.rehydrated.slice(0,300))}</pre></div></div>`;}
+function navTab(t, el) {
+  tab(t, el, true);
+}
 
-/* ---------- agent widget ---------- */
-const AWSUG=["What can I delete?","Show duplicates","Is my data private?","Find my resume"];
-function awToggle(){const p=document.getElementById('awpanel');p.classList.toggle('open');
-if(p.classList.contains('open')){setTimeout(()=>document.getElementById('awin').focus(),120);
-if(!document.getElementById('awlog').children.length){
-awSay('a',"Hey! I'm the vault agent — I read your local index. Ask me to find files, free space, or prove your data stays private.");
-document.getElementById('awchips').innerHTML=AWSUG.map(s=>`<button onclick="awAsk('${qesc(s)}')">${esc(s)}</button>`).join('');}}}
-function awSay(who,text){const l=document.getElementById('awlog');const d=document.createElement('div');d.className='msg '+who;d.textContent=text;
-d.title=new Date().toLocaleTimeString();l.appendChild(d);l.scrollTop=l.scrollHeight;return d;}
-function awThinking(){const l=document.getElementById('awlog');const d=document.createElement('div');d.className='msg a tdots';
-d.innerHTML='<span></span><span></span><span></span>';l.appendChild(d);l.scrollTop=l.scrollHeight;return d;}
-function awAsk(s){const p=document.getElementById('awpanel');if(!p.classList.contains('open'))awToggle();
-document.getElementById('awin').value=s;awSubmit(null,true);}
-async function awSubmit(e,sent){if(e)e.preventDefault();
-const inp=document.getElementById('awin');const t=inp.value.trim();if(!t)return;inp.value='';
-awSay('u',t);const tp=awThinking();
-try{const r=await api('POST','/api/agent',{text:t});
-tp.remove();awSay('a',r.reply||'(no answer)');
-if(r.tab)tab(r.tab,null);}catch(err){tp.remove();awSay('a','Backend unreachable — is the server running?');}}
+function tab(t, el, push = true) {
+  try {
+    state.tab = t;
+    document.querySelectorAll('#nav button').forEach(x => x.classList.remove('on'));
+    const b = el || document.querySelector(`[data-t=${t}]`);
+    if (b) b.classList.add('on');
+    if (push) {
+      navPush({ tab: t, path: state.treePath });
+    }
+    const views = {
+      dashboard: vDashboard,
+      search: vSearch,
+      explorer: vExplorer,
+      storage: vStorage,
+      bin: vBin,
+      organize: vOrganize,
+      ledger: vLedger
+    };
+    if (views[t]) views[t]();
+  } catch (e) {
+    toast('Navigation error: ' + e.message);
+  }
+}
 
-/* ---------- settings ---------- */
-async function openSettings(){try{const s=await api('GET','/api/settings');
-const saved=lsGet('aegis-prefs',null);
-document.getElementById('s_provider').value=(saved&&saved.provider)||s.provider;
-document.getElementById('s_model').value=(saved&&saved.model)||s.model||'';
-document.getElementById('s_base').value=(saved&&saved.base_url)||s.base_url||'';
-document.getElementById('s_ollama').value=(saved&&saved.ollama_url)||s.ollama_url||'';
-document.getElementById('s_omodel').value=(saved&&saved.ollama_model)||s.ollama_model||'';
-document.getElementById('s_status').textContent='offline mode: '+(s.offline?'ON':'off');}catch(e){}
-document.getElementById('settings').style.display='flex';}
-function closeSettings(){document.getElementById('settings').style.display='none';}
-async function saveSettings(){const b={provider:document.getElementById('s_provider').value,model:document.getElementById('s_model').value,
-base_url:document.getElementById('s_base').value,ollama_url:document.getElementById('s_ollama').value,ollama_model:document.getElementById('s_omodel').value};
-lsSet('aegis-prefs',{provider:b.provider,model:b.model,base_url:b.base_url,ollama_url:b.ollama_url,ollama_model:b.ollama_model});
-const k=document.getElementById('s_key').value;if(k)b.api_key=k;
-try{await api('POST','/api/settings',b);}catch(e){}
-document.getElementById('s_key').value='';
-document.getElementById('s_status').textContent='saved (key in RAM only, prefs local)';}
-async function clearKey(){try{await api('POST','/api/settings',{clear_key:true});}catch(e){}
-document.getElementById('s_status').textContent='key forgotten';}
-async function setOffline(on){try{await api('POST','/api/offline',{on});toast(on?'offline — zero egress':'online');}catch(e){}}
-async function boot(){try{await loadQuick();await vDashboard();}catch(e){dead(e.message||'fetch failed');}}
+/* -------------------------------------------------------------
+ * Helpers & API
+ * ------------------------------------------------------------- */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const qesc = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+const fmt = n => n >= 1073741824 ? (n / 1073741824).toFixed(1) + ' GB' : n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : n >= 1024 ? (n / 1024).toFixed(0) + ' KB' : (n || 0) + ' B';
+const dt = t => t ? new Date(t * 1000).toLocaleString() : '—';
+const PAL = ['#8075ff', '#30d158', '#ff9f0a', '#0a84ff', '#bf5af2', '#64d2ff', '#ffd60a', '#8e8e93'];
+
+async function api(m, u, b) {
+  const r = await fetch(u, {
+    method: m,
+    headers: { 'Content-Type': 'application/json' },
+    body: b ? JSON.stringify(b) : undefined
+  });
+  return r.json();
+}
+
+function toast(m) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = m;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+function lsGet(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch (e) { return f; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+/* -------------------------------------------------------------
+ * Visual Confirmation Sheet Engine (Before Making ANY Changes)
+ * ------------------------------------------------------------- */
+let currentSheetCallback = null;
+
+async function requestChange(kind, payload, onComplete) {
+  try {
+    const prev = await api('POST', '/api/change/preview', { kind, ...payload });
+    if (!prev.ok) {
+      toast(prev.error || 'Change failed pre-check');
+      return;
+    }
+    if (!prev.ops || !prev.ops.length) {
+      toast('No changes needed.');
+      return;
+    }
+    openSheet(prev, onComplete);
+  } catch (e) {
+    toast('Change request error: ' + e.message);
+  }
+}
+
+function openSheet(previewData, onComplete) {
+  state.activeToken = previewData.token;
+  currentSheetCallback = onComplete;
+  const sheet = document.getElementById('confirmSheet');
+  const title = document.getElementById('sheetTitle');
+  const sub = document.getElementById('sheetSub');
+  const body = document.getElementById('sheetBody');
+  const act = document.getElementById('sheetActionBtn');
+  const icon = document.getElementById('sheetIcon');
+  const pill = document.getElementById('sheetStatusPill');
+
+  title.textContent = previewData.title || 'Review File Changes';
+  sub.textContent = `${previewData.count} item${previewData.count !== 1 ? 's' : ''} affected (${fmt(previewData.bytes)})`;
+  act.textContent = previewData.verb || 'Apply';
+
+  if (previewData.destructive) {
+    icon.className = 'sheet-icon-bubble danger';
+    icon.textContent = '🗑';
+    act.className = 'btn-pri danger';
+  } else {
+    icon.className = 'sheet-icon-bubble';
+    icon.textContent = '✦';
+    act.className = 'btn-pri';
+  }
+
+  // Reversibility Badge
+  if (previewData.reversible) {
+    pill.innerHTML = `<span class="badge ok">✓ Safe & Reversible · Changes can be undone anytime</span>`;
+  } else {
+    pill.innerHTML = `<span class="badge danger">⚠ Irreversible Action · Items will be permanently deleted</span>`;
+  }
+
+  // Render Visual Before/After Groups
+  let html = '';
+  if (previewData.note) {
+    html += `<div class="small dim" style="margin-bottom:12px;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:9px">${esc(previewData.note)}</div>`;
+  }
+
+  if (previewData.groups && previewData.groups.length) {
+    html += previewData.groups.map(g => `
+      <div class="diff-card">
+        <div class="diff-row" style="margin-bottom:10px">
+          <div class="diff-from">
+            <div class="diff-label">From Location</div>
+            <div class="diff-val truncate">📁 ${esc(g.from || 'Current Location')}</div>
+          </div>
+          <div class="diff-arrow">➔</div>
+          <div class="diff-to">
+            <div class="diff-label">To Location</div>
+            <div class="diff-val truncate">📁 ${esc(g.to || 'Same Folder')}</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px">
+          ${g.items.slice(0, 15).map(it => `
+            <div class="row" style="justify-content:space-between;padding:4px 0;font-size:12.5px">
+              <span class="truncate" style="flex:1">
+                ${it.is_dir ? '📁' : '📄'} <b>${esc(it.name)}</b>
+                ${it.new_name && it.new_name !== it.name ? `<span style="color:var(--mint)"> ➔ ${esc(it.new_name)}</span>` : ''}
+              </span>
+              <span class="dim small" style="white-space:nowrap">${fmt(it.size)}</span>
+            </div>
+          `).join('')}
+          ${g.items.length > 15 ? `<div class="small dim" style="margin-top:4px">+ ${g.items.length - 15} more items</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (previewData.blocked && previewData.blocked.length) {
+    html += `<div style="margin-top:12px"><div class="diff-label" style="color:var(--peach)">Skipped / Blocked Items (${previewData.blocked.length})</div>
+      ${previewData.blocked.map(b => `<div class="small dim">• ${esc(b.src)}: ${esc(b.reason)}</div>`).join('')}
+    </div>`;
+  }
+
+  body.innerHTML = html;
+  sheet.classList.add('open');
+}
+
+function closeSheet() {
+  const sheet = document.getElementById('confirmSheet');
+  sheet.classList.remove('open');
+  if (state.activeToken) {
+    api('POST', '/api/change/cancel', { token: state.activeToken }).catch(() => {});
+    state.activeToken = null;
+  }
+}
+
+async function commitSheet() {
+  if (!state.activeToken) return;
+  const btn = document.getElementById('sheetActionBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Applying…';
+  try {
+    const res = await api('POST', '/api/change/commit', { token: state.activeToken });
+    closeSheet();
+    if (res.ok) {
+      toast(`Successfully completed: ${res.title} (${res.done} items)`);
+      updateBinBadge();
+      if (currentSheetCallback) currentSheetCallback(res);
+      // Refresh current active view
+      tab(state.tab, null, false);
+    } else {
+      toast(res.error || 'Commit failed');
+    }
+  } catch (e) {
+    toast('Execution error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* -------------------------------------------------------------
+ * Direct Clickable Explorer Navigation
+ * ------------------------------------------------------------- */
+function jumpToExplorer(targetPath) {
+  if (!targetPath) return;
+  tab('explorer', null, true);
+  // If target is file, open parent folder and highlight
+  setTimeout(async () => {
+    try {
+      const isDir = targetPath.endsWith('/') || targetPath.endsWith('\\');
+      let folderPath = targetPath;
+      let fileName = '';
+      if (!isDir) {
+        const parts = targetPath.split(/[\\/]/);
+        fileName = parts.pop();
+        folderPath = parts.join('/') || '/';
+      }
+      await goTree(folderPath);
+      if (fileName) {
+        highlightItem(targetPath);
+      }
+    } catch (e) {}
+  }, 100);
+}
+
+function highlightItem(fullPath) {
+  state.highlightPath = fullPath;
+  setTimeout(() => {
+    const rows = document.querySelectorAll('#ls .frow');
+    rows.forEach(r => {
+      if (r.dataset.path && (r.dataset.path === fullPath || r.dataset.path.endsWith(fullPath))) {
+        r.classList.add('highlight');
+        r.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => r.classList.remove('highlight'), 3800);
+      }
+    });
+  }, 250);
+}
+
+/* -------------------------------------------------------------
+ * Scanning & Quick Bar
+ * ------------------------------------------------------------- */
+async function startScan() {
+  const v = document.getElementById('scanpaths').value;
+  const paths = v.split(',').map(s => s.trim()).filter(Boolean);
+  document.getElementById('scanbtn').disabled = true;
+  try {
+    await api('POST', '/api/scan', { paths });
+  } catch (e) {
+    toast('Backend unreachable');
+    document.getElementById('scanbtn').disabled = false;
+    return;
+  }
+  loadQuick();
+  pollProg();
+}
+
+async function stopScan() {
+  try { await api('POST', '/api/scan/stop'); } catch (e) {}
+  toast('Stopping scan…');
+}
+
+async function pollProg() {
+  let p;
+  try { p = await api('GET', '/api/scan/progress'); } catch (e) { return; }
+  document.getElementById('prog').textContent = p.running ? `scanning ${p.phase} · ${p.seen} files` : (p.done ? (p.error ? 'scan error' : `scan complete · ${p.seen} files`) : '');
+  document.getElementById('cancel').style.display = p.running ? '' : 'none';
+  const vb = document.getElementById('vaultbadge');
+  if (p.running) {
+    vb.textContent = '◌ scanning…';
+    vb.className = 'badge warn';
+  } else {
+    vb.textContent = '● vault loaded';
+    vb.className = 'badge ok';
+    document.getElementById('scanbtn').disabled = false;
+    if (state.tab === 'storage') vStorage();
+    else if (state.tab === 'dashboard') vDashboard();
+  }
+  if (p.running) setTimeout(pollProg, 1400);
+}
+
+async function loadQuick() {
+  try {
+    const d = await api('GET', '/api/drives');
+    window._home = d.home;
+    const chips = [{ label: 'Home', path: d.home }, ...(d.specials || []).filter(s => /downloads|documents|desktop/i.test(s.label))];
+    window._quickDash = chips.slice(0, 3);
+    const rec = lsGet('aegis-recent', []);
+    document.getElementById('quick').innerHTML = '<span class="dim small">quick:</span>' +
+      chips.map(c => `<button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="quickScan('${qesc(c.path)}')">${esc(c.label)}</button>`).join('') +
+      rec.slice(0, 3).map(p => `<button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="quickScan('${qesc(p)}')">🕘 ${esc(String(p).split(/[\\/]/).filter(Boolean).pop())}</button>`).join('');
+  } catch (e) {}
+}
+
+function quickScan(p) {
+  if (!p) return;
+  document.getElementById('scanpaths').value = p;
+  startScan();
+}
+
+function topSearch() {
+  const v = document.getElementById('topq').value;
+  if (!v.trim()) return;
+  tab('search', null, true);
+  setTimeout(() => {
+    const q = document.getElementById('q');
+    if (q) { q.value = v; doSearch(); }
+  }, 90);
+}
+
+async function updateBinBadge() {
+  try {
+    const b = await api('GET', '/api/bin');
+    const badge = document.getElementById('binCountBadge');
+    if (badge) {
+      if (b.count > 0) {
+        badge.textContent = b.count;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  } catch (e) {}
+}
+
+/* -------------------------------------------------------------
+ * VIEW: DASHBOARD
+ * ------------------------------------------------------------- */
+async function vDashboard() {
+  const m = document.getElementById('main');
+  m.innerHTML = `<div class="stats">${'<div class="stat skel" style="height:96px"></div>'.repeat(4)}</div>
+  <div class="grid2"><div class="glass skel" style="height:280px"></div><div class="glass skel" style="height:280px"></div></div>`;
+
+  let d;
+  try { d = await api('GET', '/api/dashboard'); } catch (e) {
+    m.innerHTML = `<div class="glass" style="text-align:center;padding:40px"><h2>Backend Not Reachable</h2><p class="dim">Run <kbd>python app.py</kbd> in aegis.</p></div>`;
+    return;
+  }
+
+  if (!d.indexed) {
+    m.innerHTML = `<div class="glass" style="text-align:center;padding:50px 20px">
+      <div style="font-size:48px;margin-bottom:12px">❖</div>
+      <h2 style="margin:0 0 8px">Welcome to Aegis</h2>
+      <p class="dim" style="max-width:520px;margin:0 auto 18px">Your private, Apple-grade file manager. Everything runs 100% on this computer with zero cloud egress. Scan a folder to start.</p>
+      <div class="row" style="justify-content:center;gap:10px" id="dscan"></div>
+    </div>`;
+    document.getElementById('dscan').innerHTML = (window._quickDash || []).map(c => `<button class="btn-pri" onclick="quickScan('${qesc(c.path)}')">Scan ${esc(c.label)}</button>`).join('');
+    return;
+  }
+
+  m.innerHTML = `
+    <div class="stats">
+      <div class="stat"><b>${fmt(d.total)}</b><span>TOTAL INDEXED</span><small>${d.files} files locally indexed</small></div>
+      <div class="stat"><b>${fmt(d.reclaimable)}</b><span>RECOVERABLE</span><small>${d.dup_groups} duplicate groups · ${d.junk_count} junk</small></div>
+      <div class="stat"><b>${d.sensitive}</b><span>SENSITIVE FILES</span><small>Auto-withheld from any egress</small></div>
+      <div class="stat"><b>${(d.bytes_sent / 1024).toFixed(1)} KB</b><span>CLOUD EGRESS</span><small>${d.entities} local PII tokens guarded</small></div>
+    </div>
+
+    <div class="grid2">
+      <div class="glass">
+        <h3 style="margin:0 0 10px">Space Distribution</h3>
+        <div>
+          ${(d.by_category || []).map(([cat, sz]) => `
+            <div style="margin-bottom:10px">
+              <div class="row" style="justify-content:space-between;font-size:12.5px;font-weight:500">
+                <span>📁 ${esc(cat)}</span><span class="dim">${fmt(sz)}</span>
+              </div>
+              <div class="bar"><i style="width:${Math.min(100, Math.round(100 * sz / (d.total || 1)))}%"></i></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="glass">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0">Largest Files</h3>
+          <button class="btn-ghost" style="padding:4px 9px;font-size:11px" onclick="tab('storage')">Storage Hub →</button>
+        </div>
+        ${(d.largest || []).map(f => `
+          <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.name)}')">
+            <span class="n">📄 ${esc(f.name)}</span>
+            <span class="tier ${f.tier}">${f.tier}</span>
+            <span class="s">${fmt(f.size)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <div class="row" style="gap:8px">
+          <span style="font-size:18px">🛡</span>
+          <h3 style="margin:0">Privacy Shield & Local Guard</h3>
+        </div>
+        <button class="btn-pri" style="padding:5px 12px;font-size:12px" onclick="tab('ledger')">Open Privacy Shield →</button>
+      </div>
+      <p class="dim small" style="margin:0 0 12px">Every file is scanned for PII (Aadhaar, PAN, Passport, Bank, Cards) on-device. Sensitive files never leave this machine.</p>
+      <div class="row" style="gap:8px">
+        ${(d.sensitive || []).slice(0, 6).map(f => `
+          <div class="file-card" onclick="jumpToExplorer('${qesc(f.name)}')">
+            <span class="icon">🔒</span>
+            <div class="info">
+              <div class="title">${esc(f.name)}</div>
+              <div class="sub">${(f.types || []).join(', ') || 'Sensitive'}</div>
+            </div>
+          </div>
+        `).join('') || '<span class="dim small">No sensitive files found on this machine.</span>'}
+      </div>
+    </div>
+  `;
+}
+
+/* -------------------------------------------------------------
+ * VIEW: NATURAL LANGUAGE & SEMANTIC SEARCH
+ * ------------------------------------------------------------- */
+function vSearch() {
+  document.getElementById('main').innerHTML = `
+    <div class="glass">
+      <div class="row" style="gap:10px">
+        <input id="q" size="48" style="font-size:14px;padding:9px 14px" placeholder='Natural language: "Find my notes about inheritance and polymorphism"' onkeydown="if(event.key==='Enter')doSearch()">
+        <button class="btn-pri" id="sbtn" onclick="doSearch()">Search</button>
+      </div>
+      <div class="row" style="margin-top:10px;gap:6px">
+        <span class="dim small">Examples:</span>
+        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('Find my notes about inheritance and polymorphism')">Inheritance & Polymorphism</button>
+        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('rent agreement last semester')">Rent Agreement</button>
+        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('kickoff meeting presentation')">Meeting Notes</button>
+        <button class="btn-ghost" style="padding:3px 9px;font-size:11px" onclick="setQ('bank account statement')">Bank Statement</button>
+      </div>
+      <div id="searchIntent" style="margin-top:12px"></div>
+    </div>
+    <div id="searchResults"></div>
+  `;
+}
+
+function setQ(v) {
+  const el = document.getElementById('q');
+  if (el) { el.value = v; doSearch(); }
+}
+
+async function doSearch() {
+  const qi = document.getElementById('q');
+  if (!qi) return;
+  const q = qi.value.trim();
+  if (!q) return;
+
+  const btn = document.getElementById('sbtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  const out = document.getElementById('searchResults');
+  const intentBox = document.getElementById('searchIntent');
+  out.innerHTML = '<div class="glass skel" style="height:70px"></div><div class="glass skel" style="height:70px"></div>';
+
+  try {
+    const res = await api('GET', '/api/search?q=' + encodeURIComponent(q));
+    const intent = res.intent || {};
+
+    // Render Intent Breakdown
+    if (intent.topic && intent.topic.length) {
+      intentBox.innerHTML = `
+        <div class="row" style="gap:6px;font-size:11.5px;background:rgba(255,255,255,0.035);padding:8px 12px;border-radius:10px;border:1px solid var(--line)">
+          <span class="badge info">Meaning Understood</span>
+          ${intent.concepts && intent.concepts.length ? `<span class="badge ok">Concept: ${intent.concepts.join(', ')}</span>` : ''}
+          ${intent.kinds && intent.kinds.length ? `<span class="badge">Kind: ${intent.kinds.join(', ')}</span>` : ''}
+          ${intent.time ? `<span class="badge warn">Time: ${intent.time}</span>` : ''}
+          ${intent.related && intent.related.length ? `<span class="dim">Expanded: ${intent.related.slice(0, 4).join(', ')}</span>` : ''}
+        </div>
+      `;
+    }
+
+    let h = '';
+    // Matching Folders
+    if (res.folders && res.folders.length) {
+      h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Folders (${res.folders.length})</div>`;
+      h += res.folders.map(f => `
+        <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.path)}')">
+          <span style="font-size:18px">📁</span>
+          <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.path)}</span></span>
+          <button class="btn-ghost" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(f.path)}')">Open in Explorer ➔</button>
+        </div>
+      `).join('');
+    }
+
+    // Matching Files
+    const results = res.results || [];
+    if (results.length) {
+      h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Files (${results.length} found in ${res.ms}ms)</div>`;
+      h += results.map(r => `
+        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="jumpToExplorer('${qesc(r.path)}')">
+          <div class="row" style="justify-content:space-between;margin-bottom:6px">
+            <div class="row" style="gap:8px">
+              <span class="tier ${r.tier}">${r.tier}</span>
+              <span class="badge ${r.match === 'Best match' ? 'ok' : 'info'}">${r.match}</span>
+              <b style="font-size:14.5px">${esc(r.name)}</b>
+            </div>
+            <div class="row" style="gap:8px">
+              <button class="btn-ghost" style="padding:3px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 Explorer</button>
+              <button class="btn-ghost" style="padding:3px 9px;font-size:11.5px" onclick="event.stopPropagation();op('${qesc(r.path)}')">Open</button>
+            </div>
+          </div>
+          <div class="dim small" style="margin-bottom:8px">📁 ${esc(r.folder)} · ${fmt(r.size)} · ${dt(r.mtime)}</div>
+          ${r.why && r.why.length ? `<div class="row" style="gap:6px;margin-bottom:8px">${r.why.map(w => `<span class="badge" style="font-size:10.5px">✓ ${esc(w)}</span>`).join('')}</div>` : ''}
+          ${r.passage ? `<div style="background:rgba(0,0,0,0.35);padding:10px 12px;border-radius:9px;font-size:12.5px;color:rgba(255,255,255,0.85);line-height:1.5">${highlightTerms(esc(r.passage), r.terms)}</div>` : ''}
+        </div>
+      `).join('');
+    } else if (!res.folders || !res.folders.length) {
+      h = `<div class="glass" style="text-align:center;padding:36px"><h3>No Matching Files</h3><p class="dim">Try searching for other concept words or verify that the folder has been scanned.</p></div>`;
+    }
+
+    out.innerHTML = h;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Search';
+  }
+}
+
+function highlightTerms(text, terms) {
+  if (!terms || !terms.length) return text;
+  let res = text;
+  terms.forEach(t => {
+    if (t.length > 2) {
+      const reg = new RegExp(`(${t})`, 'gi');
+      res = res.replace(reg, '<mark class="hl">$1</mark>');
+    }
+  });
+  return res;
+}
+
+/* -------------------------------------------------------------
+ * VIEW: EXPLORER (With Direct File Actions & Confirmation)
+ * ------------------------------------------------------------- */
+async function vExplorer() {
+  const d = await api('GET', '/api/drives');
+  document.getElementById('main').innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <div class="row" style="gap:6px">
+          ${d.drives.map(x => `<button class="btn-ghost" onclick="goTree('${qesc(x)}')">${esc(x)}</button>`).join('')}
+          <input id="pathbar" size="46" style="margin-left:6px" placeholder="Path…">
+          <button class="btn-ghost" onclick="goTree(document.getElementById('pathbar').value)">Go</button>
+        </div>
+        <div class="row" style="gap:6px">
+          <button class="btn-pri" onclick="promptNewFolder()">+ New Folder</button>
+        </div>
+      </div>
+      <div id="crumbs" class="crumbs"></div>
+      <div class="row small" style="gap:14px;margin-top:6px">
+        <label class="dim"><input type="checkbox" id="clean" checked onchange="state.clean=this.checked;lsCur()"> Clean View</label>
+        <label class="dim">Sort: <select id="sort" onchange="state.sort=this.value;lsCur()"><option value="name">Name</option><option value="size">Size</option><option value="modified">Modified</option></select></label>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="glass" style="max-height:68vh;overflow-y:auto">
+        <div style="font-weight:700;margin-bottom:8px">Directories</div>
+        <div id="tree" class="tree"></div>
+      </div>
+      <div class="glass" style="max-height:68vh;overflow-y:auto">
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <div style="font-weight:700">Contents</div>
+          <span class="dim small" id="lscount"></span>
+        </div>
+        <div id="ls"></div>
+      </div>
+    </div>
+  `;
+  goTree(state.treePath || d.drives[0] || '/');
+}
+
+async function goTree(p, pushHistory = true) {
+  if (!p) return;
+  state.treePath = p;
+  const pb = document.getElementById('pathbar');
+  if (pb) pb.value = p;
+  renderCrumbs(p);
+  if (pushHistory) {
+    navPush({ tab: 'explorer', path: p });
+  }
+  const t = await api('GET', '/api/tree?path=' + encodeURIComponent(p));
+  const treeEl = document.getElementById('tree');
+  if (treeEl) {
+    treeEl.innerHTML = (t.children || []).map(c => `
+      <div onclick="goTree('${qesc(c.path)}')">📁 ${esc(c.name)}${c.has_children ? ' ▸' : ''}</div>
+    `).join('') || '<span class="dim">Empty / no access</span>';
+  }
+  lsCur();
+}
+
+function renderCrumbs(p) {
+  const c = document.getElementById('crumbs');
+  if (!c) return;
+  const parts = p.split(/[\\/]/).filter(Boolean);
+  let cur = '';
+  c.innerHTML = parts.map((pt, i) => {
+    cur += (i === 0 && p.includes(':') ? pt + '\\' : (i === 0 ? '/' + pt : '/' + pt));
+    const target = cur;
+    return `<a href="#" onclick="goTree('${qesc(target)}');return false">${esc(pt)}</a> / `;
+  }).join('');
+}
+
+async function lsCur() {
+  const p = state.treePath;
+  const box = document.getElementById('ls');
+  if (!p || !box) return;
+  box.innerHTML = '<div class="frow skel" style="height:40px"></div><div class="frow skel" style="height:40px"></div>';
+  const r = await api('GET', '/api/ls?path=' + encodeURIComponent(p) + '&power=' + state.power);
+  if (r.error) {
+    box.innerHTML = `<span class="dim">${esc(r.error)}</span>`;
+    return;
+  }
+  const items = r.items || [];
+  const dirs = items.filter(x => x.is_dir);
+  const files = items.filter(x => !x.is_dir);
+
+  let h = '';
+  if (dirs.length) {
+    h += `<div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;margin:8px 0 4px">Folders (${dirs.length})</div>`;
+    h += dirs.map(renderFileRow).join('');
+  }
+  if (files.length) {
+    h += `<div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;margin:12px 0 4px">Files (${files.length})</div>`;
+    h += files.map(renderFileRow).join('');
+  }
+  if (!h) h = '<div class="dim" style="padding:16px 0">Folder is empty.</div>';
+  box.innerHTML = h;
+  const cnt = document.getElementById('lscount');
+  if (cnt) cnt.textContent = `${items.length} items`;
+}
+
+function renderFileRow(x) {
+  const isSelected = state.highlightPath && (x.path === state.highlightPath);
+  return `
+    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double click to open"` : ''}>
+      <span style="font-size:16px">${x.is_dir ? '📁' : '📄'}</span>
+      <span class="n">${esc(x.name)}</span>
+      ${x.tier && x.tier !== 'Public' ? `<span class="tier ${x.tier}">${x.tier}</span>` : ''}
+      <span class="s">${x.is_dir ? '' : fmt(x.size) + ' · '}${dt(x.mtime)}</span>
+      <div class="row" style="gap:4px">
+        ${x.is_dir ? `<button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="goTree('${qesc(x.path)}')">Open</button>` : `
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="op('${qesc(x.path)}')">Open</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="rev('${qesc(x.path)}')">Reveal</button>
+        `}
+        <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="promptRename('${qesc(x.path)}', '${qesc(x.name)}')">Rename</button>
+        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="promptTrash('${qesc(x.path)}')">Bin</button>
+      </div>
+    </div>
+  `;
+}
+
+/* -------------------------------------------------------------
+ * Action Prompts (Connecting UI actions to Confirmation Sheet)
+ * ------------------------------------------------------------- */
+function promptRename(path, currentName) {
+  const newName = prompt(`Rename “${currentName}” to:`, currentName);
+  if (!newName || newName === currentName) return;
+  requestChange('rename', { path, new_name: newName }, () => lsCur());
+}
+
+function promptTrash(path) {
+  requestChange('trash', { paths: [path] }, () => lsCur());
+}
+
+function promptNewFolder() {
+  if (!state.treePath) return;
+  const name = prompt('New Folder Name:', 'Untitled Folder');
+  if (!name) return;
+  requestChange('mkdir', { parent: state.treePath, name }, () => lsCur());
+}
+
+async function op(p) { const r = await api('POST', '/api/open', { path: p }); if (!r.ok) toast(r.error || 'Cannot open'); }
+async function rev(p) { await api('POST', '/api/reveal', { path: p }); }
+
+/* -------------------------------------------------------------
+ * VIEW: RECYCLE BIN (macOS-Styled)
+ * ------------------------------------------------------------- */
+async function vBin() {
+  const m = document.getElementById('main');
+  m.innerHTML = `<div class="glass skel" style="height:120px"></div><div class="glass skel" style="height:200px"></div>`;
+  const b = await api('GET', '/api/bin');
+
+  m.innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between">
+        <div class="row" style="gap:10px">
+          <span style="font-size:26px">🗑</span>
+          <div>
+            <h2 style="margin:0">Recycle Bin</h2>
+            <div class="dim small">${b.count} quarantined item${b.count !== 1 ? 's' : ''} · ${fmt(b.bytes)} space used</div>
+          </div>
+        </div>
+        <div class="row" style="gap:8px">
+          ${b.count > 0 ? `<button class="btn-ghost" onclick="restoreAllBin()">Put All Back</button>` : ''}
+          ${b.count > 0 ? `<button class="btn-pri danger" onclick="emptyBinPrompt()">Empty Recycle Bin</button>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="glass">
+      ${b.items && b.items.length ? `
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Original Location</th>
+              <th>Date Trashed</th>
+              <th>Size</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${b.items.map(it => `
+              <tr>
+                <td><b>${esc(it.name)}</b></td>
+                <td class="dim small">${esc(it.from)}</td>
+                <td class="small">${dt(it.ts)}</td>
+                <td class="small">${fmt(it.size)}</td>
+                <td>
+                  <div class="row" style="gap:6px">
+                    <button class="btn-pri" style="padding:4px 10px;font-size:11.5px" onclick="restoreBinItem(${it.id})">Put Back</button>
+                    <button class="btn-ghost danger" style="padding:4px 8px;font-size:11.5px" onclick="purgeBinItem(${it.id})">Delete Forever</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : `
+        <div style="text-align:center;padding:40px 10px">
+          <div style="font-size:38px;margin-bottom:8px">✨</div>
+          <h3>Recycle Bin is Empty</h3>
+          <p class="dim small">Deleted items are moved here first. You can safely restore them anytime.</p>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function restoreBinItem(id) {
+  requestChange('restore', { ids: [id] }, () => vBin());
+}
+
+function restoreAllBin() {
+  requestChange('restore', {}, () => vBin());
+}
+
+function purgeBinItem(id) {
+  requestChange('purge', { ids: [id] }, () => vBin());
+}
+
+function emptyBinPrompt() {
+  requestChange('purge', {}, () => vBin());
+}
+
+/* -------------------------------------------------------------
+ * VIEW: ORGANIZE & UNNAMED SMART SUGGESTIONS
+ * ------------------------------------------------------------- */
+async function vOrganize() {
+  const m = document.getElementById('main');
+  m.innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <div>
+          <h2 style="margin:0 0 4px">Intelligent Organizer & Name Suggestions</h2>
+          <div class="dim small">AI-guided file organization and automatic name suggestions for generic/unnamed files. All changes require your visual confirmation.</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px;gap:8px">
+        <input id="obase" size="44" placeholder="Folder to organize (leave blank for index)">
+        <label class="small dim"><input type="checkbox" id="orec"> Recursive</label>
+        <button class="btn-pri" onclick="buildOrganizePlan()">Build Organization Plan</button>
+        <button class="btn-ghost" onclick="loadUnnamedFiles()">Detect Unnamed Files & Suggest Names</button>
+      </div>
+    </div>
+    <div id="organizeOutput"></div>
+  `;
+  loadUnnamedFiles();
+}
+
+async function loadUnnamedFiles() {
+  const out = document.getElementById('organizeOutput');
+  out.innerHTML = '<div class="glass skel" style="height:150px"></div>';
+  const un = await api('GET', '/api/unnamed');
+
+  if (!un.items || !un.items.length) {
+    out.innerHTML = `
+      <div class="glass" style="text-align:center;padding:34px">
+        <h3>✨ All Filenames Look Great</h3>
+        <p class="dim small">No generic filenames (like Untitled, IMG_1234, Screenshot) found needing attention.</p>
+      </div>
+    `;
+    return;
+  }
+
+  window._unnamedItems = un.items;
+  out.innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0">Generic & Unnamed Files (${un.items.length} detected)</h3>
+          <div class="dim small">Smart suggestions derived from document titles, concepts, and date context.</div>
+        </div>
+        <button class="btn-pri" onclick="applyBatchRenames()">Rename Selected (With Confirmation)</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th width="30"><input type="checkbox" checked onchange="toggleAllUnnamed(this.checked)"></th>
+            <th>Current Filename</th>
+            <th>Content Preview / Context</th>
+            <th>Smart Suggested Name</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${un.items.map((it, idx) => `
+            <tr>
+              <td><input type="checkbox" class="uchk" data-idx="${idx}" checked></td>
+              <td><b>${esc(it.name)}</b><div class="dim small truncate" style="max-width:220px">${esc(it.folder)}</div></td>
+              <td class="dim small" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.snippet || 'Context based naming')}</td>
+              <td>
+                <input id="sug_${idx}" value="${esc(it.suggested_name)}" style="width:240px;font-weight:600">
+              </td>
+              <td>
+                <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="renameSingleUnnamed(${idx})">Rename</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function toggleAllUnnamed(on) {
+  document.querySelectorAll('.uchk').forEach(c => c.checked = on);
+}
+
+function renameSingleUnnamed(idx) {
+  const it = window._unnamedItems[idx];
+  const newName = document.getElementById(`sug_${idx}`).value;
+  requestChange('rename', { path: it.path, new_name: newName }, () => loadUnnamedFiles());
+}
+
+function applyBatchRenames() {
+  const checked = [...document.querySelectorAll('.uchk:checked')];
+  if (!checked.length) {
+    toast('No files selected');
+    return;
+  }
+  const items = checked.map(c => {
+    const idx = +c.dataset.idx;
+    const it = window._unnamedItems[idx];
+    const newName = document.getElementById(`sug_${idx}`).value;
+    return { path: it.path, new_name: newName };
+  });
+
+  requestChange('renames', { items }, () => loadUnnamedFiles());
+}
+
+async function buildOrganizePlan() {
+  const base = document.getElementById('obase').value;
+  const rec = document.getElementById('orec').checked;
+  const out = document.getElementById('organizeOutput');
+  out.innerHTML = '<div class="glass skel" style="height:150px"></div>';
+
+  const r = await api('POST', '/api/organize/plan', { base, recursive: rec });
+  if (!r.ok) {
+    out.innerHTML = `<div class="glass"><span class="dim">Error: ${esc(r.error)}</span></div>`;
+    return;
+  }
+
+  state.plan = r;
+  out.innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0">Organization Plan (${r.moves.length} moves)</h3>
+          <div class="dim small">Source: ${esc(r.source)} · Withheld: ${r.withheld.length} Sensitive files</div>
+        </div>
+        <button class="btn-pri" onclick="applyOrganizePlan()">Apply Plan (With Confirmation)</button>
+      </div>
+      <table>
+        <thead><tr><th>Current File</th><th>➔ Proposed Folder / New Name</th><th>Reason</th></tr></thead>
+        <tbody>
+          ${r.moves.map(m => `
+            <tr>
+              <td>${esc(m.old.split(/[\\/]/).pop())}</td>
+              <td><b>${esc(m.folder)}</b> / ${esc(m.new_name)}</td>
+              <td class="small dim">${esc(m.reason)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function applyOrganizePlan() {
+  if (!state.plan) return;
+  requestChange('organize', { batch: state.plan.batch, selected: state.plan.moves.map(m => m.id) }, () => vOrganize());
+}
+
+/* -------------------------------------------------------------
+ * VIEW: PRIVACY SHIELD & SENSITIVE TIERS
+ * ------------------------------------------------------------- */
+async function vLedger() {
+  const m = document.getElementById('main');
+  m.innerHTML = `<div class="stats">${'<div class="stat skel" style="height:90px"></div>'.repeat(4)}</div>
+  <div class="glass skel" style="height:250px"></div>`;
+
+  const [tInfo, lInfo] = await Promise.all([
+    api('GET', '/api/privacy/tiers'),
+    api('GET', '/api/ledger?limit=30')
+  ]);
+
+  const s = lInfo.stats || {};
+  const sum = tInfo.summary || {};
+
+  m.innerHTML = `
+    <div class="stats">
+      <div class="stat"><b style="color:var(--red)">${sum.Sensitive ? sum.Sensitive.count : 0}</b><span>SENSITIVE FILES</span><small>Auto-withheld from any egress</small></div>
+      <div class="stat"><b style="color:var(--peach)">${sum.Internal ? sum.Internal.count : 0}</b><span>INTERNAL FILES</span><small>Protected by local masking</small></div>
+      <div class="stat"><b style="color:var(--mint)">${sum.Public ? sum.Public.count : 0}</b><span>PUBLIC FILES</span><small>Safe for search & organization</small></div>
+      <div class="stat"><b>${s.entities_redacted || 0}</b><span>PII DETECTIONS</span><small>Vault tokens reversible in RAM</small></div>
+    </div>
+
+    <!-- Interactive Tokenization Sandbox -->
+    <div class="glass">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <h3 style="margin:0">Local Detection & Reversible Tokenization Test</h3>
+        <span class="badge ok">100% On-Device Proof</span>
+      </div>
+      <div class="row" style="gap:8px">
+        <input id="rtIn" style="flex:1" value="Patient Aadhaar is 2345 6789 0123, PAN ABCDE1234F, email alex@gmail.com">
+        <button class="btn-pri" onclick="testRedaction()">Inspect Tokenization</button>
+      </div>
+      <div id="rtOut" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Sensitive Tiers Grouping -->
+    <div class="glass">
+      <h3 style="margin:0 0 10px">Sensitive Tier Breakdown by Entity Type</h3>
+      <div class="row" style="gap:8px;margin-bottom:14px">
+        ${(tInfo.entity_types || []).map(([typ, cnt]) => `
+          <div class="badge warn" style="font-size:12px;padding:6px 12px">
+            <b>${esc(typ)}</b>: ${cnt} instances
+          </div>
+        `).join('') || '<span class="dim small">No confidential entities detected.</span>'}
+      </div>
+
+      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Clickable to Explorer)</div>
+      ${(tInfo.sensitive_files || []).map(f => `
+        <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.path)}')">
+          <span style="font-size:16px">🔒</span>
+          <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.folder)}</span></span>
+          <span class="tier Sensitive">Sensitive</span>
+          ${f.pii ? `<span class="ptag">${esc(f.pii)}</span>` : ''}
+          <span class="s">${fmt(f.size)}</span>
+        </div>
+      `).join('') || '<div class="dim small">Zero sensitive files found.</div>'}
+    </div>
+
+    <!-- Live Ledger Audit -->
+    <div class="glass">
+      <h3 style="margin:0 0 12px">Audit Ledger (Verified Zero Egress)</h3>
+      ${(lInfo.rows || []).map(r => `
+        <div class="diff-card" style="margin-bottom:10px">
+          <div class="row" style="justify-content:space-between;margin-bottom:6px">
+            <span style="font-weight:600">#${r.id} ${esc(r.purpose)}</span>
+            <span class="badge ${r.egress ? 'warn' : 'ok'}">${r.egress ? `☁ Cloud (${r.bytes_sent} B)` : '✓ Local Only (0 B sent)'}</span>
+            <span class="dim small">${new Date(r.ts * 1000).toLocaleTimeString()}</span>
+          </div>
+          <div class="dim small" style="margin-bottom:6px">Withheld: ${r.files_withheld} sensitive files · Masked residual: ${r.residual}</div>
+          <pre style="margin:0;max-height:100px">${esc(r.sent || '— No payload left this machine —')}</pre>
+        </div>
+      `).join('') || '<span class="dim small">No requests in ledger yet.</span>'}
+    </div>
+  `;
+  testRedaction();
+}
+
+async function testRedaction() {
+  const text = document.getElementById('rtIn')?.value;
+  if (!text) return;
+  const res = await api('POST', '/api/redact-test', { text });
+  const out = document.getElementById('rtOut');
+  if (!out) return;
+  out.innerHTML = `
+    <div class="grid2">
+      <div>
+        <div class="diff-label">Egress Guarded Payload (Tokens Replace Real Data)</div>
+        <pre>${esc(res.guarded)}</pre>
+      </div>
+      <div>
+        <div class="diff-label">Local Rehydration Check (Restored in RAM: ${res.roundtrip_ok ? '✓ Exact Match' : 'Mismatch'})</div>
+        <pre>${esc(res.rehydrated)}</pre>
+      </div>
+    </div>
+  `;
+}
+
+/* -------------------------------------------------------------
+ * VIEW: STORAGE INTELLIGENCE
+ * ------------------------------------------------------------- */
+async function vStorage() {
+  const m = document.getElementById('main');
+  m.innerHTML = `<div class="glass skel" style="height:120px"></div><div class="stats">${'<div class="stat skel" style="height:90px"></div>'.repeat(4)}</div>`;
+  const o = await api('GET', '/api/storage/overview');
+
+  m.innerHTML = `
+    <div class="glass">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <h2 style="margin:0 0 4px">You can safely reclaim ${fmt(o.reclaimable)}</h2>
+          <div class="dim small">${o.junk_count} junk files (${fmt(o.junk_bytes)}) · ${o.dup_groups} duplicate groups (${fmt(o.dup_waste)})</div>
+        </div>
+        <button class="btn-pri" onclick="scanDuplicates()">Find Duplicates</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>${o.count}</b><span>INDEXED FILES</span></div>
+      <div class="stat"><b>${fmt(o.total)}</b><span>TOTAL USED</span></div>
+      <div class="stat"><b>${o.dup_groups}</b><span>DUP GROUPS</span></div>
+      <div class="stat"><b>${fmt(o.dup_waste)}</b><span>WASTED IN COPIES</span></div>
+    </div>
+
+    <div class="grid2">
+      <div class="glass">
+        <h3 style="margin:0 0 10px">Largest Stale Files (>50MB, >6mo)</h3>
+        <div id="staleBox"></div>
+      </div>
+      <div class="glass">
+        <h3 style="margin:0 0 10px">Duplicate File Groups</h3>
+        <div id="dupBox"></div>
+      </div>
+    </div>
+  `;
+  loadStorageDetails();
+}
+
+async function loadStorageDetails() {
+  const [stale, dup] = await Promise.all([
+    api('GET', '/api/storage/stale'),
+    api('GET', '/api/dups/status')
+  ]);
+
+  const sBox = document.getElementById('staleBox');
+  if (sBox) {
+    sBox.innerHTML = (stale || []).slice(0, 8).map(x => `
+      <div class="frow xrow" onclick="jumpToExplorer('${qesc(x.path)}')">
+        <span class="n">📄 ${esc(x.name)}</span>
+        <span class="s">${fmt(x.size)}</span>
+        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
+      </div>
+    `).join('') || '<span class="dim small">No stale files found.</span>';
+  }
+
+  const dBox = document.getElementById('dupBox');
+  if (dBox) {
+    const groups = dup.groups || [];
+    dBox.innerHTML = groups.slice(0, 6).map((g, i) => `
+      <div class="diff-card">
+        <div class="row" style="justify-content:space-between;margin-bottom:6px">
+          <b>Group ${i + 1} (${g.files.length} copies)</b>
+          <span class="badge warn">Wastes ${fmt(g.waste)}</span>
+        </div>
+        ${g.files.map((f, fi) => `
+          <div class="row" style="justify-content:space-between;font-size:12px;padding:3px 0">
+            <span class="truncate" style="flex:1;cursor:pointer" onclick="jumpToExplorer('${qesc(f.path)}')">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
+            ${fi > 0 ? `<button class="btn-ghost danger" style="padding:1px 6px;font-size:10px" onclick="promptTrash('${qesc(f.path)}')">Trash copy</button>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `).join('') || '<div class="dim small">Click "Find Duplicates" to scan for identical files.</div>';
+  }
+}
+
+async function scanDuplicates() {
+  toast('Scanning for duplicates…');
+  await api('POST', '/api/dups/start');
+  setTimeout(loadStorageDetails, 2000);
+}
+
+/* -------------------------------------------------------------
+ * VAULT AGENT (With Clickable Explorer Links)
+ * ------------------------------------------------------------- */
+const AWSUG = [
+  "Find my notes about inheritance and polymorphism",
+  "What files can I delete?",
+  "Suggest names for unnamed files",
+  "Is my data private?"
+];
+
+function awToggle() {
+  const p = document.getElementById('awpanel');
+  p.classList.toggle('open');
+  if (p.classList.contains('open')) {
+    setTimeout(() => document.getElementById('awin').focus(), 140);
+    if (!document.getElementById('awlog').children.length) {
+      awSay('a', "Hey! I'm the Vault Agent. I read your local index and give clickable results taking you straight to files in Explorer.");
+      document.getElementById('awchips').innerHTML = AWSUG.map(s => `<button onclick="awAsk('${qesc(s)}')">${esc(s)}</button>`).join('');
+    }
+  }
+}
+
+function awSay(who, text, items = []) {
+  const l = document.getElementById('awlog');
+  const d = document.createElement('div');
+  d.className = 'msg ' + who;
+
+  let content = esc(text);
+  if (items && items.length) {
+    content += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">`;
+    items.forEach(it => {
+      content += `
+        <div class="file-card" onclick="jumpToExplorer('${qesc(it.path)}')">
+          <span class="icon">${it.is_dir ? '📁' : '📄'}</span>
+          <div class="info">
+            <div class="title">${esc(it.name)}</div>
+            <div class="sub">${esc(it.badge || '')} · ${fmt(it.size || 0)}</div>
+          </div>
+          <span style="color:var(--acc);font-size:14px">➔</span>
+        </div>
+      `;
+    });
+    content += `</div>`;
+  }
+
+  d.innerHTML = content;
+  l.appendChild(d);
+  l.scrollTop = l.scrollHeight;
+}
+
+function awThinking() {
+  const l = document.getElementById('awlog');
+  const d = document.createElement('div');
+  d.className = 'msg a tdots';
+  d.innerHTML = '<span></span><span></span><span></span>';
+  l.appendChild(d);
+  l.scrollTop = l.scrollHeight;
+  return d;
+}
+
+function awAsk(s) {
+  const p = document.getElementById('awpanel');
+  if (!p.classList.contains('open')) awToggle();
+  document.getElementById('awin').value = s;
+  awSubmit(null);
+}
+
+async function awSubmit(e) {
+  if (e) e.preventDefault();
+  const inp = document.getElementById('awin');
+  const t = inp.value.trim();
+  if (!t) return;
+  inp.value = '';
+
+  awSay('u', t);
+  const tp = awThinking();
+
+  try {
+    const r = await api('POST', '/api/agent', { text: t });
+    tp.remove();
+    awSay('a', r.reply || 'Here is what I found:', r.items || []);
+    if (r.tab && r.tab !== state.tab) {
+      tab(r.tab, null, true);
+    }
+    if (r.focus_path) {
+      highlightItem(r.focus_path);
+    }
+  } catch (err) {
+    tp.remove();
+    awSay('a', 'Backend unreachable — verify python app.py is running.');
+  }
+}
+
+/* -------------------------------------------------------------
+ * SETTINGS
+ * ------------------------------------------------------------- */
+async function openSettings() {
+  try {
+    const s = await api('GET', '/api/settings');
+    document.getElementById('s_provider').value = s.provider || 'local-rules';
+    document.getElementById('s_model').value = s.model || '';
+    document.getElementById('s_base').value = s.base_url || '';
+    document.getElementById('s_ollama').value = s.ollama_url || '';
+    document.getElementById('s_omodel').value = s.ollama_model || '';
+    document.getElementById('s_status').textContent = 'Mode: ' + (s.offline ? 'OFFLINE (Zero Egress)' : 'Online Enabled');
+  } catch (e) {}
+  document.getElementById('settings').style.display = 'flex';
+}
+
+function closeSettings() {
+  document.getElementById('settings').style.display = 'none';
+}
+
+async function saveSettings() {
+  const b = {
+    provider: document.getElementById('s_provider').value,
+    model: document.getElementById('s_model').value,
+    base_url: document.getElementById('s_base').value,
+    ollama_url: document.getElementById('s_ollama').value,
+    ollama_model: document.getElementById('s_omodel').value
+  };
+  const k = document.getElementById('s_key').value;
+  if (k) b.api_key = k;
+  await api('POST', '/api/settings', b);
+  document.getElementById('s_key').value = '';
+  closeSettings();
+  toast('Settings updated in RAM');
+}
+
+async function clearKey() {
+  await api('POST', '/api/settings', { clear_key: true });
+  closeSettings();
+  toast('API Key erased from memory');
+}
+
+async function setOffline(on) {
+  await api('POST', '/api/offline', { on });
+  toast(on ? 'Offline mode enabled · Zero egress guaranteed' : 'Online mode active');
+}
+
+/* -------------------------------------------------------------
+ * APP BOOTSTRAP
+ * ------------------------------------------------------------- */
+async function boot() {
+  try {
+    await api('GET', '/api/health');
+    await loadQuick();
+    await updateBinBadge();
+    navPush({ tab: 'dashboard' });
+    vDashboard();
+  } catch (e) {
+    document.getElementById('main').innerHTML = `
+      <div class="glass" style="text-align:center;padding:48px">
+        <h2>Aegis Server Not Found</h2>
+        <p class="dim">Run <kbd>python app.py</kbd> in your aegis directory.</p>
+        <button class="btn-pri" onclick="boot()">Retry Connection</button>
+      </div>
+    `;
+  }
+}
+
 boot();
 </script>
 </body>
