@@ -46,6 +46,37 @@ def index():
     return FileResponse(str(FRONTEND))
 
 
+@app.get("/manifest.json")
+def manifest():
+    m = FRONTEND.parent / "manifest.json"
+    if m.exists():
+        return FileResponse(str(m), media_type="application/manifest+json")
+    return JSONResponse({
+        "name": "Aegis — Private AI File Manager",
+        "short_name": "Aegis Web",
+        "start_url": "/",
+        "display": "standalone"
+    })
+
+
+@app.get("/sw.js")
+def service_worker():
+    sw = FRONTEND.parent / "sw.js"
+    if sw.exists():
+        return FileResponse(str(sw), media_type="application/javascript")
+    return Response("self.addEventListener('install', e => self.skipWaiting());",
+                    media_type="application/javascript")
+
+
+@app.get("/favicon.ico")
+@app.get("/aegis.ico")
+def favicon():
+    ico = _app_dir() / "aegis.ico"
+    if ico.exists():
+        return FileResponse(str(ico), media_type="image/x-icon")
+    return Response(status_code=404)
+
+
 @app.get("/api/health")
 def health():
     try:

@@ -1,0 +1,17 @@
+{
+  "name": "Aegis — Private AI File Manager",
+  "short_name": "Aegis Web",
+  "description": "Apple-grade AI file system intelligence running 100% on-device in your browser",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070714",
+  "theme_color": "#070714",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

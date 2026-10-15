@@ -5,8 +5,9 @@
   "description": "Universal hackathon starter — Vite + React + Tailwind + Supabase",
   "type": "module",
   "scripts": {
-    "setup": "node scripts/setup.js",
-    "start": "vite",
+    "start": "python run_web.py",
+    "web": "python run_web.py",
+    "desktop": "python aegis/desktop.py",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

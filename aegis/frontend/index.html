@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aegis — Private AI File Manager</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#070714">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aegis">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 <style>
 /* Self-hosted fonts: 100% offline, zero network requests */
 @font-face{font-family:Inter;font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
@@ -722,6 +729,8 @@ mark.hl {
     </nav>
 
     <span class="badge ok" id="vaultbadge">● on-device</span>
+    <span class="badge info" style="font-size:11px;padding:3px 8px" title="Running as a Web Application at http://localhost:8000">🌐 Web App</span>
+    <button id="pwaInstallBtn" class="btn-ghost" style="display:none;padding:3px 9px;font-size:11px" onclick="installPWA()" title="Install Aegis as a Desktop Web App">Install App 📥</button>
     <label class="small dim" title="Reveal hidden and system files"><input type="checkbox" id="power" onchange="state.power=this.checked;lsCur()"> Power</label>
     <label class="small dim" title="Force zero egress offline"><input type="checkbox" id="offline" onchange="setOffline(this.checked)"> Offline</label>
     <button class="btn-ghost" onclick="openSettings()">Settings</button>
@@ -2189,6 +2198,38 @@ async function boot() {
       </div>
     `;
   }
+}
+
+/* -------------------------------------------------------------
+ * PWA & WEB APPLICATION SUPPORT
+ * ------------------------------------------------------------- */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'inline-flex';
+});
+
+async function installPWA() {
+  if (!deferredPrompt) {
+    toast('To install Aegis Web App: click the Install icon (⊕) in your browser address bar.');
+    return;
+  }
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'none';
+  if (outcome === 'accepted') {
+    toast('Aegis Web App installed successfully!');
+  }
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
 }
 
 boot();
