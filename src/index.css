@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root, [data-accent='midnight'] {
+  color-scheme: dark;
+  --glow1: rgba(124,108,255,.35);
+  --glow2: rgba(61,220,151,.22);
+  --glow3: rgba(255,184,107,.14);
+  --acc1: #a99bff; --acc2: #7c6cff; --acc3: #3ddc97;
+}
+[data-accent='ocean'] {
+  color-scheme: dark;
+  --glow1: rgba(56,189,248,.35);
+  --glow2: rgba(34,211,238,.20);
+  --glow3: rgba(167,139,250,.16);
+  --acc1: #7dd3fc; --acc2: #38bdf8; --acc3: #22d3ee;
+}
+[data-accent='sunset'] {
+  color-scheme: dark;
+  --glow1: rgba(251,113,133,.32);
+  --glow2: rgba(251,191,36,.20);
+  --glow3: rgba(192,132,252,.16);
+  --acc1: #fda4af; --acc2: #fb7185; --acc3: #fbbf24;
+}
+html, body, #root { height: 100%; }
+body {
+  @apply font-body text-white antialiased;
+  background:
+    radial-gradient(900px 500px at 10% -5%, var(--glow1), transparent 60%),
+    radial-gradient(800px 500px at 90% 10%, var(--glow2), transparent 60%),
+    radial-gradient(700px 600px at 50% 110%, var(--glow3), transparent 60%),
+    #0a0a1b;
+}
+
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(18px);
+}
+.glass-soft {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(12px);
+}
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-semibold text-ink;
+  background: linear-gradient(135deg, var(--acc1), var(--acc2) 45%, var(--acc3) 130%);
+  box-shadow: 0 8px 30px -8px var(--glow1);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn-primary:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-semibold;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.input {
+  @apply w-full rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.input:focus { border-color: rgba(124,108,255,.7); box-shadow: 0 0 0 3px rgba(124,108,255,.2); }
+.badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase; }
+::selection { background: rgba(124,108,255,.5); }
+.scroll-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 99px; }

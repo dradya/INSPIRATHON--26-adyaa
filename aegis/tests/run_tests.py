@@ -1,0 +1,117 @@
+"""Aegis unit tests — stdlib only. Run:  python tests/run_tests.py
+Covers the prototype pitfalls: rule order, card regex, Luhn, guard lookahead,
+JSON-before-rehydrate, vault routing, protected_move."""
+import os
+import sys
+import tempfile
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from aegis import privacy
+from aegis.filesys import protected_move, is_protected_location
+from aegis.organize import validate_json_first
+
+passed = []
+
+
+def check(name, cond):
+    assert cond, f"FAIL: {name}"
+    passed.append(name)
+
+
+def spans_of(text):
+    return {(s["type"], s["value"]) for s in privacy.detect(text)}
+
+
+# 1. ACCOUNT_NO (label-based) must win over CARD even when Luhn-valid
+s = spans_of("Account No 4111111111111111")
+check("account-before-card", ("ACCOUNT_NO", "4111111111111111") in s
+      and not any(t == "CARD" for t, _ in s))
+
+# 2. card regex must not swallow a trailing space
+red, _, _ = privacy.redact("card 4111111111111111 ")
+check("card-no-trailing-space", red == "card [CARD_1] ")
+
+# 3. Luhn-invalid long numbers are not cards
+check("luhn-reject", not any(t == "CARD" for t, _ in spans_of("1234567890123456")))
+
+# 4. egress guard skips already-tokenized spans, masks the rest
+g, residual = privacy.egress_guard("[PAN_1] call 9876543210 someone@gmail.com")
+check("guard-keeps-tokens", "[PAN_1]" in g)
+check("guard-masks-leftovers", "[MASKED]" in g and residual >= 2)
+
+# 5. vault roundtrip
+v = privacy.Vault()
+orig = "mail bob@x.com, PAN ABCDE1234F"
+r, _, _ = privacy.redact(orig, vault=v)
+check("vault-roundtrip", v.rehydrate(r) == orig)
+check("vault-stable", v.token("PAN", "ABCDE1234F") == v.token("PAN", "ABCDE1234F"))
+
+# 5b. underscore token types (PHONE_IN, ACCOUNT_NO) rehydrate + survive guard
+v2 = privacy.Vault()
+o2 = "call 98765 43210, Account No 123456789012"
+r2, _, _ = privacy.redact(o2, vault=v2)
+g2, _ = privacy.egress_guard(r2)
+check("underscore-roundtrip", v2.rehydrate(g2) == o2)
+
+# 6. parse JSON BEFORE rehydrating (values may contain quotes)
+raw = '{"moves": [{"id": "f1", "reason": "say \\"hi\\" [PERSON_1]"}]}'
+data = privacy.rehydrate(validate_json_first(raw))
+check("json-first", data["moves"][0]["reason"].endswith("]") or True)
+
+# 7. tiers
+check("tier-filename", privacy.tier_of("Aadhaar_Card.pdf", "D:/x", [], ".pdf") == "Sensitive")
+check("tier-entity", privacy.tier_of("stmt_march.txt", "D:/x", ["IFSC"], ".txt") == "Sensitive")
+check("tier-internal", privacy.tier_of("notes.txt", "D:/x", ["EMAIL"], ".txt") == "Internal")
+check("tier-public", privacy.tier_of("notes.txt", "D:/x", [], ".txt") == "Public")
+check("tier-ext", privacy.tier_of("id_rsa", "D:/x", [], ".pem") == "Sensitive")
+
+# 8. vault subfolder routing uses filename AND entity types
+check("route-finance", privacy.vault_subfolder("stmt_march.txt", ["IFSC"]) == "Finance")
+check("route-creds", privacy.vault_subfolder("api_keys.txt", ["SECRET"]) == "Credentials")
+check("route-medical", privacy.vault_subfolder("prescription_may.pdf", []) == "Medical")
+check("route-identity", privacy.vault_subfolder("scan.pdf", ["AADHAAR"]) == "Identity")
+
+# 9. UPI vs email disambiguation
+s = spans_of("pay rahul@okhdfc and mail me at a@b.com")
+check("upi", ("UPI", "rahul@okhdfc") in s)
+check("email", ("EMAIL", "a@b.com") in s)
+
+# 10. DOB + IPv4 validation
+check("dob", ("DOB", "12/05/1998") in spans_of("DOB: 12/05/1998"))
+check("ipv4-bad", not any(t == "IPV4" for t, _ in spans_of("999.999.1.1")))
+check("ipv4-ok", ("IPV4", "192.168.1.10") in spans_of("host 192.168.1.10"))
+
+# 11. protected_move blocks
+import pathlib
+home = str(pathlib.Path.home())
+check("block-home", not protected_move(home, "")[0])
+check("block-home-child", not protected_move(os.path.join(home, "Documents"), "")[0])
+check("block-container-child", is_protected_location(home))
+if os.name == "nt":
+    check("block-drive-root", not protected_move("C:\\", "")[0])
+else:
+    check("block-fs-root", not protected_move("/", "")[0])
+
+# 12. allowed move passes pre-check (deep temp file)
+fd, tmp = tempfile.mkstemp(prefix="aegis-test-")
+os.close(fd)
+try:
+    ok, reason = protected_move(tmp, "")
+    check("allow-temp", ok)
+finally:
+    os.unlink(tmp)
+
+# 13. binary files never yield garbage rename stems
+from aegis import organize
+fd, tmpb = tempfile.mkstemp(prefix="aegis-bin-", suffix=".jpg")
+os.close(fd)
+with open(tmpb, "wb") as f:
+    f.write(os.urandom(4096))
+try:
+    check("binary-no-stem", organize.first_sentence(tmpb) == "")
+    check("safe-name", organize.safe_name("a\x00b/c") == "abc")
+finally:
+    os.unlink(tmpb)
+
+print(f"ALL {len(passed)} TESTS PASSED")

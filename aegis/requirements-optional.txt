@@ -1,0 +1,4 @@
+# Optional upgrades. Everything is feature-detected; Aegis runs without any of these.
+sentence-transformers>=2.2   # MiniLM embeddings (else built-in hashing embedder)
+pypdf>=4                       # PDF text extraction (else PDFs indexed by name only)
+spacy>=3.7                      # + python -m spacy download en_core_web_sm (extra PERSON recall)
