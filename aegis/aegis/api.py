@@ -6,8 +6,10 @@ import re
 import sys
 from pathlib import Path
 
+import mimetypes
+
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import config, db
@@ -186,6 +188,115 @@ def api_open(body: dict):
 @app.post("/api/reveal")
 def api_reveal(body: dict):
     return filesys.reveal(body.get("path", ""))
+
+
+@app.get("/api/file/read")
+def api_file_read(path: str = ""):
+    if not path:
+        return JSONResponse({"ok": False, "error": "No path provided"}, 400)
+    p = os.path.normpath(os.path.abspath(path))
+    if not os.path.exists(p):
+        return JSONResponse({"ok": False, "error": "File not found"}, 404)
+    if os.path.isdir(p):
+        return JSONResponse({"ok": False, "error": "Path is a folder"}, 400)
+
+    try:
+        st = os.stat(p)
+        size = st.st_size
+        filename = os.path.basename(p)
+        ext = os.path.splitext(filename)[1].lower()
+
+        mime, _ = mimetypes.guess_type(p)
+        if not mime:
+            if ext in config.TEXT_EXTS or ext in {".env", ".gitignore", ".gitattributes", ".dockerignore", ".lock", ".cfg", ".conf", ".pyi", ".log", ".jsonl"}:
+                mime = "text/plain"
+            elif ext in {".exe", ".msi", ".dll", ".bin"}:
+                mime = "application/x-msdownload"
+            else:
+                mime = "application/octet-stream"
+
+        is_image = mime.startswith("image/")
+        is_pdf = mime == "application/pdf"
+        is_audio = mime.startswith("audio/")
+        is_video = mime.startswith("video/")
+
+        content = ""
+        is_text = False
+        truncated = False
+
+        if not (is_image or is_pdf or is_audio or is_video):
+            try:
+                with open(p, "rb") as fh:
+                    sample = fh.read(1024)
+                    if b"\0" not in sample:
+                        is_text = True
+            except Exception:
+                pass
+
+            if is_text or ext in config.TEXT_EXTS:
+                is_text = True
+                try:
+                    with open(p, "r", encoding="utf-8", errors="replace") as fh:
+                        content = fh.read(300_000)
+                        if fh.read(1):
+                            truncated = True
+                except Exception as ex:
+                    content = f"Error reading content: {ex}"
+
+        row = db.q("SELECT tier, pii, snippet FROM files WHERE path=?", (p,), one=True)
+        tier = row["tier"] if row else "Public"
+        pii = row["pii"] if row else ""
+        if not content and row and row["snippet"]:
+            content = row["snippet"]
+
+        return {
+            "ok": True,
+            "path": p,
+            "name": filename,
+            "folder": os.path.dirname(p),
+            "ext": ext,
+            "size": size,
+            "mtime": st.st_mtime,
+            "mime": mime,
+            "is_text": is_text,
+            "is_image": is_image,
+            "is_pdf": is_pdf,
+            "is_audio": is_audio,
+            "is_video": is_video,
+            "content": content,
+            "truncated": truncated,
+            "tier": tier,
+            "pii": pii
+        }
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, 500)
+
+
+@app.get("/api/file/raw")
+def api_file_raw(path: str = ""):
+    if not path:
+        return Response("Missing path", status_code=400)
+    p = os.path.normpath(os.path.abspath(path))
+    if not os.path.exists(p):
+        return Response("File not found", status_code=404)
+    if os.path.isdir(p):
+        return Response("Path is a directory", status_code=400)
+
+    filename = os.path.basename(p)
+    mime, _ = mimetypes.guess_type(p)
+    if not mime:
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in config.TEXT_EXTS or ext in {".env", ".gitignore", ".gitattributes", ".dockerignore", ".lock", ".cfg", ".conf", ".pyi", ".log", ".jsonl"}:
+            mime = "text/plain; charset=utf-8"
+        else:
+            mime = "application/octet-stream"
+
+    return FileResponse(
+        p,
+        media_type=mime,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
+    )
+
 
 
 # ---------------- storage ----------------

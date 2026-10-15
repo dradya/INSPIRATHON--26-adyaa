@@ -398,6 +398,185 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 .file-card .title { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-card .sub { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ============================================================
+ * Apple Quick Look File Viewer Modal & Smoothness Engine
+ * ============================================================ */
+.ql-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 3, 12, 0.78);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+}
+.ql-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+.ql-modal {
+  width: min(980px, 94vw);
+  height: min(780px, 88vh);
+  background: rgba(16, 16, 32, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95) translateY(12px);
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ql-overlay.open .ql-modal {
+  transform: scale(1) translateY(0);
+}
+.ql-header {
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.ql-file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.ql-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.ql-titles {
+  min-width: 0;
+  flex: 1;
+}
+.ql-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ql-sub {
+  font-size: 11.5px;
+  color: var(--dim);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ql-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.ql-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(7, 7, 18, 0.95);
+}
+.ql-content-viewer {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+.ql-code-container {
+  margin: 0;
+  padding: 16px 20px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #e2e8f0;
+  white-space: pre;
+  tab-size: 2;
+}
+.ql-image-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(circle at center, rgba(30, 30, 60, 0.3), transparent 70%);
+}
+.ql-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.ql-iframe-container {
+  width: 100%;
+  height: 100%;
+}
+.ql-iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+.ql-media-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+}
+.ql-toolbar {
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11.5px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+/* Fluid View Transitions & Smoothness */
+@keyframes viewFadeSlide {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.view-enter {
+  animation: viewFadeSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Smooth custom glass scrollbars */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
+
+html, body, #main, #ls, #awlog {
+  scroll-behavior: smooth;
+}
+
 /* Apple-style Visual Confirmation Sheet Modal */
 .sheet-overlay {
   position: fixed;
@@ -777,6 +956,43 @@ mark.hl {
   </div>
 </div>
 
+<!-- Apple Quick Look File Viewer Modal -->
+<div class="ql-overlay" id="quickLookOverlay" onclick="if(event.target===this)closeQuickLook()">
+  <div class="ql-modal" id="quickLookModal">
+    <div class="ql-header">
+      <div class="ql-file-info">
+        <div class="ql-icon" id="qlIcon">📄</div>
+        <div class="ql-titles">
+          <div class="ql-name" id="qlTitle">filename.ext</div>
+          <div class="ql-sub">
+            <span id="qlMeta">0 KB</span>
+            <span id="qlTier" class="tier Public">Public</span>
+            <span id="qlPii" class="ptag" style="display:none"></span>
+          </div>
+        </div>
+      </div>
+      <div class="ql-actions">
+        <button class="btn-pri" style="padding:5px 12px;font-size:11.5px;font-weight:600" onclick="qlOpenNative()" title="Open in Windows default program">Open in Windows 🚀</button>
+        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlOpenNewTab()" title="Open raw file in a new browser tab">New Tab ↗</button>
+        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlReveal()" title="Show in Windows File Explorer">Reveal 📂</button>
+        <button class="btn-ghost" style="padding:5px 10px;font-size:11.5px" onclick="qlCopyPath()" title="Copy full file path">Copy Path 📋</button>
+        <button class="btn-ghost" style="padding:5px 10px;font-size:14px;line-height:1" onclick="closeQuickLook()" title="Close (Esc)">✕</button>
+      </div>
+    </div>
+    <div class="ql-body" id="qlBody">
+      <div class="ql-content-viewer" id="qlContent"></div>
+    </div>
+    <div class="ql-toolbar" id="qlToolbar">
+      <span id="qlStatus">Ready</span>
+      <div class="row" style="gap:8px">
+        <span class="dim" style="font-size:11px">Tip: Spacebar toggles Quick Look · Esc closes</span>
+        <button class="btn-ghost" id="qlCopyContentBtn" style="padding:2px 7px;font-size:11px;display:none" onclick="qlCopyContent()">Copy Content</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Settings Modal -->
 <div class="modal" id="settings">
   <div>
@@ -924,6 +1140,12 @@ function tab(t, el, push = true) {
     if (b) b.classList.add('on');
     if (push) {
       navPush({ tab: t, path: state.treePath });
+    }
+    const m = document.getElementById('main');
+    if (m) {
+      m.classList.remove('view-enter');
+      void m.offsetWidth;
+      m.classList.add('view-enter');
     }
     const views = {
       dashboard: vDashboard,
@@ -1282,12 +1504,14 @@ async function vDashboard() {
           <button class="btn-ghost" style="padding:4px 9px;font-size:11px" onclick="tab('storage')">Storage Hub →</button>
         </div>
         ${(d.largest || []).map(f => `
-          <div class="frow xrow" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
+          <div class="frow xrow" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview · Double-click to open in Windows" style="cursor:pointer">
             <span class="n" style="flex:1">📄 <b>${esc(f.name)}</b></span>
             <span class="tier ${f.tier}">${f.tier}</span>
             <span class="s">${fmt(f.size)}</span>
             <div class="row" style="gap:4px">
-              <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+              <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
+              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
+              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(f.path)}'), '_blank')">Tab ↗</button>
               <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
             </div>
           </div>
@@ -1306,13 +1530,19 @@ async function vDashboard() {
       <p class="dim small" style="margin:0 0 12px">Every file is scanned for PII (Aadhaar, PAN, Passport, Bank, Cards) on-device. Sensitive files never leave this machine.</p>
       <div class="row" style="gap:8px;flex-wrap:wrap">
         ${(d.sensitive || []).slice(0, 6).map(f => `
-          <div class="file-card" onclick="${f.path ? `op('${qesc(f.path)}')` : ''}" ondblclick="${f.path ? `op('${qesc(f.path)}')` : ''}" title="Click to open file in Windows" style="cursor:pointer">
+          <div class="file-card" onclick="${f.path ? `quickLook('${qesc(f.path)}')` : ''}" ondblclick="${f.path ? `op('${qesc(f.path)}')` : ''}" title="Click to preview file · Double-click to open in Windows" style="cursor:pointer">
             <span class="icon">🔒</span>
             <div class="info">
               <div class="title">${esc(f.name)}</div>
               <div class="sub">${(f.types || []).join(', ') || 'Sensitive'}</div>
             </div>
-            ${f.path ? `<button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>` : ''}
+            ${f.path ? `
+              <div class="row" style="gap:4px">
+                <button class="btn-pri" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">👁️</button>
+                <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();op('${qesc(f.path)}')">🚀</button>
+                <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">📂</button>
+              </div>
+            ` : ''}
           </div>
         `).join('') || '<span class="dim small">No sensitive files found on this machine.</span>'}
       </div>
@@ -1399,7 +1629,7 @@ async function doSearch() {
     if (results.length) {
       h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Files (${results.length} found in ${res.ms}ms)</div>`;
       h += results.map(r => `
-        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="op('${qesc(r.path)}')" ondblclick="op('${qesc(r.path)}')" title="Click or double-click to open file in Windows">
+        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="quickLook('${qesc(r.path)}')" ondblclick="op('${qesc(r.path)}')" title="Click to preview file · Double-click to open in Windows">
           <div class="row" style="justify-content:space-between;margin-bottom:6px">
             <div class="row" style="gap:8px">
               <span class="tier ${r.tier}">${r.tier}</span>
@@ -1407,9 +1637,11 @@ async function doSearch() {
               <b style="font-size:14.5px">${esc(r.name)}</b>
             </div>
             <div class="row" style="gap:6px">
-              <button class="btn-pri" style="padding:4px 11px;font-size:11.5px;font-weight:600" onclick="event.stopPropagation();op('${qesc(r.path)}')">Open ↗</button>
+              <button class="btn-pri" style="padding:4px 11px;font-size:11.5px;font-weight:600" onclick="event.stopPropagation();quickLook('${qesc(r.path)}')">Preview 👁️</button>
+              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();op('${qesc(r.path)}')">Launch 🚀</button>
+              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(r.path)}'), '_blank')">Tab ↗</button>
               <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();rev('${qesc(r.path)}')">Reveal 📁</button>
-              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 App Explorer</button>
+              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 Explorer</button>
             </div>
           </div>
           <div class="dim small" style="margin-bottom:8px">📁 ${esc(r.folder)} · ${fmt(r.size)} · ${dt(r.mtime)}</div>
@@ -1544,9 +1776,9 @@ async function lsCur() {
 function renderFileRow(x) {
   const isSelected = state.highlightPath && (x.path === state.highlightPath);
   return `
-    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double-click to open folder"` : `ondblclick="op('${qesc(x.path)}')" title="Double-click to open file in Windows"`}>
-      <span style="font-size:16px;cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();op('${qesc(x.path)}');"`}>${x.is_dir ? '📁' : '📄'}</span>
-      <span class="n" style="cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();op('${qesc(x.path)}');"`} title="${x.is_dir ? 'Click to open folder' : 'Click to open file in Windows'}">${esc(x.name)}</span>
+    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" onclick="selectRow('${qesc(x.path)}')" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double-click to open folder"` : `ondblclick="quickLook('${qesc(x.path)}')" title="Click to select · Double-click or Spacebar to Quick Look preview"`}>
+      <span style="font-size:16px;cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();quickLook('${qesc(x.path)}');"`}>${x.is_dir ? '📁' : '📄'}</span>
+      <span class="n" style="cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();quickLook('${qesc(x.path)}');"`} title="${x.is_dir ? 'Open folder' : 'Click to preview file'}">${esc(x.name)}</span>
       ${x.tier && x.tier !== 'Public' ? `<span class="tier ${x.tier}">${x.tier}</span>` : ''}
       <span class="s">${x.is_dir ? '' : fmt(x.size) + ' · '}${dt(x.mtime)}</span>
       <div class="row" style="gap:4px">
@@ -1554,7 +1786,9 @@ function renderFileRow(x) {
           <button class="btn-ghost" style="padding:2px 7px;font-size:11px;font-weight:600" onclick="event.stopPropagation();goTree('${qesc(x.path)}')">Open 📂</button>
           <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
         ` : `
-          <button class="btn-pri" style="padding:2px 8px;font-size:11px;font-weight:600" onclick="event.stopPropagation();op('${qesc(x.path)}')">Open ↗</button>
+          <button class="btn-pri" style="padding:2px 9px;font-size:11px;font-weight:600" onclick="event.stopPropagation();quickLook('${qesc(x.path)}')">Preview 👁️</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Launch 🚀</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(x.path)}'), '_blank')" title="Open raw file in a new tab">Tab ↗</button>
           <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal 📁</button>
         `}
         <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptRename('${qesc(x.path)}', '${qesc(x.name)}')">Rename</button>
@@ -1562,6 +1796,14 @@ function renderFileRow(x) {
       </div>
     </div>
   `;
+}
+
+function selectRow(path) {
+  state.highlightPath = path;
+  document.querySelectorAll('#ls .frow').forEach(r => {
+    if (r.dataset.path === path) r.classList.add('highlight');
+    else r.classList.remove('highlight');
+  });
 }
 
 /* -------------------------------------------------------------
@@ -1603,6 +1845,209 @@ async function rev(p) {
     toast(`Cannot reveal: ${r.error || 'Unknown error'}`);
   }
 }
+
+/* -------------------------------------------------------------
+ * APPLE QUICK LOOK & IN-BROWSER FILE VIEWER ENGINE
+ * ------------------------------------------------------------- */
+let currentPreviewPath = '';
+let currentPreviewData = null;
+
+async function quickLook(path) {
+  if (!path) return;
+  currentPreviewPath = path;
+  state.highlightPath = path;
+  
+  // Highlight row in Explorer if present
+  document.querySelectorAll('#ls .frow').forEach(r => {
+    if (r.dataset.path === path) r.classList.add('highlight');
+    else r.classList.remove('highlight');
+  });
+
+  const overlay = document.getElementById('quickLookOverlay');
+  const title = document.getElementById('qlTitle');
+  const meta = document.getElementById('qlMeta');
+  const tier = document.getElementById('qlTier');
+  const pii = document.getElementById('qlPii');
+  const icon = document.getElementById('qlIcon');
+  const content = document.getElementById('qlContent');
+  const status = document.getElementById('qlStatus');
+  const copyBtn = document.getElementById('qlCopyContentBtn');
+
+  const filename = path.split(/[\\/]/).pop() || path;
+  title.textContent = filename;
+  meta.textContent = 'Loading file preview…';
+  content.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--dim);gap:14px">
+      <div style="font-size:32px">❖</div>
+      <div style="font-size:13px">Reading file securely on-device…</div>
+    </div>
+  `;
+  status.textContent = path;
+  if (copyBtn) copyBtn.style.display = 'none';
+
+  if (overlay) overlay.classList.add('open');
+
+  try {
+    const res = await api('GET', `/api/file/read?path=${encodeURIComponent(path)}`);
+    if (!res.ok) {
+      meta.textContent = 'Error opening file';
+      content.innerHTML = `
+        <div style="padding:48px 24px;text-align:center;color:var(--red)">
+          <h3>Cannot Preview File</h3>
+          <p class="dim" style="margin:8px 0 20px">${esc(res.error || 'Unknown error occurred')}</p>
+          <div class="row" style="justify-content:center;gap:10px">
+            <button class="btn-pri" onclick="op('${qesc(path)}')">Open in Windows App 🚀</button>
+            <button class="btn-ghost" onclick="rev('${qesc(path)}')">Reveal in Explorer 📂</button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    currentPreviewData = res;
+    meta.textContent = `${fmt(res.size)} · ${dt(res.mtime)} · ${res.mime}`;
+    tier.textContent = res.tier || 'Public';
+    tier.className = `tier ${res.tier || 'Public'}`;
+
+    if (res.pii) {
+      pii.textContent = res.pii;
+      pii.style.display = 'inline-block';
+    } else {
+      pii.style.display = 'none';
+    }
+
+    // Set Icon
+    if (res.is_image) icon.textContent = '🖼️';
+    else if (res.is_pdf) icon.textContent = '📑';
+    else if (res.is_audio) icon.textContent = '🎵';
+    else if (res.is_video) icon.textContent = '🎬';
+    else if (res.is_text) icon.textContent = '📝';
+    else icon.textContent = '📦';
+
+    // Render Preview Content
+    const rawUrl = `/api/file/raw?path=${encodeURIComponent(path)}`;
+
+    if (res.is_image) {
+      content.innerHTML = `
+        <div class="ql-image-container">
+          <img src="${rawUrl}" alt="${esc(res.name)}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'dim\\'>Cannot render image preview</div>'">
+        </div>
+      `;
+      status.textContent = `${res.name} · ${fmt(res.size)} · Image`;
+    } else if (res.is_pdf) {
+      content.innerHTML = `
+        <div class="ql-iframe-container">
+          <iframe src="${rawUrl}" title="${esc(res.name)}"></iframe>
+        </div>
+      `;
+      status.textContent = `${res.name} · ${fmt(res.size)} · PDF Document`;
+    } else if (res.is_audio) {
+      content.innerHTML = `
+        <div class="ql-media-container">
+          <div style="font-size:56px">🎵</div>
+          <h3 style="margin:0">${esc(res.name)}</h3>
+          <audio controls autoplay src="${rawUrl}" style="width:min(440px, 90%)"></audio>
+        </div>
+      `;
+      status.textContent = `${res.name} · Audio Player`;
+    } else if (res.is_video) {
+      content.innerHTML = `
+        <div class="ql-media-container" style="padding:10px">
+          <video controls autoplay src="${rawUrl}" style="max-width:100%;max-height:100%;border-radius:10px"></video>
+        </div>
+      `;
+      status.textContent = `${res.name} · Video Player`;
+    } else if (res.is_text) {
+      if (copyBtn) copyBtn.style.display = 'inline-flex';
+      const lines = (res.content || '').split('\n');
+      const lineCount = lines.length;
+      status.textContent = `${lineCount} lines · ${(res.content || '').length} chars ${res.truncated ? '· (preview truncated to 300KB)' : ''}`;
+
+      let codeHtml = '<div style="display:flex;min-width:100%"><div style="padding:16px 10px;text-align:right;user-select:none;color:var(--faint);font-family:monospace;font-size:12px;border-right:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25)">';
+      codeHtml += lines.map((_, i) => `<div>${i + 1}</div>`).join('');
+      codeHtml += `</div><div class="ql-code-container" style="flex:1">${esc(res.content || '(empty file)')}</div></div>`;
+      content.innerHTML = codeHtml;
+    } else {
+      // Binary or other file
+      content.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center">
+          <div style="font-size:64px;margin-bottom:16px">📦</div>
+          <h3 style="margin:0 0 8px">${esc(res.name)}</h3>
+          <p class="dim" style="max-width:440px;margin:0 0 20px">${esc(res.mime)} · ${fmt(res.size)}<br>This is a binary or executable file. Use the buttons below to open or inspect it.</p>
+          <div class="row" style="gap:10px">
+            <button class="btn-pri" onclick="qlOpenNative()">Open in Windows App 🚀</button>
+            <button class="btn-ghost" onclick="qlOpenNewTab()">Open in Browser Tab ↗</button>
+            <button class="btn-ghost" onclick="qlReveal()">Reveal in Explorer 📂</button>
+          </div>
+        </div>
+      `;
+      status.textContent = `${res.name} · ${fmt(res.size)} · Binary`;
+    }
+  } catch (err) {
+    content.innerHTML = `<div style="padding:36px;text-align:center;color:var(--red)">Failed to load preview: ${esc(err.message)}</div>`;
+  }
+}
+
+function closeQuickLook() {
+  const overlay = document.getElementById('quickLookOverlay');
+  if (overlay) overlay.classList.remove('open');
+  const content = document.getElementById('qlContent');
+  if (content) content.innerHTML = '';
+  currentPreviewPath = '';
+  currentPreviewData = null;
+}
+
+function qlOpenNative() {
+  if (currentPreviewPath) op(currentPreviewPath);
+}
+
+function qlOpenNewTab() {
+  if (currentPreviewPath) {
+    window.open(`/api/file/raw?path=${encodeURIComponent(currentPreviewPath)}`, '_blank');
+  }
+}
+
+function qlReveal() {
+  if (currentPreviewPath) rev(currentPreviewPath);
+}
+
+function qlCopyPath() {
+  if (currentPreviewPath) {
+    navigator.clipboard.writeText(currentPreviewPath);
+    toast('Copied full path to clipboard!');
+  }
+}
+
+function qlCopyContent() {
+  if (currentPreviewData && currentPreviewData.content) {
+    navigator.clipboard.writeText(currentPreviewData.content);
+    toast('Copied file content to clipboard!');
+  }
+}
+
+// Global Keyboard Handler for Spacebar (Quick Look) and Escape
+window.addEventListener('keydown', (e) => {
+  const ql = document.getElementById('quickLookOverlay');
+  const isQLOpen = ql && ql.classList.contains('open');
+
+  if (e.key === 'Escape') {
+    if (isQLOpen) {
+      closeQuickLook();
+      e.preventDefault();
+    } else if (document.getElementById('confirmSheet')?.classList.contains('open')) {
+      closeSheet();
+      e.preventDefault();
+    }
+  } else if (e.key === ' ' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+    if (isQLOpen) {
+      closeQuickLook();
+      e.preventDefault();
+    } else if (state.highlightPath) {
+      quickLook(state.highlightPath);
+      e.preventDefault();
+    }
+  }
+});
 
 /* -------------------------------------------------------------
  * VIEW: RECYCLE BIN (macOS-Styled)
@@ -1750,7 +2195,7 @@ async function loadUnnamedFiles() {
             <tr>
               <td><input type="checkbox" class="uchk" data-idx="${idx}" checked></td>
               <td>
-                <b style="cursor:pointer;color:var(--acc)" onclick="op('${qesc(it.path)}')" title="Click to open file in Windows">${esc(it.name)} ↗</b>
+                <b style="cursor:pointer;color:var(--acc)" onclick="quickLook('${qesc(it.path)}')" ondblclick="op('${qesc(it.path)}')" title="Click to preview file · Double-click to open in Windows">${esc(it.name)} 👁️</b>
                 <div class="dim small truncate" style="max-width:220px">${esc(it.folder)}</div>
               </td>
               <td class="dim small" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.snippet || 'Context based naming')}</td>
@@ -1759,7 +2204,8 @@ async function loadUnnamedFiles() {
               </td>
               <td>
                 <div class="row" style="gap:4px">
-                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="op('${qesc(it.path)}')">Open ↗</button>
+                  <button class="btn-pri" style="padding:3px 8px;font-size:11px" onclick="quickLook('${qesc(it.path)}')">Preview 👁️</button>
+                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="op('${qesc(it.path)}')">Launch 🚀</button>
                   <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="rev('${qesc(it.path)}')">Reveal</button>
                   <button class="btn-pri" style="padding:3px 9px;font-size:11px" onclick="renameSingleUnnamed(${idx})">Rename</button>
                 </div>
@@ -1825,7 +2271,7 @@ async function buildOrganizePlan() {
         <tbody>
           ${r.moves.map(m => `
             <tr>
-              <td><b style="cursor:pointer;color:var(--acc)" onclick="op('${qesc(m.old)}')" title="Click to open file in Windows">${esc(m.old.split(/[\\/]/).pop())} ↗</b></td>
+              <td><b style="cursor:pointer;color:var(--acc)" onclick="quickLook('${qesc(m.old)}')" ondblclick="op('${qesc(m.old)}')" title="Click to preview file · Double-click to open in Windows">${esc(m.old.split(/[\\/]/).pop())} 👁️</b></td>
               <td><b>${esc(m.folder)}</b> / ${esc(m.new_name)}</td>
               <td class="small dim">${esc(m.reason)}</td>
             </tr>
@@ -1889,16 +2335,18 @@ async function vLedger() {
         `).join('') || '<span class="dim small">No confidential entities detected.</span>'}
       </div>
 
-      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Click or double-click to open in Windows)</div>
+      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Click to preview · Double-click to open in Windows)</div>
       ${(tInfo.sensitive_files || []).map(f => `
-        <div class="frow xrow" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
+        <div class="frow xrow" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview file · Double-click to open in Windows" style="cursor:pointer">
           <span style="font-size:16px">🔒</span>
           <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.folder)}</span></span>
           <span class="tier Sensitive">Sensitive</span>
           ${f.pii ? `<span class="ptag">${esc(f.pii)}</span>` : ''}
           <span class="s">${fmt(f.size)}</span>
           <div class="row" style="gap:4px">
-            <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+            <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
+            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
+            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();window.open('/api/file/raw?path=' + encodeURIComponent('${qesc(f.path)}'), '_blank')">Tab ↗</button>
             <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
             <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();jumpToExplorer('${qesc(f.path)}')">Explorer</button>
           </div>
@@ -1994,11 +2442,12 @@ async function loadStorageDetails() {
   const sBox = document.getElementById('staleBox');
   if (sBox) {
     sBox.innerHTML = (stale || []).slice(0, 8).map(x => `
-      <div class="frow xrow" onclick="op('${qesc(x.path)}')" ondblclick="op('${qesc(x.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
-        <span class="n">📄 ${esc(x.name)}</span>
+      <div class="frow xrow" onclick="quickLook('${qesc(x.path)}')" ondblclick="op('${qesc(x.path)}')" title="Click to preview · Double-click to open in Windows" style="cursor:pointer">
+        <span class="n">📄 <b>${esc(x.name)}</b></span>
         <span class="s">${fmt(x.size)}</span>
         <div class="row" style="gap:4px">
-          <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Open ↗</button>
+          <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();quickLook('${qesc(x.path)}')">Preview 👁️</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Launch 🚀</button>
           <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
           <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
         </div>
@@ -2017,9 +2466,10 @@ async function loadStorageDetails() {
         </div>
         ${g.files.map((f, fi) => `
           <div class="row" style="justify-content:space-between;font-size:12px;padding:3px 0">
-            <span class="truncate" style="flex:1;cursor:pointer" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to open in Windows">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
+            <span class="truncate" style="flex:1;cursor:pointer" onclick="quickLook('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to preview · Double-click to open in Windows">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
             <div class="row" style="gap:4px">
-              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+              <button class="btn-pri" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();quickLook('${qesc(f.path)}')">Preview 👁️</button>
+              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Launch 🚀</button>
               <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
               ${fi > 0 ? `<button class="btn-ghost danger" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();promptTrash('${qesc(f.path)}')">Trash copy</button>` : ''}
             </div>
@@ -2068,14 +2518,15 @@ function awSay(who, text, items = []) {
     content += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">`;
     items.forEach(it => {
       content += `
-        <div class="file-card" onclick="${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `op('${qesc(it.path)}')`}" ondblclick="${it.is_dir ? `rev('${qesc(it.path)}')` : `op('${qesc(it.path)}')`}" title="${it.is_dir ? 'Click to open in Explorer, double-click to reveal' : 'Click to open file in Windows'}" style="cursor:pointer">
+        <div class="file-card" onclick="${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `quickLook('${qesc(it.path)}')`}" ondblclick="${it.is_dir ? `rev('${qesc(it.path)}')` : `op('${qesc(it.path)}')`}" title="${it.is_dir ? 'Click to open in Explorer · Double-click to reveal' : 'Click to preview · Double-click to open in Windows'}" style="cursor:pointer">
           <span class="icon">${it.is_dir ? '📁' : '📄'}</span>
           <div class="info">
             <div class="title">${esc(it.name)}</div>
             <div class="sub">${esc(it.badge || '')} · ${fmt(it.size || 0)}</div>
           </div>
           <div class="row" style="gap:4px">
-            <button class="btn-pri" style="padding:2px 8px;font-size:10.5px" onclick="event.stopPropagation();${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `op('${qesc(it.path)}')`}">${it.is_dir ? 'Browse' : 'Open ↗'}</button>
+            <button class="btn-pri" style="padding:2px 8px;font-size:10.5px" onclick="event.stopPropagation();${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `quickLook('${qesc(it.path)}')`}">${it.is_dir ? 'Browse 📂' : 'Preview 👁️'}</button>
+            ${!it.is_dir ? `<button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();op('${qesc(it.path)}')">Launch 🚀</button>` : ''}
             <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(it.path)}')">Reveal</button>
           </div>
         </div>
