@@ -54,14 +54,27 @@ or Ollama. Offline toggle forces local-only. Keys stay in server RAM; the API ne
 Every `gateway()` call — cloud, Ollama, or local — lands in the **Privacy Ledger** with
 side-by-side Original-vs-Sent and the dark-red token chips.
 
-## Desktop application (final packaging) — DONE ✅
+## 🚀 1-Click GUI Installer & Setup Wizard (Zero Commands Needed)
 
-`dist/Aegis/Aegis.exe` (65 MB folder) is built and acceptance-tested.
-Double-click it: native window (pywebview) + embedded backend, no Python needed.
+Aegis includes a graphical Setup Wizard with Apple/macOS aesthetics:
+- **`AegisSetup.exe`**: Standalone executable setup wizard.
+- **`Install-Aegis.bat`**: 1-click batch launcher in both root and `aegis/` folders.
+- **`installer.py`**: Python GUI wizard (Tkinter + high-DPI support).
+
+### What the Setup Wizard does:
+1. Automatically discovers host Python and windowless `pythonw.exe` interpreters.
+2. Deploys application modules, frontend assets, and multi-resolution icons into `%LOCALAPPDATA%\Programs\Aegis`.
+3. Verifies & installs required dependencies (`fastapi`, `uvicorn`, `pywebview`, `numpy`, `pypdf`).
+4. Creates a 1-click **Desktop shortcut** (`Aegis.lnk`) with the custom Aegis shield icon (`aegis.ico`).
+5. Adds Aegis to the **Windows Start Menu**.
+6. Generates zero-console silent background launchers (`AegisLauncher.vbs` & `run_aegis.bat`).
+7. Users can launch Aegis with a simple double-click on their Desktop — **zero terminal interaction required!**
 
 ```bash
-# rebuild after code changes (one command, needs Aegis.spec)
-python -m PyInstaller --noconfirm Aegis.spec
+# To run the GUI Setup Wizard manually from terminal:
+python aegis/installer.py
+
+# Or double-click AegisSetup.exe / Install-Aegis.bat in Windows Explorer!
 ```
 
 Notes:
