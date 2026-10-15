@@ -114,4 +114,44 @@ try:
 finally:
     os.unlink(tmpb)
 
+# 14. semantic understanding & filler stripping
+from aegis import semantic
+u = semantic.understand("find my notes about inheritance and polymorphism from last week")
+check("semantic-filler-strip", "inheritance" in u["core"] and "polymorphism" in u["core"])
+check("semantic-kind-notes", "notes" in u["kinds"])
+check("semantic-time-span", u["span"] is not None)
+check("semantic-concept-oop", "oop" in u["concepts"])
+
+# 15. changes engine: preview -> commit -> undo contract
+from aegis import changes
+fd, tmp1 = tempfile.mkstemp(prefix="aegis-change-")
+os.close(fd)
+try:
+    with open(tmp1, "w") as f:
+        f.write("content to rename")
+    prev = changes.preview("rename", {"path": tmp1, "new_name": "renamed_test.txt"})
+    check("change-preview-ok", prev["ok"] and prev["token"])
+    tok = prev["token"]
+    res = changes.commit(tok)
+    new_path = os.path.join(os.path.dirname(tmp1), "renamed_test.txt")
+    check("change-commit-renamed", res["ok"] and os.path.exists(new_path))
+    # Undo
+    un_prev = changes.preview("undo", {"batch": res["batch"]})
+    check("undo-preview-ok", un_prev["ok"])
+    un_res = changes.commit(un_prev["token"])
+    check("undo-commit-restored", un_res["ok"] and os.path.exists(tmp1))
+finally:
+    if os.path.exists(tmp1):
+        os.unlink(tmp1)
+    if os.path.exists(os.path.join(os.path.dirname(tmp1), "renamed_test.txt")):
+        os.unlink(os.path.join(os.path.dirname(tmp1), "renamed_test.txt"))
+
+# 16. unnamed file detection & suggestions
+from aegis import unnamed
+check("unnamed-detect", unnamed.is_unnamed_or_generic("Untitled document.docx"))
+check("unnamed-img", unnamed.is_unnamed_or_generic("IMG_9921.jpg"))
+sug = unnamed.suggest_name("C:/docs/Untitled.txt", "Untitled.txt", ".txt", snippet="# Polymorphism in Python\nInheritance concepts")
+check("unnamed-sug-title", "Polymorphism" in sug or "Inheritance" in sug)
+
 print(f"ALL {len(passed)} TESTS PASSED")
+

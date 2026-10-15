@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import config, db
-from . import agent, filesys, indexer, organize, privacy, search, storage
+from . import agent, changes, filesys, indexer, organize, privacy, search, storage, unnamed
 
 def _app_dir():
     # frozen (PyInstaller): --add-data lands under sys._MEIPASS
@@ -48,6 +48,10 @@ def index():
 
 @app.get("/api/health")
 def health():
+    try:
+        indexer.start_upgrade()
+    except Exception:
+        pass
     return {"ok": True, "embedder": indexer.embedder_name(),
             "offline": config.SETTINGS["offline"],
             "provider": config.SETTINGS["provider"]}
@@ -298,3 +302,73 @@ def ledger_list(limit: int = 50):
                       "residual": stats[2],
                       "entities_redacted": (red[0] if red else 0) or 0,
                       "withheld": (withheld[0] if withheld else 0) or 0}}
+
+
+# ---------------- change engine (visual confirmation -> commit) ----------------
+@app.post("/api/change/preview")
+def api_change_preview(body: dict):
+    kind = body.get("kind", "")
+    return changes.preview(kind, body)
+
+
+@app.post("/api/change/commit")
+def api_change_commit(body: dict):
+    token = body.get("token", "")
+    return changes.commit(token)
+
+
+@app.post("/api/change/cancel")
+def api_change_cancel(body: dict):
+    token = body.get("token", "")
+    return changes.cancel(token)
+
+
+@app.get("/api/history")
+def api_history():
+    return {"batches": changes.history()}
+
+
+# ---------------- recycle bin ----------------
+@app.get("/api/bin")
+def api_bin():
+    return changes.bin_items()
+
+
+# ---------------- unnamed files & suggestions ----------------
+@app.get("/api/unnamed")
+def api_unnamed(path: str = ""):
+    return unnamed.find_unnamed(path)
+
+
+# ---------------- sensitive tiers breakdown & grouping ----------------
+@app.get("/api/privacy/tiers")
+def privacy_tiers():
+    counts = {r[0]: r[1] for r in db.q("SELECT tier, COUNT(*) FROM files GROUP BY tier")}
+    bytes_by_tier = {r[0]: (r[1] or 0) for r in db.q("SELECT tier, SUM(size) FROM files GROUP BY tier")}
+
+    type_counts = {}
+    rows = db.q("SELECT pii FROM files WHERE pii != ''")
+    for r in rows:
+        for t in (r["pii"] or "").split(","):
+            t = t.strip()
+            if t:
+                type_counts[t] = type_counts.get(t, 0) + 1
+
+    sens_files = [dict(r) for r in db.q(
+        "SELECT id, path, name, folder, ext, size, mtime, tier, pii, snippet FROM files WHERE tier='Sensitive' ORDER BY size DESC LIMIT 40")]
+    internal_files = [dict(r) for r in db.q(
+        "SELECT id, path, name, folder, ext, size, mtime, tier, pii, snippet FROM files WHERE tier='Internal' ORDER BY size DESC LIMIT 20")]
+    public_files = [dict(r) for r in db.q(
+        "SELECT id, path, name, folder, ext, size, mtime, tier, snippet FROM files WHERE tier='Public' ORDER BY size DESC LIMIT 20")]
+
+    return {
+        "summary": {
+            "Sensitive": {"count": counts.get("Sensitive", 0), "bytes": bytes_by_tier.get("Sensitive", 0)},
+            "Internal": {"count": counts.get("Internal", 0), "bytes": bytes_by_tier.get("Internal", 0)},
+            "Public": {"count": counts.get("Public", 0), "bytes": bytes_by_tier.get("Public", 0)},
+        },
+        "entity_types": sorted(type_counts.items(), key=lambda x: -x[1]),
+        "sensitive_files": sens_files,
+        "internal_files": internal_files,
+        "public_files": public_files
+    }
