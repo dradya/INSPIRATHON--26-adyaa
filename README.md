@@ -21,15 +21,26 @@ INSPIRATHON '26/
 └── HACKATHON_GUIDE.md  ← statement → rebrand cheat-sheet
 ```
 
-## 60-second start
+## Run locally
 
 ```bash
 npm install
-cp .env.example .env   # paste Supabase URL + anon key
-npm run dev            # → http://localhost:5173
+npm run setup          # creates .env from .env.example; keeps existing .env unchanged
+npm start              # → http://localhost:5173
 ```
 
-Supabase side: **SQL Editor → paste `supabase/schema.sql` → Run → paste `seed.sql` → Run.** Done.
+After `npm run setup`, add your Supabase project URL and anon/public key to `.env`.
+Create the Supabase backend by running `supabase/schema.sql` in the Supabase SQL Editor;
+run `supabase/seed.sql` too if you want demo data. See [Supabase setup](supabase/README.md)
+for the full backend and authentication setup.
+
+`npm run dev` remains available for development. To verify a production bundle locally,
+run `npm run build` followed by `npm run preview`.
+
+> Before a commercial launch, configure your real production environment and authentication
+> URLs, review the database RLS policies for your business requirements, and never put a
+> Supabase service-role key in this frontend. Vite variables prefixed with `VITE_` are
+> included in the browser bundle; use only the Supabase anon/publishable key here.
 
 ## Why this wins hackathons
 - **Statement-proof:** `projects` table is generic — becomes Complaints / Patients / Cases / Ideas with zero migrations (use `metadata` JSONB + rename `src/config.js`).
