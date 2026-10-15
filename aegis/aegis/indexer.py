@@ -10,7 +10,7 @@ import zipfile
 import numpy as np
 
 from . import config, db
-from . import privacy
+from . import privacy, semantic
 
 PROGRESS = {"running": False, "phase": "", "root": "", "seen": 0,
             "done": False, "error": ""}
@@ -69,10 +69,17 @@ def extract_text(path, ext):
             return "\n".join((p.extract_text() or "") for p in r.pages[:20])[:20000]
         if ext in (".docx", ".pptx"):
             with zipfile.ZipFile(path) as z:
-                blobs = [z.read(n) for n in z.namelist()
-                         if n.endswith(".xml") and ("word/" in n or "slides/" in n)]
+                blobs = [z.read(n) for n in sorted(z.namelist())
+                         if n == "word/document.xml"
+                         or re.match(r"ppt/slides/slide\d+\.xml$", n)]
             txt = b" ".join(blobs).decode("utf-8", "ignore")
-            return re.sub(r"<[^>]+>", " ", txt)[:20000]
+            txt = re.sub(r"</w:p>|</a:p>", "\n", txt)
+            return re.sub(r"[ \t]+", " ", re.sub(r"<[^>]+>", " ", txt))[:20000]
+        if ext == ".ipynb":
+            import json as _json
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                nb = _json.load(f)
+            return "\n".join("".join(c.get("source", [])) for c in nb.get("cells", []))[:20000]
         if ext in config.TEXT_EXTS:
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
                 return f.read(200000)
@@ -99,7 +106,7 @@ def hash_embed(text, dim=512):
 def embedder_name():
     global _model, _model_tried
     if _model_tried:
-        return "minilm" if _model else "hash512"
+        return "minilm" if _model else semantic.EMBEDDER
     _model_tried = True
     try:
         from sentence_transformers import SentenceTransformer
@@ -107,15 +114,16 @@ def embedder_name():
         return "minilm"
     except Exception:
         _model = None
-        return "hash512"
+        return semantic.EMBEDDER
 
 
-def embed(texts):
+def embed(texts, names=None):
     name = embedder_name()
     if name == "minilm":
         return np.asarray(_model.encode(texts, normalize_embeddings=True),
                           dtype=np.float32)
-    return np.stack([hash_embed(t) for t in texts])
+    names = names or [""] * len(texts)
+    return np.stack([semantic.embed_text(t, n) for t, n in zip(texts, names)])
 
 
 def scan_roots(roots):
@@ -161,6 +169,8 @@ def _run(roots):
     except Exception as e:  # noqa: BLE001 - surface in progress, keep server up
         PROGRESS["error"] = str(e)
     PROGRESS.update(running=False, done=True, phase="done")
+    from . import search
+    search.invalidate()
 
 
 def _phase1(root):
@@ -207,37 +217,81 @@ def _upsert_meta(batch, now):
 def _phase2():
     rows = db.q("""SELECT id, path, name, folder, ext FROM files
                    WHERE indexed_at=0 LIMIT 200000""")
-    with db._lock:  # noqa: SLF001
-        c = db.conn()
-        for r in rows:
+    for i in range(0, len(rows), 200):
+        if STOP:
+            break
+        updates = []
+        for r in rows[i:i + 200]:
             if STOP:
                 break
             text = extract_text(r["path"], r["ext"] or "")
-            snippet = (text or "")[:4000]
-            _, spans, counts = privacy.redact(f"{r['name']}\n{snippet[:2000]}")
+            snippet = (text or "")[:8000]
+            _, spans, counts = privacy.redact(f"{r['name']}\n{snippet[:3000]}")
             types = sorted({s["type"] for s in spans})
             tier = privacy.tier_of(r["name"], r["folder"], types, r["ext"])
-            c.execute("UPDATE files SET snippet=?, tier=?, indexed_at=? WHERE id=?",
-                      (snippet, tier, time.time(), r["id"]))
-        c.commit()
+            updates.append((snippet, tier, ",".join(types), time.time(), r["id"]))
+        with db._lock:  # noqa: SLF001 - short batches keep the UI responsive
+            c = db.conn()
+            c.executemany("UPDATE files SET snippet=?, tier=?, pii=?, indexed_at=?"
+                          " WHERE id=?", updates)
+            c.commit()
+
+
+def _embed_text_of(r):
+    folder = os.path.basename(r["folder"] or "")
+    return f"{semantic.split_name(r['name'])} {folder} {(r['snippet'] or '')[:3000]}"
 
 
 def _phase3():
     name = embedder_name()
-    db.q("UPDATE files SET embedding=NULL WHERE embedder != '' AND embedder != ?",
-         (name,), commit=True)
+    db.q("UPDATE files SET embedding=NULL WHERE embedder != ?", (name,), commit=True)
     rows = db.q("SELECT id, name, folder, snippet FROM files WHERE embedding IS NULL")
-    texts = [f"{r['name']} {r['folder']} {(r['snippet'] or '')[:2000]}" for r in rows]
-    for i in range(0, len(texts), 64):
+    for i in range(0, len(rows), 128):
         if STOP:
             break
-        vecs = embed(texts[i:i + 64])
+        chunk = rows[i:i + 128]
+        vecs = embed([_embed_text_of(r) for r in chunk], [r["name"] for r in chunk])
         with db._lock:  # noqa: SLF001
             c = db.conn()
-            for r, v in zip(rows[i:i + 64], vecs):
-                c.execute("UPDATE files SET embedding=?, embedder=? WHERE id=?",
-                          (v.astype(np.float32).tobytes(), name, r["id"]))
+            c.executemany("UPDATE files SET embedding=?, embedder=? WHERE id=?",
+                          [(v.astype(np.float32).tobytes(), name, r["id"])
+                           for r, v in zip(chunk, vecs)])
             c.commit()
+        PROGRESS["embedded"] = i + len(chunk)
+
+
+UPGRADE = {"running": False, "done": 0, "total": 0, "phase": ""}
+
+
+def start_upgrade():
+    """Bring an older index up to the current meaning engine, in background."""
+    if PROGRESS["running"] or UPGRADE["running"]:
+        return
+    threading.Thread(target=_upgrade, daemon=True).start()
+
+
+def _upgrade():
+    UPGRADE["running"] = True
+    try:
+        name = embedder_name()
+        if db.get_kv("content_v") != "2":
+            # PDFs/Office files were name-only before pypdf; re-read them
+            db.q("""UPDATE files SET indexed_at=0 WHERE ext IN
+                    ('.pdf','.docx','.pptx','.md','.txt','.ipynb','.tex')""", commit=True)
+            UPGRADE["phase"] = "reading documents"
+            _phase2()
+            db.set_kv("content_v", "2")
+        stale = db.q("SELECT COUNT(*) FROM files WHERE embedder != ? OR embedding IS NULL",
+                     (name,), one=True)[0]
+        if stale:
+            UPGRADE.update(phase="understanding meaning", total=stale)
+            _phase3()
+    except Exception as e:  # noqa: BLE001 - never crash the server
+        UPGRADE["phase"] = f"error: {e}"
+    finally:
+        UPGRADE["running"] = False
+        from . import search
+        search.invalidate()
 
 
 def _rollup_dirs(root):
@@ -252,3 +306,43 @@ def _rollup_dirs(root):
                            size=excluded.size, count=excluded.count""",
                       (folder, parent, size or 0, count or 0))
         c.commit()
+
+
+def forget(path):
+    """Drop a path (file or whole folder) from the index after it moved away."""
+    p = os.path.abspath(path)
+    like = p.rstrip("\\/") + os.sep + "%"
+    db.q("DELETE FROM files WHERE path=? OR path LIKE ?", (p, like), commit=True)
+    db.q("DELETE FROM dirs WHERE path=? OR path LIKE ?", (p, like), commit=True)
+
+
+def reindex(paths, cap=3000):
+    """Index specific paths right now (after rename / move / restore)."""
+    global STOP
+    if not PROGRESS["running"]:
+        STOP = False
+    batch, now = [], time.time()
+    for p in paths:
+        p = os.path.abspath(p)
+        if os.path.isdir(p):
+            for _d, e in iter_files(p):
+                if _d == "__junkdir__":
+                    continue
+                try:
+                    st = e.stat(follow_symlinks=False)
+                except OSError:
+                    continue
+                batch.append((e.path, e.name, os.path.dirname(e.path),
+                              os.path.splitext(e.name)[1].lower(), st.st_size, st.st_mtime))
+                if len(batch) >= cap:
+                    break
+        elif os.path.isfile(p):
+            st = os.stat(p)
+            batch.append((p, os.path.basename(p), os.path.dirname(p),
+                          os.path.splitext(p)[1].lower(), st.st_size, st.st_mtime))
+    if batch:
+        _upsert_meta(batch, now)
+        _phase2()
+        _phase3()
+    from . import search
+    search.invalidate()

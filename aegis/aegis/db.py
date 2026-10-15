@@ -40,7 +40,43 @@ CREATE TABLE IF NOT EXISTS ops(
 CREATE TABLE IF NOT EXISTS quar(
   id INTEGER PRIMARY KEY, batch TEXT, orig TEXT, quar TEXT, ts REAL, restored INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS kv(k TEXT PRIMARY KEY, v TEXT);
+CREATE TABLE IF NOT EXISTS batches(
+  batch TEXT PRIMARY KEY, ts REAL, kind TEXT, title TEXT, count INTEGER,
+  bytes INTEGER DEFAULT 0, reversible INTEGER DEFAULT 1, undone INTEGER DEFAULT 0);
 """
+
+
+FTS_SQL = """
+DROP TRIGGER IF EXISTS files_fts_ai; DROP TRIGGER IF EXISTS files_fts_ad;
+DROP TRIGGER IF EXISTS files_fts_au; DROP TABLE IF EXISTS files_fts;
+CREATE VIRTUAL TABLE files_fts USING fts5(name, folder, snippet,
+  content='files', content_rowid='id', tokenize='porter unicode61 remove_diacritics 2');
+CREATE TRIGGER files_fts_ai AFTER INSERT ON files BEGIN
+  INSERT INTO files_fts(rowid, name, folder, snippet)
+  VALUES (new.id, new.name, new.folder, new.snippet); END;
+CREATE TRIGGER files_fts_ad AFTER DELETE ON files BEGIN
+  INSERT INTO files_fts(files_fts, rowid, name, folder, snippet)
+  VALUES ('delete', old.id, old.name, old.folder, old.snippet); END;
+CREATE TRIGGER files_fts_au AFTER UPDATE ON files BEGIN
+  INSERT INTO files_fts(files_fts, rowid, name, folder, snippet)
+  VALUES ('delete', old.id, old.name, old.folder, old.snippet);
+  INSERT INTO files_fts(rowid, name, folder, snippet)
+  VALUES (new.id, new.name, new.folder, new.snippet); END;
+INSERT INTO files_fts(files_fts) VALUES('rebuild');
+"""
+
+
+def _migrate(c):
+    """In-place upgrades for databases created by older builds."""
+    cols = {r[1] for r in c.execute("PRAGMA table_info(files)")}
+    if "pii" not in cols:
+        c.execute("ALTER TABLE files ADD COLUMN pii TEXT DEFAULT ''")
+    row = c.execute("SELECT sql FROM sqlite_master WHERE name='files_fts'").fetchone()
+    if not row or "porter" not in (row[0] or ""):
+        c.executescript(FTS_SQL)  # stemmed FTS: notes~note, inherited~inherit
+    c.execute("CREATE INDEX IF NOT EXISTS files_folder ON files(folder)")
+    c.execute("CREATE INDEX IF NOT EXISTS dirs_parent ON dirs(parent)")
+    c.commit()
 
 
 def conn():
@@ -52,6 +88,7 @@ def conn():
             _db.row_factory = sqlite3.Row
             _db.execute("PRAGMA journal_mode=WAL")
             _db.executescript(SCHEMA)
+            _migrate(_db)
         return _db
 
 
