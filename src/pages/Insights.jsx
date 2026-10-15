@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Lightbulb, Check, X, Sparkles, ShieldAlert, HardDrive, FolderCog } from 'lucide-react'
 import { useFS } from '../context/FSContext.jsx'
 import { GlassCard, Empty } from '../components/ui.jsx'
@@ -5,8 +6,13 @@ import { fmtBytes } from '../lib/files/insights.js'
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js'
 
 const KIND_ICON = { space: HardDrive, organize: FolderCog, privacy: ShieldAlert, cleanup: Sparkles }
+const ROUTES = {
+  dup: '/cleanup', media: '/cleanup', stale: '/cleanup', temp: '/cleanup',
+  pii: '/privacy', rename: '/explorer', sort: '/explorer'
+}
 
 export default function Insights() {
+  const navigate = useNavigate()
   const { suggestions, sugState, setSuggestion, status, sessionId } = useFS()
   if (status !== 'ready') return <div className="mx-auto max-w-3xl px-5 py-14"><Empty title="No scan loaded" hint="Load the demo vault or scan a folder from the Dashboard." /></div>
 
@@ -23,6 +29,17 @@ export default function Insights() {
         }).select('id').single()
         if (data && state === 'accepted') await supabase.from('suggestions').update({ upvotes: 1 }).eq('id', data.id)
       } catch { /* local-first */ }
+    }
+    // Navigate to relevant page when accepted
+    if (state === 'accepted') {
+      const routes = {
+        dup: '/cleanup', media: '/cleanup', stale: '/cleanup', temp: '/cleanup',
+        pii: '/privacy', rename: '/explorer', sort: '/explorer'
+      }
+      const target = routes[s.id]
+      if (target) {
+        setTimeout(() => navigate(target), 400)
+      }
     }
   }
 
@@ -45,7 +62,9 @@ export default function Insights() {
           </div>
         ) : (
           <div className={`mt-4 rounded-xl px-3 py-2 text-center text-xs font-bold ${st === 'accepted' ? 'bg-mint/15 text-mint' : 'bg-white/5 text-white/40'}`}>
-            {st === 'accepted' ? '✓ Accepted — queued as your organization plan' : 'Dismissed'}
+            {st === 'accepted'
+              ? (ROUTES[s.id] ? '✓ Accepted — opening relevant view…' : '✓ Accepted — queued as your organization plan')
+              : 'Dismissed'}
           </div>
         )}
       </GlassCard>
@@ -56,6 +75,17 @@ export default function Insights() {
     <div className="mx-auto max-w-6xl px-5 py-8">
       <h1 className="font-display text-3xl font-bold md:text-4xl">Insights</h1>
       <p className="mt-1 text-sm text-white/50">Generated on-device from your scan. Accept to build your organization plan — synced (redacted) when Supabase is connected.</p>
+      {suggestions.length > 0 && (
+        <div className="mt-4 glass rounded-2xl px-5 py-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-white/60">Organization progress</span>
+            <span className="font-bold text-mint">{done.length}/{suggestions.length} reviewed</span>
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-gradient-to-r from-neon to-mint transition-all duration-500" style={{ width: `${(done.length / suggestions.length) * 100}%` }} />
+          </div>
+        </div>
+      )}
       <div className="mt-5 grid gap-4 md:grid-cols-2">{open.map(card)}</div>
       {!open.length && <div className="mt-5"><Empty title="All caught up 🎉" hint="Every suggestion reviewed. Rescan anytime." /></div>}
       {done.length > 0 && (

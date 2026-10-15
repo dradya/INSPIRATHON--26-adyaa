@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Bot, LayoutDashboard, FolderSearch, Trash2, Lightbulb, ShieldCheck, LogOut, Search, Settings } from 'lucide-react'
+import { Bot, LayoutDashboard, FolderSearch, Trash2, Lightbulb, ShieldCheck, LogOut, Search, Settings, Menu, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useFS } from '../context/FSContext.jsx'
 import { APP } from '../config.js'
@@ -7,6 +8,7 @@ import NotificationsBell from './NotificationsBell.jsx'
 import { openPalette } from './CommandPalette.jsx'
 
 export default function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
   const { user, profile, signOut } = useAuth()
   const { status } = useFS()
   const nav = useNavigate()
@@ -54,15 +56,24 @@ export default function Navbar() {
               <button onClick={async () => { await signOut(); nav('/') }} className="rounded-xl bg-white/5 p-2.5 text-white/70 hover:text-white" title="Sign out"><LogOut size={16} /></button>
             </>
           ) : (
-            <span className="badge bg-mint/15 text-mint">Demo mode · login soon</span>
+            <span className="badge bg-mint/15 text-mint">Local mode · on-device</span>
           )}
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="rounded-xl bg-white/5 p-2.5 text-white/70 hover:text-white lg:hidden">
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </div>
-      <div className="flex gap-1 overflow-x-auto px-4 pb-2 lg:hidden scroll-thin">
-        {links.map(([to, l]) => (
-          <Link key={to} to={to} className="shrink-0 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/70">{l}</Link>
-        ))}
-      </div>
+      {mobileOpen && (
+        <div className="border-t border-white/10 bg-ink/95 px-4 py-3 lg:hidden">
+          <div className="grid grid-cols-2 gap-2">
+            {links.map(([to, l, Icon]) => (
+              <Link key={to} to={to} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2.5 text-sm text-white/70 hover:bg-white/10 hover:text-white">
+                <Icon size={15} /> {l}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

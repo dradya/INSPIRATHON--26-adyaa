@@ -107,3 +107,25 @@ export function healthScore(files, stats, dups) {
   s -= Math.min(10, files.filter((f) => isStale(f, 365)).length * 0.1)
   return Math.max(5, Math.round(s))
 }
+
+export function buildDetailedReport(files, stats, dups) {
+  const now = Date.now()
+  const weekAgo = now - 7 * 864e5
+  const monthAgo = now - 30 * 864e5
+  const yearAgo = now - 365 * 864e5
+  
+  return {
+    recentlyModified: files.filter(f => new Date(f.modified).getTime() > weekAgo).length,
+    lastMonth: files.filter(f => { const t = new Date(f.modified).getTime(); return t > monthAgo && t <= weekAgo }).length,
+    stale: files.filter(f => new Date(f.modified).getTime() < yearAgo).length,
+    avgFileSize: stats.total / (stats.count || 1),
+    largestFile: files.reduce((max, f) => f.size > max.size ? f : max, { size: 0 }),
+    extensionCount: new Set(files.map(f => f.ext)).size,
+    folderCount: new Set(files.map(f => (f.path || '').split('/')[0])).size,
+    duplicateWaste: dups.reduce((a, g) => a + g.waste, 0),
+    piiFileCount: files.filter(f => f.pii?.length).length,
+    unnamedCount: files.filter(f => isUnnamed(f.name)).length,
+    tempCount: files.filter(f => f.kind === 'temp').length,
+  }
+}
+

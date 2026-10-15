@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, FolderKanban, CheckSquare, MessagesSquare } from 'lucide-react'
+import { Search, FolderKanban, CheckSquare, MessagesSquare, FileText } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js'
+import { useFS } from '../context/FSContext.jsx'
+import { fmtBytes } from '../lib/files/insights.js'
 
-// Global ⌘K / Ctrl+K search across projects, tasks, posts.
+// Global ⌘K / Ctrl+K search across files, projects, tasks, posts.
 export default function CommandPalette() {
   const nav = useNavigate()
+  const { files = [] } = useFS() || {}
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState('')
   const [res, setRes] = useState({ projects: [], tasks: [], posts: [] })
@@ -39,7 +42,17 @@ export default function CommandPalette() {
   const go = (to) => { setOpen(false); setQ(''); nav(to) }
   if (!open) return null
 
+  const fileMatches = (files || [])
+    .filter((f) => q.trim().length >= 2 && (f.redacted || '').toLowerCase().includes(q.trim().toLowerCase()))
+    .slice(0, 8)
+    .map((f) => ({
+      t: f.redacted,
+      s: f.size ? fmtBytes(f.size) : (f.kind || 'file'),
+      to: '/explorer'
+    }))
+
   const groups = [
+    { label: 'Files', icon: FileText, items: fileMatches },
     { label: 'Projects', icon: FolderKanban, items: res.projects.map((r) => ({ t: r.title, s: r.category, to: `/projects/${r.id}` })) },
     { label: 'Tasks', icon: CheckSquare, items: res.tasks.map((r) => ({ t: r.title, s: r.status, to: '/tasks' })) },
     { label: 'Posts', icon: MessagesSquare, items: res.posts.map((r) => ({ t: r.body.slice(0, 60), s: r.kind, to: '/feed' })) }
@@ -50,14 +63,14 @@ export default function CommandPalette() {
       <div className="glass mx-auto mt-20 max-w-xl overflow-hidden rounded-2xl shadow-card" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b border-white/10 px-4">
           <Search size={16} className="text-white/40" />
-          <input autoFocus className="w-full bg-transparent py-3.5 text-sm outline-none placeholder:text-white/30" placeholder="Search projects, tasks, posts…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input autoFocus className="w-full bg-transparent py-3.5 text-sm outline-none placeholder:text-white/30" placeholder="Search files, actions…" value={q} onChange={(e) => setQ(e.target.value)} />
           <kbd className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/50">ESC</kbd>
         </div>
         <div className="max-h-[50vh] overflow-y-auto scroll-thin p-2">
-          {!isSupabaseConfigured && <div className="p-4 text-center text-xs text-white/40">Connect Supabase to enable search.</div>}
-          {isSupabaseConfigured && q.trim().length < 2 && (
+          {!isSupabaseConfigured && !files?.length && q.trim().length >= 2 && <div className="p-4 text-center text-xs text-white/40">Connect Supabase or load a vault to enable search.</div>}
+          {q.trim().length < 2 && (
             <div className="space-y-1 p-1 text-sm">
-              {[['/dashboard', 'Go to Dashboard'], ['/projects', 'Go to Projects'], ['/tasks', 'Go to Board'], ['/agent', 'Ask Nova Agent']].map(([to, l]) => (
+              {[['/dashboard', 'Go to Dashboard'], ['/explorer', 'Go to Explorer'], ['/cleanup', 'Go to Cleanup'], ['/insights', 'Go to Insights'], ['/privacy', 'Privacy Pipeline'], ['/agent', 'Ask VaultLens Agent']].map(([to, l]) => (
                 <button key={to} onClick={() => go(to)} className="block w-full rounded-xl px-3 py-2 text-left text-white/70 hover:bg-white/5 hover:text-white">{l}</button>
               ))}
             </div>

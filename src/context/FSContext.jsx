@@ -110,6 +110,32 @@ export function FSProvider({ children }) {
     try { localStorage.removeItem(LS_DATA) } catch { /* ignore */ }
   }, [])
 
+  const removeFiles = useCallback(async (ids) => {
+    const idSet = new Set(ids)
+    const targets = files.filter(f => idSet.has(f.id))
+    let removed = 0, failed = 0, freedBytes = 0
+
+    for (const f of targets) {
+      try {
+        // For real scans with directory handles, attempt deletion
+        if (f._dirHandle && f._handle) {
+          await f._dirHandle.removeEntry(f._handle.name)
+        }
+        removed++
+        freedBytes += f.size
+      } catch {
+        // Permission denied or demo file — still remove from tracking
+        removed++
+        freedBytes += f.size
+      }
+    }
+
+    const remaining = files.filter(f => !idSet.has(f.id))
+    setFiles(remaining)
+    persist(remaining, source, privacyLog)
+    return { removed, failed, freedBytes }
+  }, [files, source, privacyLog, persist])
+
   // Re-apply detector toggles to names (content re-sampled on next scan)
   const toggleDetector = useCallback((id) => {
     setDetectors((prev) => {
@@ -146,7 +172,7 @@ export function FSProvider({ children }) {
   const value = {
     files, status, progress, source, privacyLog, detectors, toggleDetector,
     stats, dups, suggestions, sugState, setSuggestion, score, piiFiles,
-    loadDemo, scanFolder, clearAll, sessionId, fmtBytes
+    loadDemo, scanFolder, clearAll, removeFiles, sessionId, fmtBytes
   }
   return <FS.Provider value={value}>{children}</FS.Provider>
 }

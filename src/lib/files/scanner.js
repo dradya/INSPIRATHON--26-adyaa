@@ -64,7 +64,8 @@ export async function pickAndScan({ onProgress, enabled, signal } = {}) {
             contentHash: null,
             pii,
             _contentHits: contentHits,
-            _handle: fh
+            _handle: fh,
+            _dirHandle: dirHandle
           })
           done++
           if (done % 25 === 0) onProgress?.({ done, phase: 'scanning' })

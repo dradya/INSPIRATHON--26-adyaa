@@ -43,9 +43,19 @@ export default function Dashboard() {
           <h1 className="font-display text-3xl font-bold md:text-4xl">Storage overview</h1>
           <p className="text-sm text-white/50">{source} · {stats.count} files · analyzed on-device</p>
         </div>
-        <div className={`glass rounded-2xl px-5 py-3 text-center ${score >= 70 ? 'ring-1 ring-mint/40' : score >= 40 ? 'ring-1 ring-peach/40' : 'ring-1 ring-red-400/50'}`}>
-          <div className="font-display text-3xl font-bold">{score}</div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-white/45">health score</div>
+        <div className="glass rounded-2xl px-5 py-3 text-center">
+          <div className="relative mx-auto h-16 w-16">
+            <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+              <circle cx="32" cy="32" r="28" fill="none"
+                stroke={score >= 70 ? '#3ddc97' : score >= 40 ? '#ffb86b' : '#f87171'}
+                strokeWidth="4" strokeLinecap="round"
+                strokeDasharray={`${(score / 100) * 175.9} 175.9`}
+                className="transition-all duration-1000" />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center font-display text-xl font-bold">{score}</span>
+          </div>
+          <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-white/45">health</div>
         </div>
       </div>
 

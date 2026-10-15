@@ -248,7 +248,7 @@ def dashboard():
               db.q("SELECT id, ts, purpose, provider, egress, bytes_sent, files_sent,"
                    " files_withheld, residual, ok FROM ledger ORDER BY id DESC LIMIT 5")]
     largest = [dict(r) for r in db.q(
-        "SELECT name, size, tier FROM files ORDER BY size DESC LIMIT 5")]
+        "SELECT path, name, size, mtime, tier FROM files ORDER BY size DESC LIMIT 5")]
     sens = []
     for r in db.q("SELECT name, size, snippet FROM files WHERE tier='Sensitive'"
                   " ORDER BY size DESC LIMIT 5"):

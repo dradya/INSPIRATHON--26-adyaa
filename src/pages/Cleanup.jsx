@@ -6,10 +6,12 @@ import { fmtBytes } from '../lib/files/insights.js'
 import { useToast } from '../components/Toast.jsx'
 
 export default function Cleanup() {
-  const { files, status, dups } = useFS()
+  const { files, status, dups, removeFiles } = useFS()
   const toast = useToast()
   const [tab, setTab] = useState('dups')
   const [checked, setChecked] = useState({})
+  const [confirming, setConfirming] = useState(false)
+  const [cleaning, setCleaning] = useState(false)
 
   const large = useMemo(() => [...files].filter((f) => f.size > 100 * 1024 * 1024).sort((a, b) => b.size - a.size).slice(0, 30), [files])
   const stale = useMemo(() => files.filter((f) => Date.now() - new Date(f.modified).getTime() > 180 * 864e5).sort((a, b) => b.size - a.size).slice(0, 30), [files])
@@ -29,12 +31,37 @@ export default function Cleanup() {
     return (rows || []).filter((f) => checked[f.id]).reduce((a, f) => a + f.size, 0)
   }
 
-  const queue = () => {
-    const n = Object.values(checked).filter(Boolean).length
-    if (!n) return toast.info('Select files first ☝️')
-    toast.ok(`Queued ${n} items · ${fmtBytes(selectedBytes())} marked for cleanup`)
+  const getSelectedIds = () => {
+    if (tab === 'dups') {
+      const ids = []
+      dups.forEach((g, gi) => g.files.forEach((f, fi) => {
+        if (fi > 0 && checked[`${gi}:${f.id}`]) ids.push(f.id)
+      }))
+      return ids
+    }
+    return (rows || []).filter(f => checked[f.id]).map(f => f.id)
+  }
+
+  const queue = async () => {
+    const ids = getSelectedIds()
+    if (!ids.length) return toast.info('Select files first ☝️')
+    if (!confirming) {
+      setConfirming(true)
+      return
+    }
+    setCleaning(true)
+    try {
+      const result = await removeFiles(ids)
+      toast.ok(`✓ Removed ${result.removed} files · freed ${fmtBytes(result.freedBytes)}`)
+    } catch (e) {
+      toast.err('Cleanup failed: ' + e.message)
+    }
+    setCleaning(false)
+    setConfirming(false)
     setChecked({})
   }
+
+  const cancelConfirm = () => { setConfirming(false) }
 
   const sb = selectedBytes()
 
@@ -43,7 +70,7 @@ export default function Cleanup() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold md:text-4xl">Cleanup queue</h1>
-          <p className="mt-1 text-sm text-white/50">Review → select → queue. Nothing is deleted by this demo; it produces the exact action list.</p>
+          <p className="mt-1 text-sm text-white/50">Review → select → confirm. Files are removed from tracking and deleted when folder access permits.</p>
         </div>
         <div className="glass rounded-2xl px-5 py-3 text-center ring-1 ring-mint/30">
           <div className="font-display text-2xl font-bold text-mint">{fmtBytes(sb)}</div>
@@ -58,11 +85,20 @@ export default function Cleanup() {
           ['stale', `Stale 6m+ (${stale.length})`, Clock],
           ['temp', `Temp & logs (${temps.length})`, FileX]
         ].map(([id, label, Icon]) => (
-          <button key={id} onClick={() => { setTab(id); setChecked({}) }} className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold ${tab === id ? 'bg-neon text-ink' : 'bg-white/5 text-white/60 hover:text-white'}`}>
+          <button key={id} onClick={() => { setTab(id); setChecked({}); setConfirming(false) }} className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold ${tab === id ? 'bg-neon text-ink' : 'bg-white/5 text-white/60 hover:text-white'}`}>
             <Icon size={14} /> {label}
           </button>
         ))}
-        <button onClick={queue} className="btn-primary ml-auto !py-2 text-sm">Queue cleanup</button>
+        {confirming ? (
+          <>
+            <button onClick={cancelConfirm} className="btn-ghost ml-auto !py-2 text-sm">Cancel</button>
+            <button onClick={queue} disabled={cleaning} className="btn-primary !py-2 text-sm !bg-red-500/80 hover:!bg-red-500">
+              {cleaning ? 'Cleaning…' : `Confirm delete ${getSelectedIds().length} files`}
+            </button>
+          </>
+        ) : (
+          <button onClick={queue} className="btn-primary ml-auto !py-2 text-sm">Queue cleanup</button>
+        )}
       </div>
 
       {tab === 'dups' ? (

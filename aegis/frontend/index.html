@@ -168,6 +168,14 @@ font-size:11px;font-weight:700;display:inline-grid;place-items:center;flex-shrin
 .brow:first-child .rank{background:linear-gradient(135deg,#a99bff,#3ddc97);color:#0a0a1b}
 .bar{box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
 .bar i{box-shadow:0 0 12px rgba(124,108,255,.55)}
+/* insight tooltips */
+#tip{position:fixed;z-index:120;max-width:310px;background:#16162e;border:1px solid rgba(124,108,255,.45);
+border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.55;pointer-events:none;opacity:0;
+transition:opacity .12s ease;box-shadow:0 14px 44px rgba(0,0,0,.6)}
+#tip.show{opacity:1}
+#tip .tt{font-weight:700;margin-bottom:2px;word-break:break-word}
+#tip .tk{color:var(--dim);word-break:break-word}
+#tip .tier{font-size:10px}
 </style>
 </head>
 <body>
@@ -211,6 +219,7 @@ font-size:11px;font-weight:700;display:inline-grid;place-items:center;flex-shrin
   <button class="btn-ghost" onclick="clearKey()">Forget key</button><button class="btn-ghost" onclick="closeSettings()">Close</button></div>
   <p class="small dim" id="s_status"></p>
 </div></div>
+<div id="tip"></div>
 <div id="toasts"></div>
 <button id="awbtn" onclick="awToggle()" title="Ask the vault agent"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0a0a1b" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1.2" fill="#0a0a1b"/><circle cx="14.5" cy="14" r="1.2" fill="#0a0a1b"/><path d="M12 9V5M9 5h6"/></svg></button>
 <div id="awpanel">
@@ -233,6 +242,20 @@ const dt=t=>t?new Date(t*1000).toLocaleString():'—';
 const PAL=['#7c6cff','#3ddc97','#ffb86b','#38bdf8','#f472b6','#a3e635','#facc15','#94a3b8'];
 async function api(m,u,b){const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});return r.json();}
 function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2800);}
+function age(t){if(!t)return'—';const d=Math.floor(Date.now()/1000-t);const days=Math.floor(d/86400);
+if(days<0)return'in the future';if(days===0)return'today';if(days<30)return days+(days>1?' days ago':' day ago');
+if(days<365){const m=Math.floor(days/30);return m+(m>1?' mos ago':' mo ago');}return (days/365).toFixed(1)+' yrs ago';}
+function tierTip(t){return t==='Sensitive'?'Withheld from every cloud call · filed to Private_Vault':t==='Internal'?'Has identifiers · leaves only as [TOKENS]':'No identifiers found';}
+function tipShow(html,x,y){const t=document.getElementById('tip');if(!t)return;t.innerHTML=html;t.classList.add('show');tipMove(x,y);}
+function tipMove(x,y){const t=document.getElementById('tip');if(!t||!t.classList.contains('show'))return;
+const w=320,h=t.offsetHeight||120;let lx=x+16,ly=y+16;
+if(lx+w>innerWidth)lx=x-w-10;if(ly+h>innerHeight)ly=y-h-10;
+t.style.left=Math.max(8,lx)+'px';t.style.top=Math.max(8,ly)+'px';}
+function tipHide(){const t=document.getElementById('tip');if(t)t.classList.remove('show');}
+document.addEventListener('mouseover',e=>{const el=e.target&&e.target.closest?e.target.closest('[data-tip]'):null;
+if(el)tipShow(el.getAttribute('data-tip'),e.clientX,e.clientY);});
+document.addEventListener('mousemove',e=>{tipMove(e.clientX,e.clientY);});
+document.addEventListener('mouseout',e=>{if(e.target&&e.target.closest&&e.target.closest('[data-tip]'))tipHide();});
 function lsGet(k,f){try{const v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function tab(t,el){try{state.tab=t;document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));
@@ -295,7 +318,7 @@ function dR(id){const d=window['_donut'+id];if(!d)return;
 const a=document.getElementById('dc-'+id),b=document.getElementById('ds-'+id);
 if(a)a.textContent=fmt(d.total);if(b)b.textContent='total';
 document.querySelectorAll('#main svg.donut circle.seg').forEach(c=>{c.style.opacity='1';});}
-function bars(rows,mx){return rows.map((r,i)=>`<div class="brow"><div class="row" style="justify-content:space-between;gap:10px"><span class="row" style="gap:8px;min-width:0;flex:1"><span class="rank">${i+1}</span><span class="truncate">📁 ${esc(r.name)}</span></span><span class="dim small" style="white-space:nowrap">${r.sub||''}</span></div><div class="bar"><i data-w="${Math.max(2,Math.round(100*r.value/mx))}"></i></div></div>`).join('');}
+function bars(rows,mx){return rows.map((r,i)=>`<div class="brow" ${r.tip?`data-tip="${esc(r.tip)}"`:''}><div class="row" style="justify-content:space-between;gap:10px"><span class="row" style="gap:8px;min-width:0;flex:1"><span class="rank">${i+1}</span><span class="truncate">📁 ${esc(r.name)}</span></span><span class="dim small" style="white-space:nowrap">${r.sub||''}</span></div><div class="bar"><i data-w="${Math.max(2,Math.round(100*r.value/mx))}"></i></div></div>`).join('');}
 function animBars(){requestAnimationFrame(()=>requestAnimationFrame(()=>{document.querySelectorAll('#main [data-w]').forEach(el=>{el.style.width=el.dataset.w+'%';});}));}
 
 /* ---------- DASHBOARD ---------- */
@@ -314,14 +337,14 @@ document.getElementById('dscan').innerHTML=(window._quickDash||[]).map(c=>`<butt
 return;}
 vb.textContent='● vault loaded';vb.className='badge ok';
 const dupN=d.dup_groups;
-const folders=(d.top_folders||[]).map(f=>({name:(f.path||'').split(/[\\/]/).filter(Boolean).pop()||f.path,value:f.size,sub:`${fmt(f.size)} · ${f.count} files`}));
+const folders=(d.top_folders||[]).map(f=>({name:(f.path||'').split(/[\\/]/).filter(Boolean).pop()||f.path,value:f.size,sub:`${fmt(f.size)} · ${f.count} files`,tip:`<div class="tt">${esc(f.path||'')}</div><div>${f.count} files · avg ${fmt(f.count?Math.round(f.size/f.count):0)} each</div>`}));
 const fmx=Math.max(1,...folders.map(f=>f.value));
 m.innerHTML=`
 <div class="stats">
-<div class="stat"><b>${fmt(d.total)}</b><span>TOTAL USED</span><small>${d.files} files</small></div>
-<div class="stat"><b>${fmt(d.reclaimable)}</b><span>RECOVERABLE</span><small>${dupN} duplicate groups</small></div>
-<div class="stat"><b>${d.sensitive}</b><span>PII-FLAGGED</span><small>names or content</small></div>
-<div class="stat"><b>${(d.bytes_sent/1024).toFixed(1)} KB</b><span>SENT TO CLOUD</span><small>${d.entities} entities redacted</small></div>
+<div class="stat" data-tip="${esc(`<div class="tt">Storage used</div><div>${d.files} files across scanned roots.</div>`)}"><b>${fmt(d.total)}</b><span>TOTAL USED</span><small>${d.files} files</small></div>
+<div class="stat" data-tip="${esc(`<div class="tt">Recoverable breakdown</div><div>${fmt(d.reclaimable-d.dup_waste)} junk + ${fmt(d.dup_waste)} duplicates.</div><div class="tk">Open Storage → Cleanup queue.</div>`)}"><b>${fmt(d.reclaimable)}</b><span>RECOVERABLE</span><small>${d.dup_groups} duplicate groups</small></div>
+<div class="stat" data-tip="${esc(`<div class="tt">Identifier exposure</div><div>${d.sensitive} sensitive · ${d.internal} internal-tier files.</div><div class="tk">Hover Privacy watch rows for details.</div>`)}"><b>${d.sensitive}</b><span>PII-FLAGGED</span><small>names or content</small></div>
+<div class="stat" data-tip="${esc(`<div class="tt">Cloud egress</div><div>${d.cloud_requests} requests · ${d.withheld} files withheld entirely.</div><div class="tk">Ledger has per-request proof.</div>`)}"><b>${(d.bytes_sent/1024).toFixed(1)} KB</b><span>SENT TO CLOUD</span><small>${d.entities} entities redacted</small></div>
 </div>
 <div class="grid2">
 <div class="glass"><h3 style="margin:0 0 6px">Space by type</h3>${donut(d.by_category.map(([k,v])=>[k[0].toUpperCase()+k.slice(1),v]))}</div>
@@ -330,9 +353,9 @@ m.innerHTML=`
 </div>
 <div class="grid2">
 <div class="glass"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Largest files</h3><a href="#" class="small" onclick="tab('storage',null);return false">cleanup →</a></div>
-${(d.largest||[]).map(f=>`<div class="frow"><span class="n">${esc(f.name)}</span><span class="s">${fmt(f.size)}</span></div>`).join('')}</div>
+${(d.largest||[]).map(f=>{const tip=`<div class="tt">${esc(f.name)}</div><div>${fmt(f.size)} · ${age(f.mtime)} old</div><div><span class="tier ${f.tier}">${f.tier}</span> <span class="tk">${tierTip(f.tier)}</span></div><div class="tk">${esc(f.path||'')}</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(f.name)}</span><span class="s">${fmt(f.size)}</span></div>`;}).join('')}</div>
 <div class="glass"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🛡 Privacy watch</h3><a href="#" class="small" onclick="tab('ledger',null);return false">ledger →</a></div>
-${(d.sensitive||[]).map(f=>`<div class="frow"><span class="n">${esc(f.name)}</span>${(f.types||[]).map(t=>`<span class="ptag">${esc(t)}</span>`).join('')}</div>`).join('')||'<span class="dim">No sensitive files 🎉</span>'}
+${(d.sensitive||[]).map(f=>{const tip=`<div class="tt">${esc(f.name)}</div><div>Detected: ${(f.types||[]).join(', ')||'keywords'} — redacted on-device.</div><div class="tk">Withheld from every cloud call.</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(f.name)}</span>${(f.types||[]).map(t=>`<span class="ptag">${esc(t)}</span>`).join('')}</div>`;}).join('')||'<span class="dim">No sensitive files 🎉</span>'}
 <div class="row" style="margin-top:10px"><button class="btn-pri" style="flex:1" onclick="tab('organize',null)">Review organization →</button></div></div>
 </div>`;animBars();}
 
@@ -347,7 +370,7 @@ const rec=lsGet('aegis-q',[]);lsSet('aegis-q',[q.trim(),...rec.filter(x=>x!==q.t
 const btn=document.getElementById('sbtn');const old=btn.innerHTML;btn.innerHTML='<span class="spin"></span>';btn.disabled=true;
 document.getElementById('res').innerHTML='<div class="glass skel" style="height:64px"></div><div class="glass skel" style="height:64px"></div>';
 try{const r=await api('GET','/api/search?q='+encodeURIComponent(q));
-document.getElementById('res').innerHTML=(r.results||[]).map(x=>`<div class="glass" style="cursor:pointer" onclick="preview(${x.id})">
+document.getElementById('res').innerHTML=(r.results||[]).map(x=>{const tip=`<div class="tt">${esc(x.name)}</div><div class="tk">${esc(x.path)}</div><div>${esc((x.snippet||'').slice(0,150))}${(x.snippet||'').length>150?'…':''}</div>`;return `<div class="glass" style="cursor:pointer" data-tip="${esc(tip)}" onclick="preview(${x.id})">
 <span class="tier ${x.tier}">${x.tier}</span> <b>${esc(x.name)}</b> <span class="dim small">${esc(x.folder)} · ${fmt(x.size)} · ${dt(x.mtime)}</span><br>
 <span class="small dim">${esc(x.reason)} · score ${x.score}</span></div>`).join('')||'<div class="glass">No matches. Scan first (top bar).</div>';
 window._res=Object.fromEntries((r.results||[]).map(x=>[x.id,x]));}
@@ -394,9 +417,13 @@ return 'Other';}
 function cleanHide(x){if(!state.clean)return false;
 if(x.is_dir)return JUNK_DIRS.has(x.name.toLowerCase());
 return JUNK_RE.test(x.name);}
+function fileTip(x){return `<div class="tt">${esc(x.name)}</div>`
++`<div>${x.is_dir?'Folder':fmt(x.size)+' · '+dt(x.mtime)+' ('+age(x.mtime)+')'}</div>`
++(x.is_dir?'':`<div><span class="tier ${x.tier}">${x.tier}</span> <span class="tk">${tierTip(x.tier)}</span></div>`)
++`<div class="tk">${esc(x.path)}</div>`;}
 function fileRow(x){
 const act=x.is_dir?`<a href="#" onclick="goTree('${qesc(x.path)}');return false">open</a>`:`<a href="#" onclick="op('${qesc(x.path)}');return false">open</a> · <a href="#" onclick="rev('${qesc(x.path)}');return false">reveal</a>`;
-return `<div class="frow ${x.is_dir?'xrow':''}" ${x.is_dir?`ondblclick="goTree('${qesc(x.path)}')" title="double-click to open"`:''}>
+return `<div class="frow ${x.is_dir?'xrow':''}" data-tip="${esc(fileTip(x))}" ${x.is_dir?`ondblclick="goTree('${qesc(x.path)}')" title="double-click to open"`:''}>
 <span class="n">${x.is_dir?'📁':'📄'} ${esc(x.name)}${x.hidden?' <span class="dim">·h</span>':''}</span>
 ${x.is_dir?'':`<span class="tier ${x.tier}">${x.tier}</span>`}
 <span class="s">${x.is_dir?'':fmt(x.size)+' · '}${dt(x.mtime)}</span>
@@ -448,13 +475,13 @@ if(!document.getElementById('tm'))return;
 document.getElementById('crumb').textContent=t.path;
 const mx=Math.max(1,...t.dirs.map(d=>d.size),...t.files.map(f=>f.size));
 document.getElementById('tm').innerHTML=(p?`<button class="btn-ghost" onclick="treeMap('${qesc(t.path.split(/[/\\\\]/).slice(0,-1).join('/')||'/')}')">⬆ up</button>`:'')+
-t.dirs.map(d=>`<button class="tilebtn" onclick="treeMap('${qesc(d.path)}')">📁 ${esc(d.name)} <span class="dim">· ${fmt(d.size)} · ${d.count}</span><span class="bar"><i data-w="${Math.max(2,Math.round(100*d.size/mx))}"></i></span></button>`).join('')+
+t.dirs.map(d=>{const tip=`<div class="tt">${esc(d.path)}</div><div>${d.count} files · avg ${fmt(d.count?Math.round(d.size/d.count):0)}</div><div class="tk">Click to drill in.</div>`;return `<button class="tilebtn" data-tip="${esc(tip)}" onclick="treeMap('${qesc(d.path)}')">📁 ${esc(d.name)} <span class="dim">· ${fmt(d.size)} · ${d.count}</span><span class="bar"><i data-w="${Math.max(2,Math.round(100*d.size/mx))}"></i></span></button>`;}).join('')+
 t.files.slice(0,10).map(f=>`<div class="small">📄 ${esc(f.name)} · ${fmt(f.size)}</div>`).join('');animBars();}
 async function loadLists(){if(!document.getElementById('lg'))return;
 const lg=await api('GET','/api/storage/largest?n=10');
-document.getElementById('lg').innerHTML=lg.map(x=>`<div class="frow"><span class="n">${esc(x.name)}</span><span class="tier ${x.tier}">${x.tier}</span><span class="s">${fmt(x.size)}</span></div>`).join('')||'<span class="dim">—</span>';
+document.getElementById('lg').innerHTML=lg.map(x=>{const tip=`<div class="tt">${esc(x.name)}</div><div>${fmt(x.size)} · ${age(x.mtime)} old</div><div class="tk">${esc(x.path||'')}</div>`;return `<div class="frow" data-tip="${esc(tip)}"><span class="n">${esc(x.name)}</span><span class="tier ${x.tier}">${x.tier}</span><span class="s">${fmt(x.size)}</span></div>`;}).join('')||'<span class="dim">—</span>';
 const st=await api('GET','/api/storage/stale');
-document.getElementById('st').innerHTML=st.slice(0,10).map(x=>`<label class="small" style="display:block;margin:5px 0"><input type="checkbox" class="qchk" value="${esc(x.path)}"> ${esc(x.name)} · ${fmt(x.size)}</label>`).join('')||'<span class="dim">—</span>';}
+document.getElementById('st').innerHTML=st.slice(0,10).map(x=>`<label class="small" style="display:block;margin:5px 0" title="Untouched ${age(x.mtime)} · ${esc(x.path||'')}"><input type="checkbox" class="qchk" value="${esc(x.path)}"> ${esc(x.name)} · ${fmt(x.size)}</label>`).join('')||'<span class="dim">—</span>';}
 async function dupsGo(btn){if(btn)btn.disabled=true;try{await api('POST','/api/dups/start');}catch(e){}dPoll();}
 async function dPoll(){const s=await api('GET','/api/dups/status');
 if(!document.getElementById('dstat'))return;
@@ -511,10 +538,10 @@ function chipSent(s){return esc(s).replace(/\[([A-Z_]+)_\d+\]/g,'<span class="to
 function hiOrig(orig,spans){let h='',last=0;for(const s of (spans||[]).slice(0,80)){h+=esc(orig.slice(last,s.start))+'<mark class="pii" title="'+esc(s.type)+'">'+esc(orig.slice(s.start,s.end))+'</mark>';last=s.end;}return h+esc(orig.slice(last));}
 async function vLedger(){const L=await api('GET','/api/ledger?limit=50');const s=L.stats;
 document.getElementById('main').innerHTML=`
-<div class="stats"><div class="stat"><b>${s.cloud_requests}</b><span>CLOUD REQUESTS</span></div>
-<div class="stat"><b>${(s.bytes_sent/1024).toFixed(1)} KB</b><span>BYTES SENT</span></div>
-<div class="stat"><b>${s.entities_redacted}</b><span>ENTITIES REDACTED</span></div>
-<div class="stat"><b>${s.withheld}</b><span>SENSITIVE WITHHELD</span></div></div>
+<div class="stats"><div class="stat" data-tip="Gateway calls that actually reached a cloud API. Local-rules and Ollama runs show 0 here."><b>${s.cloud_requests}</b><span>CLOUD REQUESTS</span></div>
+<div class="stat" data-tip="Total redacted payload bytes sent. Originals never leave — see each row below."><b>${(s.bytes_sent/1024).toFixed(1)} KB</b><span>BYTES SENT</span></div>
+<div class="stat" data-tip="Identifier spans replaced with [TYPE_N] tokens before any egress."><b>${s.entities_redacted}</b><span>ENTITIES REDACTED</span></div>
+<div class="stat" data-tip="Sensitive-tier files excluded from every cloud payload, planned locally instead."><b>${s.withheld}</b><span>SENSITIVE WITHHELD</span></div></div>
 <div class="glass"><b>Redaction tester</b> <span class="dim small">paste text → redacted + counts + rehydrate roundtrip</span>
 <div class="row" style="margin-top:6px"><input id="rt" size="56" placeholder="My PAN is ABCDE1234F, call 98765 43210"><button class="btn-pri" onclick="rTest()">Redact</button></div><div id="rtout"></div></div>
 ${L.rows.map(r=>{let ent={};try{ent=JSON.parse(r.entities||'{}')}catch(e){}
