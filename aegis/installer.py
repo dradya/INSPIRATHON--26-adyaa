@@ -404,7 +404,7 @@ class AegisInstallerApp(tk.Tk):
 
         self.txt_log = tk.Text(
             log_frame, bg="#070716", fg=COLOR_TXT, insertbackground=COLOR_TXT,
-            font=("Consolas", 8.5), relief="flat", padx=12, pady=10
+            font=("Consolas", 9), relief="flat", padx=12, pady=10
         )
         self.txt_log.pack(fill="both", expand=True)
 
@@ -413,24 +413,36 @@ class AegisInstallerApp(tk.Tk):
 
     def log(self, msg):
         def _append():
-            self.txt_log.insert("end", msg + "\n")
-            self.txt_log.see("end")
+            if hasattr(self, "txt_log") and self.txt_log.winfo_exists():
+                self.txt_log.insert("end", msg + "\n")
+                self.txt_log.see("end")
         self.after(0, _append)
 
     def set_progress(self, percent, status=""):
         def _update():
-            self.prog_bar["value"] = percent
-            if status:
+            if hasattr(self, "prog_bar") and self.prog_bar.winfo_exists():
+                self.prog_bar["value"] = percent
+            if status and hasattr(self, "lbl_status") and self.lbl_status.winfo_exists():
                 self.lbl_status.config(text=status)
         self.after(0, _update)
 
     def start_installation(self):
-        self.build_step_progress()
-        threading.Thread(target=self._run_install_thread, daemon=True).start()
+        # Capture GUI variables on main thread before spawning worker thread
+        target_dir = Path(self.install_dir_var.get()).resolve()
+        do_desktop = self.shortcut_desktop_var.get()
+        do_start = self.shortcut_start_var.get()
+        do_deps = self.deps_var.get()
+        do_launch = self.launch_after_var.get()
 
-    def _run_install_thread(self):
+        self.build_step_progress()
+        threading.Thread(
+            target=self._run_install_thread,
+            args=(target_dir, do_desktop, do_start, do_deps, do_launch),
+            daemon=True
+        ).start()
+
+    def _run_install_thread(self, target_dir, do_desktop, do_start, do_deps, do_launch):
         try:
-            target_dir = Path(self.install_dir_var.get()).resolve()
             src_dir = self.base_source_dir
 
             self.set_progress(5, "Initializing installation environment…")
@@ -445,6 +457,7 @@ class AegisInstallerApp(tk.Tk):
             self.log(f"Detected windowless:   {pythonw_exe}")
 
             # 2. Copy Aegis Application Assets
+            # 2. Copy Aegis Application Assets
             self.set_progress(20, "Deploying Aegis application files…")
             deploy_items = ["aegis", "frontend", "desktop.py", "app.py", "requirements.txt", "requirements-optional.txt", "aegis.ico", "README.md"]
             copied_count = 0
@@ -453,11 +466,12 @@ class AegisInstallerApp(tk.Tk):
                 if src_item.exists():
                     dst_item = target_dir / name
                     if src_item.is_dir():
-                        if dst_item.exists():
-                            shutil.rmtree(dst_item)
-                        shutil.copytree(src_item, dst_item)
+                        shutil.copytree(src_item, dst_item, dirs_exist_ok=True)
                     else:
-                        shutil.copy2(src_item, dst_item)
+                        try:
+                            shutil.copy2(src_item, dst_item)
+                        except Exception:
+                            pass
                     copied_count += 1
                     self.log(f"✓ Copied: {name}")
 
@@ -468,7 +482,7 @@ class AegisInstallerApp(tk.Tk):
                 self.log("✓ Copied: aegis.ico")
 
             # 3. Verify & Install Python Dependencies
-            if self.deps_var.get():
+            if do_deps:
                 self.set_progress(45, "Verifying and installing Python dependencies…")
                 self.log("\nChecking Python dependencies (FastAPI, PyWebView, NumPy, PyPDF)...")
                 req_file = target_dir / "requirements.txt"
@@ -533,7 +547,7 @@ class AegisInstallerApp(tk.Tk):
             shortcut_ico = str(target_ico) if target_ico.exists() else None
 
             # 5. Desktop Shortcut
-            if self.shortcut_desktop_var.get():
+            if do_desktop:
                 self.set_progress(85, "Creating Desktop shortcut…")
                 desktop_dir = Path(os.environ.get("USERPROFILE", os.path.expanduser("~"))) / "Desktop"
                 desktop_lnk = desktop_dir / f"{APP_NAME}.lnk"
@@ -548,7 +562,7 @@ class AegisInstallerApp(tk.Tk):
                 self.log("✓ Desktop shortcut created successfully.")
 
             # 6. Start Menu Shortcut
-            if self.shortcut_start_var.get():
+            if do_start:
                 self.set_progress(95, "Creating Start Menu shortcut…")
                 start_menu_dir = Path(os.environ.get("APPDATA", os.path.expanduser("~"))) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
                 start_menu_dir.mkdir(parents=True, exist_ok=True)
@@ -570,14 +584,15 @@ class AegisInstallerApp(tk.Tk):
             self.log("Double-click the desktop shortcut anytime to run Aegis.")
             self.log("=======================================================")
 
-            self.after(500, lambda: self.show_completed(target_dir, pythonw_exe, desktop_py))
+            self.after(500, lambda: self.show_completed(target_dir, pythonw_exe, desktop_py, do_launch))
 
         except Exception as e:
             self.set_progress(100, "Error during installation")
             self.log(f"\n❌ Error: {str(e)}")
-            messagebox.showerror("Installation Error", f"Failed to complete installation:\n{str(e)}")
+            err_msg = str(e)
+            self.after(0, lambda: messagebox.showerror("Installation Error", f"Failed to complete installation:\n{err_msg}"))
 
-    def show_completed(self, target_dir, pythonw_exe, desktop_py):
+    def show_completed(self, target_dir, pythonw_exe, desktop_py, do_launch):
         for w in self.btn_finish_bar.winfo_children():
             w.destroy()
 
@@ -597,7 +612,7 @@ class AegisInstallerApp(tk.Tk):
         )
         btn_launch.pack(side="right")
 
-        if self.launch_after_var.get():
+        if do_launch:
             self.launch_app_and_exit(target_dir, pythonw_exe, desktop_py)
 
     def launch_app_and_exit(self, target_dir, pythonw_exe, desktop_py):
