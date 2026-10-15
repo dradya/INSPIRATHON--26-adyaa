@@ -29,6 +29,12 @@ def _wait(port):
 
 
 def serve(port):
+    try:
+        req = urllib.request.urlopen(f"http://127.0.0.1:{port}/api/health", timeout=0.5)
+        if req.status == 200:
+            return None
+    except Exception:
+        pass
     t = threading.Thread(
         target=uvicorn.run,
         kwargs={"app": api_app, "host": "127.0.0.1", "port": port,
@@ -40,24 +46,25 @@ def serve(port):
 
 def main(port=8000, no_window=False):
     t = serve(port)
-    if not _wait(port):
+    if t is not None and not _wait(port):
         print("backend failed to start")
         return 1
     url = f"http://127.0.0.1:{port}"
     if no_window or os.environ.get("AEGIS_NO_WINDOW") == "1":
         print(f"Aegis backend on {url} (no window)")
-        t.join()
+        if t is not None:
+            t.join()
         return 0
     try:
         import webview
         webview.create_window("Aegis — private file manager", url,
                               width=1320, height=880)
         webview.start()
-    except ImportError:
-        print("pywebview missing: pip install pywebview for a native window.")
-        print(f"Running in browser instead: {url}")
+    except Exception as e:
+        print(f"Native window fallback ({e}). Running in browser instead: {url}")
         webbrowser.open(url)
-        t.join()
+        if t is not None:
+            t.join()
     return 0
 
 
