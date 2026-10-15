@@ -1119,10 +1119,12 @@ function jumpToExplorer(targetPath) {
 
 function highlightItem(fullPath) {
   state.highlightPath = fullPath;
+  const targetNorm = (fullPath || '').replace(/\\/g, '/').toLowerCase();
   setTimeout(() => {
     const rows = document.querySelectorAll('#ls .frow');
     rows.forEach(r => {
-      if (r.dataset.path && (r.dataset.path === fullPath || r.dataset.path.endsWith(fullPath))) {
+      const rowNorm = (r.dataset.path || '').replace(/\\/g, '/').toLowerCase();
+      if (rowNorm && (rowNorm === targetNorm || rowNorm.endsWith('/' + targetNorm) || rowNorm.endsWith(targetNorm))) {
         r.classList.add('highlight');
         r.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => r.classList.remove('highlight'), 3800);
@@ -1271,10 +1273,14 @@ async function vDashboard() {
           <button class="btn-ghost" style="padding:4px 9px;font-size:11px" onclick="tab('storage')">Storage Hub →</button>
         </div>
         ${(d.largest || []).map(f => `
-          <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.name)}')">
-            <span class="n">📄 ${esc(f.name)}</span>
+          <div class="frow xrow" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
+            <span class="n" style="flex:1">📄 <b>${esc(f.name)}</b></span>
             <span class="tier ${f.tier}">${f.tier}</span>
             <span class="s">${fmt(f.size)}</span>
+            <div class="row" style="gap:4px">
+              <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+              <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
+            </div>
           </div>
         `).join('')}
       </div>
@@ -1289,14 +1295,15 @@ async function vDashboard() {
         <button class="btn-pri" style="padding:5px 12px;font-size:12px" onclick="tab('ledger')">Open Privacy Shield →</button>
       </div>
       <p class="dim small" style="margin:0 0 12px">Every file is scanned for PII (Aadhaar, PAN, Passport, Bank, Cards) on-device. Sensitive files never leave this machine.</p>
-      <div class="row" style="gap:8px">
+      <div class="row" style="gap:8px;flex-wrap:wrap">
         ${(d.sensitive || []).slice(0, 6).map(f => `
-          <div class="file-card" onclick="jumpToExplorer('${qesc(f.name)}')">
+          <div class="file-card" onclick="${f.path ? `op('${qesc(f.path)}')` : ''}" ondblclick="${f.path ? `op('${qesc(f.path)}')` : ''}" title="Click to open file in Windows" style="cursor:pointer">
             <span class="icon">🔒</span>
             <div class="info">
               <div class="title">${esc(f.name)}</div>
               <div class="sub">${(f.types || []).join(', ') || 'Sensitive'}</div>
             </div>
+            ${f.path ? `<button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>` : ''}
           </div>
         `).join('') || '<span class="dim small">No sensitive files found on this machine.</span>'}
       </div>
@@ -1367,10 +1374,13 @@ async function doSearch() {
     if (res.folders && res.folders.length) {
       h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Folders (${res.folders.length})</div>`;
       h += res.folders.map(f => `
-        <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.path)}')">
+        <div class="frow xrow" onclick="goTree('${qesc(f.path)}'); tab('explorer');" ondblclick="rev('${qesc(f.path)}')" title="Click to open in Explorer, double-click to reveal in Windows">
           <span style="font-size:18px">📁</span>
           <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.path)}</span></span>
-          <button class="btn-ghost" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(f.path)}')">Open in Explorer ➔</button>
+          <div class="row" style="gap:6px">
+            <button class="btn-pri" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();goTree('${qesc(f.path)}'); tab('explorer');">Open 📂</button>
+            <button class="btn-ghost" style="padding:4px 10px;font-size:11.5px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal in Windows ↗</button>
+          </div>
         </div>
       `).join('');
     }
@@ -1380,16 +1390,17 @@ async function doSearch() {
     if (results.length) {
       h += `<div style="margin:16px 0 8px;font-weight:700;font-size:12px;text-transform:uppercase;color:var(--dim)">Matching Files (${results.length} found in ${res.ms}ms)</div>`;
       h += results.map(r => `
-        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="jumpToExplorer('${qesc(r.path)}')">
+        <div class="glass" style="margin-bottom:12px;cursor:pointer" onclick="op('${qesc(r.path)}')" ondblclick="op('${qesc(r.path)}')" title="Click or double-click to open file in Windows">
           <div class="row" style="justify-content:space-between;margin-bottom:6px">
             <div class="row" style="gap:8px">
               <span class="tier ${r.tier}">${r.tier}</span>
               <span class="badge ${r.match === 'Best match' ? 'ok' : 'info'}">${r.match}</span>
               <b style="font-size:14.5px">${esc(r.name)}</b>
             </div>
-            <div class="row" style="gap:8px">
-              <button class="btn-ghost" style="padding:3px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 Explorer</button>
-              <button class="btn-ghost" style="padding:3px 9px;font-size:11.5px" onclick="event.stopPropagation();op('${qesc(r.path)}')">Open</button>
+            <div class="row" style="gap:6px">
+              <button class="btn-pri" style="padding:4px 11px;font-size:11.5px;font-weight:600" onclick="event.stopPropagation();op('${qesc(r.path)}')">Open ↗</button>
+              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();rev('${qesc(r.path)}')">Reveal 📁</button>
+              <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="event.stopPropagation();jumpToExplorer('${qesc(r.path)}')">🗂 App Explorer</button>
             </div>
           </div>
           <div class="dim small" style="margin-bottom:8px">📁 ${esc(r.folder)} · ${fmt(r.size)} · ${dt(r.mtime)}</div>
@@ -1524,18 +1535,21 @@ async function lsCur() {
 function renderFileRow(x) {
   const isSelected = state.highlightPath && (x.path === state.highlightPath);
   return `
-    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double click to open"` : ''}>
-      <span style="font-size:16px">${x.is_dir ? '📁' : '📄'}</span>
-      <span class="n">${esc(x.name)}</span>
+    <div class="frow ${isSelected ? 'highlight' : ''}" data-path="${esc(x.path)}" ${x.is_dir ? `ondblclick="goTree('${qesc(x.path)}')" title="Double-click to open folder"` : `ondblclick="op('${qesc(x.path)}')" title="Double-click to open file in Windows"`}>
+      <span style="font-size:16px;cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();op('${qesc(x.path)}');"`}>${x.is_dir ? '📁' : '📄'}</span>
+      <span class="n" style="cursor:pointer" ${x.is_dir ? `onclick="event.stopPropagation();goTree('${qesc(x.path)}');"` : `onclick="event.stopPropagation();op('${qesc(x.path)}');"`} title="${x.is_dir ? 'Click to open folder' : 'Click to open file in Windows'}">${esc(x.name)}</span>
       ${x.tier && x.tier !== 'Public' ? `<span class="tier ${x.tier}">${x.tier}</span>` : ''}
       <span class="s">${x.is_dir ? '' : fmt(x.size) + ' · '}${dt(x.mtime)}</span>
       <div class="row" style="gap:4px">
-        ${x.is_dir ? `<button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="goTree('${qesc(x.path)}')">Open</button>` : `
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="op('${qesc(x.path)}')">Open</button>
-          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="rev('${qesc(x.path)}')">Reveal</button>
+        ${x.is_dir ? `
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px;font-weight:600" onclick="event.stopPropagation();goTree('${qesc(x.path)}')">Open 📂</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
+        ` : `
+          <button class="btn-pri" style="padding:2px 8px;font-size:11px;font-weight:600" onclick="event.stopPropagation();op('${qesc(x.path)}')">Open ↗</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal 📁</button>
         `}
-        <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="promptRename('${qesc(x.path)}', '${qesc(x.name)}')">Rename</button>
-        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="promptTrash('${qesc(x.path)}')">Bin</button>
+        <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptRename('${qesc(x.path)}', '${qesc(x.name)}')">Rename</button>
+        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
       </div>
     </div>
   `;
@@ -1561,8 +1575,25 @@ function promptNewFolder() {
   requestChange('mkdir', { parent: state.treePath, name }, () => lsCur());
 }
 
-async function op(p) { const r = await api('POST', '/api/open', { path: p }); if (!r.ok) toast(r.error || 'Cannot open'); }
-async function rev(p) { await api('POST', '/api/reveal', { path: p }); }
+async function op(p) {
+  if (!p) return;
+  const fileName = p.split(/[\\/]/).pop() || 'file';
+  toast(`Opening ${fileName}…`);
+  const r = await api('POST', '/api/open', { path: p });
+  if (!r.ok) {
+    toast(`Cannot open: ${r.error || 'Unknown error'}`);
+  }
+}
+
+async function rev(p) {
+  if (!p) return;
+  const fileName = p.split(/[\\/]/).pop() || 'item';
+  toast(`Revealing ${fileName} in Windows Explorer…`);
+  const r = await api('POST', '/api/reveal', { path: p });
+  if (r && !r.ok) {
+    toast(`Cannot reveal: ${r.error || 'Unknown error'}`);
+  }
+}
 
 /* -------------------------------------------------------------
  * VIEW: RECYCLE BIN (macOS-Styled)
@@ -1709,13 +1740,20 @@ async function loadUnnamedFiles() {
           ${un.items.map((it, idx) => `
             <tr>
               <td><input type="checkbox" class="uchk" data-idx="${idx}" checked></td>
-              <td><b>${esc(it.name)}</b><div class="dim small truncate" style="max-width:220px">${esc(it.folder)}</div></td>
+              <td>
+                <b style="cursor:pointer;color:var(--acc)" onclick="op('${qesc(it.path)}')" title="Click to open file in Windows">${esc(it.name)} ↗</b>
+                <div class="dim small truncate" style="max-width:220px">${esc(it.folder)}</div>
+              </td>
               <td class="dim small" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.snippet || 'Context based naming')}</td>
               <td>
                 <input id="sug_${idx}" value="${esc(it.suggested_name)}" style="width:240px;font-weight:600">
               </td>
               <td>
-                <button class="btn-ghost" style="padding:4px 9px;font-size:11.5px" onclick="renameSingleUnnamed(${idx})">Rename</button>
+                <div class="row" style="gap:4px">
+                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="op('${qesc(it.path)}')">Open ↗</button>
+                  <button class="btn-ghost" style="padding:3px 7px;font-size:11px" onclick="rev('${qesc(it.path)}')">Reveal</button>
+                  <button class="btn-pri" style="padding:3px 9px;font-size:11px" onclick="renameSingleUnnamed(${idx})">Rename</button>
+                </div>
               </td>
             </tr>
           `).join('')}
@@ -1778,7 +1816,7 @@ async function buildOrganizePlan() {
         <tbody>
           ${r.moves.map(m => `
             <tr>
-              <td>${esc(m.old.split(/[\\/]/).pop())}</td>
+              <td><b style="cursor:pointer;color:var(--acc)" onclick="op('${qesc(m.old)}')" title="Click to open file in Windows">${esc(m.old.split(/[\\/]/).pop())} ↗</b></td>
               <td><b>${esc(m.folder)}</b> / ${esc(m.new_name)}</td>
               <td class="small dim">${esc(m.reason)}</td>
             </tr>
@@ -1842,14 +1880,19 @@ async function vLedger() {
         `).join('') || '<span class="dim small">No confidential entities detected.</span>'}
       </div>
 
-      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Clickable to Explorer)</div>
+      <div style="font-weight:700;margin-bottom:8px">Sensitive Files (Click or double-click to open in Windows)</div>
       ${(tInfo.sensitive_files || []).map(f => `
-        <div class="frow xrow" onclick="jumpToExplorer('${qesc(f.path)}')">
+        <div class="frow xrow" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
           <span style="font-size:16px">🔒</span>
           <span class="n"><b>${esc(f.name)}</b> <span class="dim small">${esc(f.folder)}</span></span>
           <span class="tier Sensitive">Sensitive</span>
           ${f.pii ? `<span class="ptag">${esc(f.pii)}</span>` : ''}
           <span class="s">${fmt(f.size)}</span>
+          <div class="row" style="gap:4px">
+            <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
+            <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();jumpToExplorer('${qesc(f.path)}')">Explorer</button>
+          </div>
         </div>
       `).join('') || '<div class="dim small">Zero sensitive files found.</div>'}
     </div>
@@ -1942,10 +1985,14 @@ async function loadStorageDetails() {
   const sBox = document.getElementById('staleBox');
   if (sBox) {
     sBox.innerHTML = (stale || []).slice(0, 8).map(x => `
-      <div class="frow xrow" onclick="jumpToExplorer('${qesc(x.path)}')">
+      <div class="frow xrow" onclick="op('${qesc(x.path)}')" ondblclick="op('${qesc(x.path)}')" title="Click or double-click to open in Windows" style="cursor:pointer">
         <span class="n">📄 ${esc(x.name)}</span>
         <span class="s">${fmt(x.size)}</span>
-        <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
+        <div class="row" style="gap:4px">
+          <button class="btn-pri" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();op('${qesc(x.path)}')">Open ↗</button>
+          <button class="btn-ghost" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();rev('${qesc(x.path)}')">Reveal</button>
+          <button class="btn-ghost danger" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();promptTrash('${qesc(x.path)}')">Bin</button>
+        </div>
       </div>
     `).join('') || '<span class="dim small">No stale files found.</span>';
   }
@@ -1961,8 +2008,12 @@ async function loadStorageDetails() {
         </div>
         ${g.files.map((f, fi) => `
           <div class="row" style="justify-content:space-between;font-size:12px;padding:3px 0">
-            <span class="truncate" style="flex:1;cursor:pointer" onclick="jumpToExplorer('${qesc(f.path)}')">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
-            ${fi > 0 ? `<button class="btn-ghost danger" style="padding:1px 6px;font-size:10px" onclick="promptTrash('${qesc(f.path)}')">Trash copy</button>` : ''}
+            <span class="truncate" style="flex:1;cursor:pointer" onclick="op('${qesc(f.path)}')" ondblclick="op('${qesc(f.path)}')" title="Click to open in Windows">${fi === 0 ? '⭐ [Keep]' : '📄'} ${esc(f.path.split(/[\\/]/).pop())}</span>
+            <div class="row" style="gap:4px">
+              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();op('${qesc(f.path)}')">Open ↗</button>
+              <button class="btn-ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();rev('${qesc(f.path)}')">Reveal</button>
+              ${fi > 0 ? `<button class="btn-ghost danger" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();promptTrash('${qesc(f.path)}')">Trash copy</button>` : ''}
+            </div>
           </div>
         `).join('')}
       </div>
@@ -2008,13 +2059,16 @@ function awSay(who, text, items = []) {
     content += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">`;
     items.forEach(it => {
       content += `
-        <div class="file-card" onclick="jumpToExplorer('${qesc(it.path)}')">
+        <div class="file-card" onclick="${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `op('${qesc(it.path)}')`}" ondblclick="${it.is_dir ? `rev('${qesc(it.path)}')` : `op('${qesc(it.path)}')`}" title="${it.is_dir ? 'Click to open in Explorer, double-click to reveal' : 'Click to open file in Windows'}" style="cursor:pointer">
           <span class="icon">${it.is_dir ? '📁' : '📄'}</span>
           <div class="info">
             <div class="title">${esc(it.name)}</div>
             <div class="sub">${esc(it.badge || '')} · ${fmt(it.size || 0)}</div>
           </div>
-          <span style="color:var(--acc);font-size:14px">➔</span>
+          <div class="row" style="gap:4px">
+            <button class="btn-pri" style="padding:2px 8px;font-size:10.5px" onclick="event.stopPropagation();${it.is_dir ? `goTree('${qesc(it.path)}'); tab('explorer');` : `op('${qesc(it.path)}')`}">${it.is_dir ? 'Browse' : 'Open ↗'}</button>
+            <button class="btn-ghost" style="padding:2px 7px;font-size:10.5px" onclick="event.stopPropagation();rev('${qesc(it.path)}')">Reveal</button>
+          </div>
         </div>
       `;
     });

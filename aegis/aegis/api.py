@@ -254,11 +254,11 @@ def dashboard():
     largest = [dict(r) for r in db.q(
         "SELECT path, name, size, mtime, tier FROM files ORDER BY size DESC LIMIT 5")]
     sens = []
-    for r in db.q("SELECT name, size, snippet FROM files WHERE tier='Sensitive'"
+    for r in db.q("SELECT path, name, size, snippet FROM files WHERE tier='Sensitive'"
                   " ORDER BY size DESC LIMIT 5"):
         _red, spans, _c = privacy.redact(
             f"{r['name']}\n{(r['snippet'] or '')[:2000]}")
-        sens.append({"name": r["name"], "size": r["size"],
+        sens.append({"path": r["path"], "name": r["name"], "size": r["size"],
                      "types": sorted({s["type"] for s in spans})[:3]})
     try:
         top_folders = storage.treemap("")["dirs"][:7]

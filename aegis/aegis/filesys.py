@@ -160,31 +160,73 @@ def ls(path, power=False):
 
 
 def open_path(path):
-    ext = os.path.splitext(path)[1].lower()
-    if ext in config.BLOCK_OPEN_EXTS:
-        return {"ok": False, "error": f"blocked executable type {ext}"}
-    if not os.path.exists(path):
-        return {"ok": False, "error": "missing"}
+    if not path:
+        return {"ok": False, "error": "No path provided"}
+    path_norm = os.path.normpath(os.path.abspath(path))
+    if not os.path.exists(path_norm):
+        return {"ok": False, "error": f"File does not exist: {path_norm}"}
     try:
         if sys.platform == "win32":
-            os.startfile(path)  # noqa: S606 - local desktop action
+            try:
+                os.startfile(path_norm)  # noqa: S606 - local desktop action
+                return {"ok": True}
+            except OSError as start_err:
+                # If no default association or WinError 1155, fallback intelligently
+                ext = os.path.splitext(path_norm)[1].lower()
+                is_text = ext in config.TEXT_EXTS or ext in {
+                    ".env", ".gitignore", ".gitattributes", ".dockerignore",
+                    ".lock", ".cfg", ".conf", ".pyi", ".log", ".jsonl"
+                }
+                if not is_text and not os.path.isdir(path_norm):
+                    try:
+                        with open(path_norm, "rb") as fh:
+                            chunk = fh.read(512)
+                            if b"\0" not in chunk:
+                                is_text = True
+                    except Exception:
+                        pass
+
+                if is_text:
+                    try:
+                        subprocess.Popen(["notepad.exe", path_norm])
+                        return {"ok": True, "opened_with": "notepad"}
+                    except Exception:
+                        pass
+
+                # Fallback: reveal in Windows Explorer with file selected
+                try:
+                    reveal(path_norm)
+                    return {"ok": True, "revealed": True}
+                except Exception:
+                    return {"ok": False, "error": str(start_err)}
         elif sys.platform == "darwin":
-            subprocess.Popen(["open", path])
+            subprocess.Popen(["open", path_norm])
+            return {"ok": True}
         else:
-            subprocess.Popen(["xdg-open", path])
-        return {"ok": True}
-    except OSError as e:
+            subprocess.Popen(["xdg-open", path_norm])
+            return {"ok": True}
+    except Exception as e:
         return {"ok": False, "error": str(e)}
 
 
 def reveal(path):
+    if not path:
+        return {"ok": False, "error": "No path provided"}
+    path_norm = os.path.normpath(os.path.abspath(path))
+    if not os.path.exists(path_norm):
+        return {"ok": False, "error": f"Path does not exist: {path_norm}"}
     try:
         if sys.platform == "win32":
-            subprocess.Popen(["explorer", "/select,", os.path.abspath(path)])
+            if os.path.isdir(path_norm):
+                subprocess.Popen(["explorer.exe", path_norm])
+            else:
+                subprocess.Popen(["explorer.exe", f"/select,{path_norm}"])
         elif sys.platform == "darwin":
-            subprocess.Popen(["open", "-R", path])
+            subprocess.Popen(["open", "-R", path_norm])
         else:
-            subprocess.Popen(["xdg-open", os.path.dirname(os.path.abspath(path))])
+            p = path_norm if os.path.isdir(path_norm) else os.path.dirname(path_norm)
+            subprocess.Popen(["xdg-open", p])
         return {"ok": True}
-    except OSError as e:
+    except Exception as e:
         return {"ok": False, "error": str(e)}
+
