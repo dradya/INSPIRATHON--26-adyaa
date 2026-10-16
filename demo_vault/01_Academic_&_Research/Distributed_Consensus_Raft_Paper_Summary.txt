@@ -1,0 +1,6 @@
+Raft Consensus Algorithm — Study Summary
+Leader election, log replication, and safety properties in distributed state machines.
+Unlike Paxos, Raft decomposes consensus into independent subproblems:
+1. Leader Election with randomized election timeouts (150ms - 300ms).
+2. Log Replication via AppendEntries RPCs.
+3. Safety guarantee: Leader Completeness Property ensures committed entries are present in all future leaders.

@@ -1,0 +1,16 @@
+HDFC BANK LIMITED — ANNUAL ACCOUNT STATEMENT (LAST YEAR 2025)
+==============================================================
+Account Holder : Arjun Dev Sharma
+Account Number : 50100482910384
+IFSC Code      : HDFC0001245
+Customer PAN   : ABCDE1234F
+Contact Phone  : +91 98765 43210
+Statement Period: 01-Jan-2025 to 31-Dec-2025
+
+DATE        DESCRIPTION                                  DEBIT (INR)    CREDIT (INR)   BALANCE (INR)
+----------------------------------------------------------------------------------------------------
+05-Jan-2025 NEFT-SALARY CREDIT-TECH LABS                                1,85,000.00    6,42,100.00
+14-Feb-2025 UPI/cloud-billing@axis/AWS Hosting            14,250.00                    6,27,850.00
+28-Mar-2025 IMPS-TAX SAVING ELSS MUTUAL FUND             1,50,000.00                   4,77,850.00
+19-Aug-2025 NEFT-HACKATHON GRANT AWARD                                  2,50,000.00    7,27,850.00
+12-Dec-2025 POS-MANALI WINTER EXPEDITION GEAR             28,400.00                    6,99,450.00

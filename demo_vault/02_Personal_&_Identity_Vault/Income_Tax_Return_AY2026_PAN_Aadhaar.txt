@@ -1,0 +1,16 @@
+INDIAN INCOME TAX RETURN ACKNOWLEDGEMENT — ASSESSMENT YEAR 2026-27
+====================================================================
+Taxpayer Name   : Arjun Dev Sharma
+PAN Number      : ABCDE1234F
+Aadhaar Number  : 4589 2310 7845
+Registered Email: arjun.sharma@indraprastha.dev
+Mobile Number   : +91 98765 43210
+Residential Addr: Flat 402, Sudarshana Enclave, Bengaluru 560034
+
+BANK REFUND MANDATE
+Bank Name       : HDFC Bank Ltd
+Account Number  : 50100482910384
+IFSC Code       : HDFC0001245
+Gross Total Inc : INR 24,80,000
+Tax Paid (TDS)  : INR 4,12,500
+Status          : E-Verified via Aadhaar OTP

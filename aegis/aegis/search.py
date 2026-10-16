@@ -245,3 +245,64 @@ def _public_intent(intent, related):
     return {"topic": intent["core"], "kinds": intent["kinds"],
             "folder": intent["folder"], "time": intent["time_label"],
             "concepts": intent["concepts"][:3], "related": related[:8]}
+
+
+def ai_assist(query):
+    """Synthesize a direct answer over top search matches using privacy.gateway().
+    Sensitive files are withheld from cloud reasoning and summarized locally."""
+    s_res = search(query, limit=8)
+    hits = s_res.get("results", [])
+    if not hits:
+        return {"ok": True, "summary": "No matching files found for this query.",
+                "source": "local-rules", "withheld": 0, "files_sent": 0}
+    cloud_hits = [h for h in hits if h["tier"] != "Sensitive"][:5]
+    withheld = [h for h in hits if h["tier"] == "Sensitive"]
+
+    def local_summary():
+        top = hits[0]
+        parts = [f"Best match is “{top['name']}” ({', '.join(top.get('why') or [top.get('match', 'match')])})."]
+        if top.get("passage"):
+            parts.append(f"Excerpt: {top['passage'][:180]}")
+        if len(hits) > 1:
+            others = ", ".join(h["name"] for h in hits[1:4])
+            parts.append(f"Also matched: {others}.")
+        if withheld:
+            parts.append(f"{len(withheld)} Sensitive file(s) matched and are kept strictly on-device.")
+        return {"summary": " ".join(parts), "highlights": [h["name"] for h in hits[:3]], "_local": True}
+
+    lines = []
+    for i, h in enumerate(cloud_hits, 1):
+        r_name, _, _ = privacy.redact(h["name"])
+        lines.append(f"f{i} | {r_name} | {h['ext']} | {h.get('cloud_view') or ''}")
+    original = f"Query: {query}\n" + ("\n".join(lines) or "(all matching files withheld as Sensitive)")
+    prompt = (
+        'You are Aegis AI search assistant. Given a user query and redacted file snippets, '
+        'reply JSON only: {"summary": "concise 1-2 sentence answer pointing out which file(s) answer the query and key details", '
+        '"highlights": ["filename1", "filename2"]}. No prose.\n' + original
+    )
+    gw = privacy.gateway(
+        purpose="search-assist",
+        original=original,
+        files_sent=len(cloud_hits),
+        files_withheld=len(withheld),
+        prompt=prompt,
+        local_fn=local_summary,
+    )
+    if not gw.get("ok") or not isinstance(gw.get("data"), dict):
+        loc = local_summary()
+        return {"ok": True, "summary": loc["summary"], "highlights": loc["highlights"],
+                "source": "local-rules", "withheld": len(withheld), "files_sent": 0,
+                "fallback_reason": gw.get("error", "")}
+    data = gw["data"]
+    summary = data.get("summary") or local_summary()["summary"]
+    if gw.get("egress") and withheld:
+        summary += f" ({len(withheld)} sensitive file(s) were withheld from cloud AI and kept local.)"
+    return {
+        "ok": True,
+        "summary": summary,
+        "highlights": data.get("highlights") or [h["name"] for h in hits[:3]],
+        "source": "cloud" if gw.get("egress") else "local-rules",
+        "withheld": len(withheld),
+        "files_sent": len(cloud_hits) if gw.get("egress") else 0,
+    }
+

@@ -153,5 +153,43 @@ check("unnamed-img", unnamed.is_unnamed_or_generic("IMG_9921.jpg"))
 sug = unnamed.suggest_name("C:/docs/Untitled.txt", "Untitled.txt", ".txt", snippet="# Polymorphism in Python\nInheritance concepts")
 check("unnamed-sug-title", "Polymorphism" in sug or "Inheritance" in sug)
 
+# 17. Google AI (Gemini) provider & gateway prompt redaction + markdown fence stripping
+from aegis import config
+captured = {}
+orig_post = privacy._post_json
+try:
+    def fake_post(url, payload, headers, timeout):
+        captured["url"] = url
+        captured["payload"] = payload
+        captured["headers"] = headers
+        return {"candidates": [{"content": {"parts": [{"text": '```json\n{"reply": "Hello [PERSON_1]"}\n```'}]}}]}
+    privacy._post_json = fake_post
+    config.SETTINGS["api_key"] = "AIzaTestKey1234567890"
+    config.SETTINGS["base_url"] = "https://generativelanguage.googleapis.com/v1beta"
+    gw = privacy.gateway(
+        purpose="test-google",
+        original="Name: Priya Sharma",
+        prompt="User info: Name: Priya Sharma",
+        provider="google",
+        model="models/gemini-2.0-flash",
+    )
+    check("google-url-clean", captured["url"].endswith("/models/gemini-2.0-flash:generateContent"))
+    check("google-header-key", captured["headers"].get("x-goog-api-key") == "AIzaTestKey1234567890")
+    sent_text = captured["payload"]["contents"][0]["parts"][0]["text"]
+    check("google-prompt-redacted", "Priya Sharma" not in sent_text and "[PERSON_" in sent_text)
+    check("google-rehydrate-fence", gw["ok"] and gw["data"]["reply"] == "Hello Priya Sharma")
+finally:
+    privacy._post_json = orig_post
+    config.SETTINGS["api_key"] = ""
+    config.SETTINGS["base_url"] = ""
+
+# 18. AI-assisted search summary & AI unnamed file refinement
+from aegis import search as aegis_search
+sa = aegis_search.ai_assist("inheritance polymorphism")
+check("search-assist-ok", sa.get("ok") is True and "summary" in sa)
+ua = unnamed.ai_suggest()
+check("unnamed-ai-ok", ua.get("ok") is True and "items" in ua)
+
 print(f"ALL {len(passed)} TESTS PASSED")
+
 

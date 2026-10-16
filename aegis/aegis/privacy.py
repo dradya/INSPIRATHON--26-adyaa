@@ -220,14 +220,54 @@ def vault_subfolder(filename, pii_types):
 def _post_json(url, payload, headers, timeout):
     req = urllib.request.Request(url, data=json.dumps(payload).encode(),
                                  headers={"Content-Type": "application/json", **headers})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode())
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        detail = ""
+        try:
+            body = json.loads(e.read().decode("utf-8", errors="ignore"))
+            err = body.get("error")
+            detail = err.get("message", "") if isinstance(err, dict) else str(err or "")
+        except Exception:
+            pass
+        raise RuntimeError(f"HTTP {e.code}: {detail or e.reason}") from e
 
 
 def call_llm(provider, model, prompt, timeout=120):
     s = config.SETTINGS
+    if provider == "google":
+        m = (model or "gemini-2.0-flash").strip()
+        if m.startswith("models/"):
+            m = m.split("/", 1)[1]
+        base = (s.get("base_url") or "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
+        if "/openai" in base or base.endswith("/chat/completions"):
+            url = base if base.endswith("/chat/completions") else f"{base}/chat/completions"
+            j = _post_json(url,
+                           {"model": m,
+                            "messages": [{"role": "system", "content": "Reply with JSON only. No prose."},
+                                         {"role": "user", "content": prompt}],
+                            "temperature": 0.2},
+                           {"Authorization": f"Bearer {s['api_key']}"}, timeout)
+            return j["choices"][0]["message"]["content"]
+        if ":generateContent" in base:
+            url = base
+        elif "/models/" in base:
+            url = f"{base}:generateContent"
+        else:
+            url = f"{base}/models/{m}:generateContent"
+        j = _post_json(url,
+                       {"systemInstruction": {"parts": [{"text": "Reply with JSON only. No prose."}]},
+                        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                        "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"}},
+                       {"x-goog-api-key": s["api_key"]}, timeout)
+        cands = j.get("candidates") or []
+        parts = ((cands[0].get("content") or {}).get("parts") or []) if cands else []
+        return "".join(p.get("text", "") for p in parts)
     if provider == "anthropic":
-        j = _post_json("https://api.anthropic.com/v1/messages",
+        base = (s.get("base_url") or "https://api.anthropic.com").rstrip("/")
+        url = base if base.endswith("/v1/messages") else f"{base}/v1/messages"
+        j = _post_json(url,
                        {"model": model or "claude-sonnet-4-20250514", "max_tokens": 2048,
                         "system": "Reply with JSON only. No prose.",
                         "messages": [{"role": "user", "content": prompt}]},
@@ -235,7 +275,8 @@ def call_llm(provider, model, prompt, timeout=120):
         return "".join(b.get("text", "") for b in j.get("content", []) if b.get("type") == "text")
     if provider == "openai":
         base = (s["base_url"] or "https://api.openai.com/v1").rstrip("/")
-        j = _post_json(f"{base}/chat/completions",
+        url = base if base.endswith("/chat/completions") else f"{base}/chat/completions"
+        j = _post_json(url,
                        {"model": model or "gpt-4o-mini",
                         "messages": [{"role": "system", "content": "Reply with JSON only. No prose."},
                                      {"role": "user", "content": prompt}],
@@ -263,6 +304,9 @@ def gateway(*, purpose, original, files_sent=0, files_withheld=0,
     provider = "local-rules" if s["offline"] else (provider or s["provider"])
     redacted, spans, counts = redact(original)
     guarded, residual = egress_guard(redacted)
+    safe_prompt = (prompt.replace(original, guarded)
+                   if (original and original in (prompt or ""))
+                   else egress_guard(redact(prompt or "")[0])[0])
     sent_bytes = len(guarded.encode()) if provider != "local-rules" else 0
     entities = {"spans": spans, "counts": counts}
 
@@ -277,8 +321,11 @@ def gateway(*, purpose, original, files_sent=0, files_withheld=0,
             log(True, False, "")
             return {"ok": True, "egress": False, "data": data,
                     "entities": entities, "residual": residual}
-        raw = call_llm(provider, model or s.get("model", ""), prompt, timeout)
-        data = json.loads(raw)          # parse FIRST ...
+        raw = call_llm(provider, model or s.get("model", ""), safe_prompt, timeout)
+        clean = (raw or "").strip()
+        if clean.startswith("```"):
+            clean = re.sub(r"^```(?:json)?\s*|\s*```$", "", clean, flags=re.S)
+        data = json.loads(clean)        # parse FIRST ...
         data = rehydrate(data)          # ... then rehydrate per field
         log(True, True, guarded)
         return {"ok": True, "egress": True, "data": data,

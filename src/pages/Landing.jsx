@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, FolderSearch, ShieldCheck, Sparkles, HardDrive, Bot, Zap } from 'lucide-react'
 import { APP } from '../config.js'
 import { GlassCard } from '../components/ui.jsx'
+import { ArtifactCard } from '../ArjunTheme.jsx'
 import { useFS } from '../context/FSContext.jsx'
 import { fsSupported } from '../lib/files/scanner.js'
 import { useToast } from '../components/Toast.jsx'
@@ -61,14 +62,15 @@ export default function Landing() {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 pb-24">
-        <div className="glass rounded-3xl p-8 text-center md:p-12">
-          <h2 className="font-display text-3xl font-bold md:text-4xl">The 3-minute judge demo</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-white/55">1. Load the demo vault → 2. Watch duplicates + PII surface on the dashboard → 3. Open Privacy to prove nothing raw left the device → 4. Ask the agent “what can I delete?”</p>
-          <div className="mt-6 flex justify-center gap-3">
+        <ArtifactCard title="The 3-Minute Judge Demo" subtitle="Gandiva precision & on-device telemetry">
+          <p className="max-w-2xl text-sm leading-relaxed text-white/70">
+            1. Load the demo vault → 2. Watch duplicates + PII surface on the dashboard → 3. Open Privacy to prove nothing raw left the device → 4. Ask the agent “what can I delete?”
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <button onClick={demo} className="btn-primary">Start demo</button>
             <Link to="/agent" className="btn-ghost">Meet the agent</Link>
           </div>
-        </div>
+        </ArtifactCard>
       </section>
     </div>
   )

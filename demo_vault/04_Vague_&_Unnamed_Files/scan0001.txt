@@ -1,0 +1,5 @@
+Scanned Identity Verification Record
+Holder: Arjun Dev Sharma
+PAN: ABCDE1234F
+Aadhaar: 4589 2310 7845
+Verified on-device for KYC compliance.

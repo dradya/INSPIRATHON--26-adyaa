@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --arjun-obsidian: #090a0f;
+  --arjun-surface: #12141f;
+  --arjun-gold: #d4af37;
+  --arjun-gold-bright: #f3e5ab;
+  --arjun-bronze: #9c7a44;
+  --arjun-astral: #38bdf8;
+  --arjun-ivory: #f4f1ea;
+  --font-display: 'Cinzel', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background-color: var(--arjun-obsidian);
+  color: var(--arjun-ivory);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* 1.5-Second Opening Animation Keyframes */
+@keyframes arjunSplashFadeOut {
+  0%, 78% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes bowDraw {
+  0% {
+    stroke-dashoffset: 300;
+    transform: scale(0.88);
+    opacity: 0;
+  }
+  45% {
+    stroke-dashoffset: 0;
+    transform: scale(1);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.75));
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes arrowLaunch {
+  0%, 30% {
+    transform: translateY(24px) scaleY(0.6);
+    opacity: 0;
+  }
+  65% {
+    transform: translateY(0px) scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-60px) scaleY(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes chakraSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.arjun-splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #16192b 0%, #090a0f 75%);
+  animation: arjunSplashFadeOut 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.arjun-bow-svg {
+  stroke-dasharray: 300;
+  animation: bowDraw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, stroke-dashoffset;
+}
+
+.arjun-arrow-svg {
+  animation: arrowLaunch 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Sleek Artifact Card with Filigree Corners */
+.artifact-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(22, 25, 43, 0.85), rgba(11, 13, 20, 0.95));
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.artifact-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.55);
+  box-shadow: 0 12px 32px -8px rgba(212, 175, 55, 0.18);
+}
+
+.artifact-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.14em;
+  background: linear-gradient(90deg, #f3e5ab 0%, #d4af37 50%, #9c7a44 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

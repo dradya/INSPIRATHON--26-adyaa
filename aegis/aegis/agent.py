@@ -185,9 +185,10 @@ def answer(text):
     if re.search(r"thank", t):
         return {"reply": "You're welcome! Always keeping your files safe and completely local.", "tab": None, "items": []}
 
-    # Fallback to cloud reasoning IF user explicitly configured an API key and is online
+    # Fallback to cloud/local-LLM reasoning IF user explicitly configured a provider and is online
     from . import config
-    if not config.SETTINGS["offline"] and config.SETTINGS["provider"] != "local-rules" and config.SETTINGS["api_key"]:
+    if not config.SETTINGS["offline"] and config.SETTINGS["provider"] != "local-rules" and (
+            config.SETTINGS["api_key"] or config.SETTINGS["provider"] == "ollama"):
         n = db.q("SELECT COUNT(*), COALESCE(SUM(size),0) FROM files", one=True)
         original = f"User asks: {t}. Index: {n[0]} files, {n[1]} bytes."
         cloud_res = privacy.gateway(

@@ -183,3 +183,57 @@ def find_unnamed(path="", limit=60):
             break
 
     return {"items": items, "count": len(items)}
+
+
+def ai_suggest(path="", limit=40):
+    """Refine suggestions for unnamed/generic files via privacy.gateway().
+    Sensitive files are never sent to cloud providers; only redacted snippets of
+    non-sensitive files are sent."""
+    base = find_unnamed(path=path, limit=limit)
+    items = base.get("items", [])
+    if not items:
+        return {"ok": True, "items": [], "count": 0, "source": "local-rules", "withheld": 0}
+    cloud_items = [x for x in items if x.get("tier") != "Sensitive" and x.get("snippet")][:25]
+    withheld = [x for x in items if x.get("tier") == "Sensitive"]
+    if not cloud_items:
+        return {"ok": True, "items": items, "count": len(items),
+                "source": "local-rules", "withheld": len(withheld)}
+
+    lines = []
+    for i, x in enumerate(cloud_items, 1):
+        red_snip, _, _ = privacy.redact((x.get("snippet") or "")[:200])
+        lines.append(f"u{i} | ext:{x['ext']} | current:{x['name']} | {red_snip}")
+    original = "\n".join(lines)
+    prompt = (
+        'You are Aegis filename assistant. Suggest clear, concise, descriptive filenames '
+        '(keeping the exact extension, using underscores instead of spaces, max 45 chars). '
+        'Reply JSON only: {"names": [{"id": "u1", "suggested_name": "Descriptive_Name.ext"}]}. No prose.\n'
+        + original
+    )
+    gw = privacy.gateway(
+        purpose="unnamed-rename",
+        original=original,
+        files_sent=len(cloud_items),
+        files_withheld=len(withheld),
+        prompt=prompt,
+        local_fn=lambda: {"names": [], "_local": True},
+    )
+    if gw.get("ok") and gw.get("egress") and isinstance(gw.get("data"), dict):
+        by_id = {f"u{i}": x for i, x in enumerate(cloud_items, 1)}
+        for entry in gw["data"].get("names") or []:
+            target = by_id.get(entry.get("id"))
+            new_n = (entry.get("suggested_name") or "").strip()
+            if not target or not new_n:
+                continue
+            new_n = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", new_n).strip(" .")
+            if not new_n:
+                continue
+            ext = target.get("ext") or ""
+            if ext and not new_n.lower().endswith(ext.lower()):
+                new_n = os.path.splitext(new_n)[0] + ext
+            target["suggested_name"] = new_n[:65]
+        return {"ok": True, "items": items, "count": len(items),
+                "source": "cloud", "withheld": len(withheld)}
+    return {"ok": True, "items": items, "count": len(items),
+            "source": "local-rules", "withheld": len(withheld)}
+

@@ -26,7 +26,7 @@ FRONTEND = _app_dir() / "frontend" / "index.html"
 LOCAL_HOST = re.compile(r"^(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$")
 LOCAL_ORIGIN = re.compile(r"^https?://(127\.0\.0\.1|localhost)(:\d+)?$")
 
-app = FastAPI(title="Aegis")
+app = FastAPI(title="ARJUN")
 # self-hosted fonts (offline-safe): /fonts/*.woff2 next to index.html
 app.mount("/fonts", StaticFiles(directory=str(FRONTEND.parent / "fonts")),
           name="fonts")
@@ -54,8 +54,8 @@ def manifest():
     if m.exists():
         return FileResponse(str(m), media_type="application/manifest+json")
     return JSONResponse({
-        "name": "Aegis — Private AI File Manager",
-        "short_name": "Aegis Web",
+        "name": "ARJUN — The Astral Shield & Precision Engine",
+        "short_name": "ARJUN",
         "start_url": "/",
         "display": "standalone"
     })
@@ -110,6 +110,37 @@ def set_settings(body: dict):
     return get_settings()
 
 
+@app.post("/api/settings/test")
+def test_settings(body: dict):
+    prev = dict(config.SETTINGS)
+    try:
+        for k in ("provider", "model", "base_url", "ollama_url", "ollama_model"):
+            if k in body:
+                config.SETTINGS[k] = str(body[k])[:500]
+        if body.get("api_key"):
+            config.SETTINGS["api_key"] = str(body["api_key"])
+        p = config.SETTINGS["provider"]
+        if p == "local-rules":
+            return {"ok": True, "provider": p, "message": "Local rules active — zero network egress."}
+        if p in ("google", "anthropic", "openai") and not config.SETTINGS["api_key"]:
+            return {"ok": False, "error": f"Please enter an API key for {p}."}
+        res = privacy.gateway(
+            purpose="connection-test",
+            original="Connection check (no file data).",
+            prompt='Reply with JSON only: {"status": "ok"}',
+            local_fn=lambda: {"status": "ok"},
+            provider=p,
+            model=config.SETTINGS.get("model", ""),
+            timeout=20,
+        )
+        if not res.get("ok"):
+            return {"ok": False, "error": res.get("error", "Connection failed")}
+        return {"ok": True, "provider": p, "message": f"Connected to {p} successfully!"}
+    finally:
+        if not body.get("save"):
+            config.SETTINGS.update(prev)
+
+
 @app.post("/api/offline")
 def set_offline(body: dict):
     config.SETTINGS["offline"] = bool(body.get("on"))
@@ -147,6 +178,11 @@ def do_search(q: str = "", limit: int = 30):
     return search.search(q, min(limit, 100))
 
 
+@app.post("/api/search/assist")
+def api_search_assist(body: dict):
+    return search.ai_assist((body or {}).get("q", ""))
+
+
 @app.post("/api/redact-test")
 def redact_test(body: dict):
     text = (body.get("text") or "")[:4000]
@@ -162,10 +198,28 @@ def redact_test(body: dict):
 @app.get("/api/drives")
 def api_drives():
     home = os.path.expanduser("~")
-    specials = [{"label": n, "path": os.path.join(home, n)}
-                for n in ("Desktop", "Documents", "Downloads", "Pictures",
-                          "Music", "Videos") if os.path.isdir(os.path.join(home, n))]
-    return {"drives": filesys.drives(), "home": home, "specials": specials}
+    demo_dir = _app_dir().parent / "demo_vault"
+    specials = []
+    if demo_dir.is_dir():
+        specials.append({"label": "✦ Judge Demo Vault", "path": str(demo_dir)})
+    specials += [{"label": n, "path": os.path.join(home, n)}
+                 for n in ("Desktop", "Documents", "Downloads", "Pictures",
+                           "Music", "Videos") if os.path.isdir(os.path.join(home, n))]
+    return {"drives": filesys.drives(), "home": home, "specials": specials,
+            "demo_vault": str(demo_dir)}
+
+
+@app.post("/api/demo/load")
+def api_demo_load(body: dict = None):
+    demo_dir = _app_dir().parent / "demo_vault"
+    seed_script = _app_dir().parent / "scripts" / "seed_demo_vault.py"
+    if seed_script.exists():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("seed_demo_vault", str(seed_script))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.seed()
+    return indexer.scan_roots([str(demo_dir)])
 
 
 @app.get("/api/tree")
@@ -481,6 +535,11 @@ def api_bin():
 @app.get("/api/unnamed")
 def api_unnamed(path: str = ""):
     return unnamed.find_unnamed(path)
+
+
+@app.post("/api/unnamed/ai")
+def api_unnamed_ai(body: dict):
+    return unnamed.ai_suggest((body or {}).get("path", ""))
 
 
 # ---------------- sensitive tiers breakdown & grouping ----------------

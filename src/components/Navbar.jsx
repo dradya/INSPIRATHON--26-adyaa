@@ -21,13 +21,19 @@ export default function Navbar() {
     ['/agent', 'Agent', Bot]
   ]
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[#d4af37]/20 bg-[#090a0f]/90 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-5 py-3">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-neon to-mint font-display text-lg font-bold text-ink shadow-glow">V</span>
+        <Link to="/" className="flex shrink-0 items-center gap-3">
+          <div className="w-9 h-9 rounded-lg border border-[#d4af37]/50 bg-[#12141f] flex items-center justify-center shadow-[0_0_15px_rgba(212,175,55,0.25)] shrink-0">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <path d="M4 16C7 6 17 6 20 16" stroke="#d4af37" strokeWidth="2" strokeLinecap="round" />
+              <line x1="12" y1="19" x2="12" y2="5" stroke="#38bdf8" strokeWidth="1.8" strokeLinecap="round" />
+              <polygon points="12,3 9,7 15,7" fill="#f3e5ab" />
+            </svg>
+          </div>
           <span className="leading-tight">
-            <span className="block font-display text-[17px] font-700 font-bold tracking-tight">{APP.name}</span>
-            <span className="hidden text-[11px] text-white/50 sm:block">{APP.tagline}</span>
+            <span className="artifact-title block text-lg font-extrabold tracking-wider">{APP.name}</span>
+            <span className="hidden text-[10px] tracking-[0.2em] uppercase text-[#9c7a44] sm:block">Gandiva Protocol Active</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-1 text-sm lg:flex">

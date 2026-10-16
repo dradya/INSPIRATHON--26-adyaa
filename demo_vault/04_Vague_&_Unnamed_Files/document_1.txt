@@ -1,0 +1,2 @@
+# Semester Exam Schedule And Syllabus 2026
+Final examination dates for CS301 Algorithms, CS304 Operating Systems, and CS309 Cryptography.

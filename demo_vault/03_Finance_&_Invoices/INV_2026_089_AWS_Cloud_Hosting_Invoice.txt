@@ -1,0 +1,15 @@
+TAX INVOICE — AMAZON WEB SERVICES INDIA PVT LTD
+================================================
+Invoice Number : INV-2026-089
+Invoice Date   : 01-Oct-2026
+Billing Email  : billing@indraprastha.dev
+
+Item Description                          Qty     Unit Price     Total (INR)
+----------------------------------------------------------------------------
+EC2 g5.xlarge GPU Instances (Hours)       120        85.00         10,200.00
+S3 Glacier Encrypted Archive (TB)           4       450.00          1,800.00
+CloudFront Data Transfer                   50        12.00            600.00
+----------------------------------------------------------------------------
+Subtotal                                                           12,600.00
+IGST (18%)                                                          2,268.00
+Grand Total Due                                                INR 14,868.00

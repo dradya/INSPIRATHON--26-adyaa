@@ -19,25 +19,25 @@ from aegis import db  # noqa: F401 - init schema on boot
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Aegis Web Application")
+    ap = argparse.ArgumentParser(description="ARJUN Web Application")
     ap.add_argument("--port", type=int, default=8000, help="Port to run web app on")
     ap.add_argument("--no-browser", action="store_true", help="Don't automatically open browser")
     args = ap.parse_args()
 
     url = f"http://127.0.0.1:{args.port}"
     print("=" * 60)
-    print("🛡️   AEGIS — Private AI File Manager (Web Application)")
+    print("🏹   ARJUN — The Astral Shield & Precision Engine")
     print(f"🌐  Running at: {url}")
-    print("🔒  100% On-Device · Zero Cloud Egress · Apple-Grade UI")
+    print("🔒  100% On-Device · Zero Cloud Egress · Gandiva Protocol Active")
     print("=" * 60)
 
     # Check if already running on this port
     try:
         req = urllib.request.urlopen(f"{url}/api/health", timeout=0.6)
         if req.status == 200:
-            print(f"\n[+] Aegis Web App is already active on {url}!")
+            print(f"\n[+] ARJUN Web App is already active on {url}!")
             if not args.no_browser:
-                print("[+] Opening Aegis Web App in your browser...")
+                print("[+] Opening ARJUN Web App in your browser...")
                 webbrowser.open(url)
             return 0
     except Exception:

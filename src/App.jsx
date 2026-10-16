@@ -17,11 +17,12 @@ import Agent from './pages/Agent.jsx'
 import Profile from './pages/Profile.jsx'
 import Settings, { initAccent } from './pages/Settings.jsx'
 import NotFound from './pages/NotFound.jsx'
+import { ArjunOpeningAnimation } from './ArjunTheme.jsx'
 
 function Footer() {
   return (
-    <footer className="border-t border-white/10 py-8 text-center text-xs text-white/35">
-      Built for INSPIRATHON &apos;26 · VaultLens · on-device first, private by design
+    <footer className="border-t border-[#d4af37]/20 py-8 text-center text-xs text-white/40">
+      Built for INSPIRATHON &apos;26 · <span className="font-semibold text-[#f3e5ab]">ARJUN</span> · The Astral Shield &amp; Precision Engine · On-device first, private by design
     </footer>
   )
 }
@@ -36,7 +37,8 @@ function Shell() {
   const location = useLocation()
   useEffect(() => { initAccent() }, [])
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col bg-[#090a0f] text-[#f4f1ea]">
+      <ArjunOpeningAnimation />
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait">

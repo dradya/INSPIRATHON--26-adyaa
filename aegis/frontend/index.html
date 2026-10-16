@@ -3,48 +3,273 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aegis</title>
+<meta name="color-scheme" content="light dark">
+<script>
+try {
+  document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem("color-scheme") ?? "light dark";
+} catch (_) {}
+</script>
+<title>ARJUN — Sovereign File Intelligence &amp; Astral Shield</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
-<meta name="theme-color" content="#f7f5f0">
+<meta name="theme-color" content="#12100d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(fonts/inter-400.woff2) format("woff2")}
 @font-face{font-family:Inter;font-weight:500;font-display:swap;src:url(fonts/inter-500.woff2) format("woff2")}
 @font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:700;font-display:swap;src:url(fonts/inter-600.woff2) format("woff2")}
 
-:root{
-  --bg:#f7f5f0; --surface:#fffefb; --sunk:#f1eee7;
-  --ink:#23211d; --ink2:#5c5850; --ink3:#948f85;
-  --line:#e7e2d8; --line2:#d8d2c4;
-  --accent:#3f6b57; --accent-ink:#fff; --accent-soft:#e6efe9;
-  --warn:#9a5b22; --warn-soft:#f7ecdf;
-  --danger:#a33f2e; --danger-soft:#f7e4df;
-  --mark:#f4e4b0;
-  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
-  --sans:Inter,-apple-system,"Segoe UI",system-ui,sans-serif;
-  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
-  --r:10px;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#1b1a17; --surface:#22211d; --sunk:#181714;
-    --ink:#ece8df; --ink2:#b5afa3; --ink3:#857f74;
-    --line:#33312b; --line2:#423f37;
-    --accent:#8fb9a2; --accent-ink:#152019; --accent-soft:#26332c;
-    --warn:#d9a46b; --warn-soft:#352a1e;
-    --danger:#e08c7c; --danger-soft:#3a2420;
-    --mark:#5a4b22;
+:root {
+  color-scheme: light dark;
+
+  /* Light Scheme Tokens: Bhojpatra Parchment, Chola Bronze, Kumkum & Lampblack */
+  --bg-light: #f4efe4;
+  --bg-elev-light: #ebe3d3;
+  --surface-light: #faf6ee;
+  --surface-2-light: #f0e8d8;
+  --sunk-light: #e6decb;
+  --ink-light: #1b1712;
+  --ink2-light: #4f4639;
+  --ink3-light: #7d705d;
+  --line-light: #d5c9b3;
+  --line2-light: #bba98c;
+  --accent-light: #8f5f14;
+  --accent-bright-light: #b87f20;
+  --accent-ink-light: #faf6ee;
+  --accent-soft-light: rgba(143, 95, 20, 0.11);
+  --warn-light: #9e4f16;
+  --warn-soft-light: rgba(158, 79, 22, 0.12);
+  --danger-light: #9c2b23;
+  --danger-soft-light: rgba(156, 43, 35, 0.11);
+  --mark-light: #efe0b4;
+  --shadow-light: 0 10px 28px -10px rgba(42, 32, 16, 0.10);
+
+  /* Dark Scheme Tokens: Sanctum Obsidian, Burnished Brass, Vermilion & Sandalwood Ivory */
+  --bg-dark: #0e0d0a;
+  --bg-elev-dark: #13110d;
+  --surface-dark: #171510;
+  --surface-2-dark: #1f1c15;
+  --sunk-dark: #110f0b;
+  --ink-dark: #efe9dc;
+  --ink2-dark: #b7ac97;
+  --ink3-dark: #877960;
+  --line-dark: rgba(204, 164, 78, 0.19);
+  --line2-dark: rgba(204, 164, 78, 0.36);
+  --accent-dark: #d1a43e;
+  --accent-bright-dark: #ecd07d;
+  --accent-ink-dark: #12100b;
+  --accent-soft-dark: rgba(209, 164, 62, 0.14);
+  --warn-dark: #d8893b;
+  --warn-soft-dark: rgba(216, 137, 59, 0.15);
+  --danger-dark: #d85a4e;
+  --danger-soft-dark: rgba(216, 90, 78, 0.16);
+  --mark-dark: rgba(209, 164, 62, 0.28);
+  --shadow-dark: 0 14px 36px -12px rgba(0, 0, 0, 0.65);
+
+  /* Mineral Chart Pigments (Classical Fresco & Yantra Palette) */
+  --pigment-gold: #c9962c;
+  --pigment-cinnabar: #b9462f;
+  --pigment-jade: #347d5a;
+  --pigment-lapis: #3c659c;
+  --pigment-copper: #b66c2b;
+  --pigment-mulberry: #7d4e78;
+  --pigment-stone: #736958;
+
+  /* Default to Light Tokens for legacy fallback */
+  --bg: var(--bg-light);
+  --bg-elev: var(--bg-elev-light);
+  --surface: var(--surface-light);
+  --surface-2: var(--surface-2-light);
+  --sunk: var(--sunk-light);
+  --ink: var(--ink-light);
+  --ink2: var(--ink2-light);
+  --ink3: var(--ink3-light);
+  --line: var(--line-light);
+  --line2: var(--line2-light);
+  --accent: var(--accent-light);
+  --accent-bright: var(--accent-bright-light);
+  --accent-ink: var(--accent-ink-light);
+  --accent-soft: var(--accent-soft-light);
+  --warn: var(--warn-light);
+  --warn-soft: var(--warn-soft-light);
+  --danger: var(--danger-light);
+  --danger-soft: var(--danger-soft-light);
+  --mark: var(--mark-light);
+  --card-shadow: var(--shadow-light);
+
+  --display: "Cinzel", Georgia, serif;
+  --sans: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --serif: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+
+  /* Mandatory fallback for browsers without light-dark() */
+  @media (prefers-color-scheme: dark) {
+    --bg: var(--bg-dark);
+    --bg-elev: var(--bg-elev-dark);
+    --surface: var(--surface-dark);
+    --surface-2: var(--surface-2-dark);
+    --sunk: var(--sunk-dark);
+    --ink: var(--ink-dark);
+    --ink2: var(--ink2-dark);
+    --ink3: var(--ink3-dark);
+    --line: var(--line-dark);
+    --line2: var(--line2-dark);
+    --accent: var(--accent-dark);
+    --accent-bright: var(--accent-bright-dark);
+    --accent-ink: var(--accent-ink-dark);
+    --accent-soft: var(--accent-soft-dark);
+    --warn: var(--warn-dark);
+    --warn-soft: var(--warn-soft-dark);
+    --danger: var(--danger-dark);
+    --danger-soft: var(--danger-soft-dark);
+    --mark: var(--mark-dark);
+    --card-shadow: var(--shadow-dark);
   }
+
+  /* Map <meta name="color-scheme"> override back to :root */
+  &:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+    --bg: var(--bg-dark);
+    --bg-elev: var(--bg-elev-dark);
+    --surface: var(--surface-dark);
+    --surface-2: var(--surface-2-dark);
+    --sunk: var(--sunk-dark);
+    --ink: var(--ink-dark);
+    --ink2: var(--ink2-dark);
+    --ink3: var(--ink3-dark);
+    --line: var(--line-dark);
+    --line2: var(--line2-dark);
+    --accent: var(--accent-dark);
+    --accent-bright: var(--accent-bright-dark);
+    --accent-ink: var(--accent-ink-dark);
+    --accent-soft: var(--accent-soft-dark);
+    --warn: var(--warn-dark);
+    --warn-soft: var(--warn-soft-dark);
+    --danger: var(--danger-dark);
+    --danger-soft: var(--danger-soft-dark);
+    --mark: var(--mark-dark);
+    --card-shadow: var(--shadow-dark);
+  }
+  &:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+    --bg: var(--bg-light);
+    --bg-elev: var(--bg-elev-light);
+    --surface: var(--surface-light);
+    --surface-2: var(--surface-2-light);
+    --sunk: var(--sunk-light);
+    --ink: var(--ink-light);
+    --ink2: var(--ink2-light);
+    --ink3: var(--ink3-light);
+    --line: var(--line-light);
+    --line2: var(--line2-light);
+    --accent: var(--accent-light);
+    --accent-bright: var(--accent-bright-light);
+    --accent-ink: var(--accent-ink-light);
+    --accent-soft: var(--accent-soft-light);
+    --warn: var(--warn-light);
+    --warn-soft: var(--warn-soft-light);
+    --danger: var(--danger-light);
+    --danger-soft: var(--danger-soft-light);
+    --mark: var(--mark-light);
+    --card-shadow: var(--shadow-light);
+  }
+
+  @supports (color: light-dark(white, black)) {
+    --bg: light-dark(var(--bg-light), var(--bg-dark));
+    --bg-elev: light-dark(var(--bg-elev-light), var(--bg-elev-dark));
+    --surface: light-dark(var(--surface-light), var(--surface-dark));
+    --surface-2: light-dark(var(--surface-2-light), var(--surface-2-dark));
+    --sunk: light-dark(var(--sunk-light), var(--sunk-dark));
+    --ink: light-dark(var(--ink-light), var(--ink-dark));
+    --ink2: light-dark(var(--ink2-light), var(--ink2-dark));
+    --ink3: light-dark(var(--ink3-light), var(--ink3-dark));
+    --line: light-dark(var(--line-light), var(--line-dark));
+    --line2: light-dark(var(--line2-light), var(--line2-dark));
+    --accent: light-dark(var(--accent-light), var(--accent-dark));
+    --accent-bright: light-dark(var(--accent-bright-light), var(--accent-bright-dark));
+    --accent-ink: light-dark(var(--accent-ink-light), var(--accent-ink-dark));
+    --accent-soft: light-dark(var(--accent-soft-light), var(--accent-soft-dark));
+    --warn: light-dark(var(--warn-light), var(--warn-dark));
+    --warn-soft: light-dark(var(--warn-soft-light), var(--warn-soft-dark));
+    --danger: light-dark(var(--danger-light), var(--danger-dark));
+    --danger-soft: light-dark(var(--danger-soft-light), var(--danger-soft-dark));
+    --mark: light-dark(var(--mark-light), var(--mark-dark));
+  }
+
+  accent-color: var(--accent);
 }
+
+/* 1.5-Second Opening Animation Keyframes */
+@keyframes arjunSplashFadeOut {
+  0%, 78% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes bowDraw {
+  0% { stroke-dashoffset: 300; transform: scale(0.88); opacity: 0; }
+  45% { stroke-dashoffset: 0; transform: scale(1); opacity: 1; }
+  75% { transform: scale(1.04); filter: drop-shadow(0 0 16px rgba(209, 164, 62, 0.65)); }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+@keyframes arrowLaunch {
+  0%, 30% { transform: translateY(24px) scaleY(0.6); opacity: 0; }
+  65% { transform: translateY(0px) scaleY(1); opacity: 1; }
+  100% { transform: translateY(-60px) scaleY(1.2); opacity: 0; }
+}
+@keyframes chakraSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.arjun-splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #1b1812 0%, #0e0d0a 75%);
+  animation: arjunSplashFadeOut 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+  will-change: opacity;
+}
+.arjun-bow-svg {
+  stroke-dasharray: 300;
+  animation: bowDraw 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, stroke-dashoffset;
+}
+.arjun-arrow-svg {
+  animation: arrowLaunch 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+.artifact-title {
+  font-family: var(--display);
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+body{
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 900px 500px at 85% 0%, var(--accent-soft), transparent 70%),
+    radial-gradient(ellipse 700px 400px at 10% 100%, var(--warn-soft), transparent 70%);
+  color:var(--ink);
+  font:14px/1.55 var(--sans);
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--accent)}
-h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;margin:0}
-h1{font-size:30px;line-height:1.2}
-h2{font-size:20px}
-h3{font-size:16px}
+h1,h2,h3{font-family:var(--sans);font-weight:700;letter-spacing:-0.02em;color:var(--ink);margin:0}
+h1{font-size:28px;line-height:1.2;font-weight:800;letter-spacing:-0.03em}
+h2{font-size:20px;line-height:1.3;font-weight:700;letter-spacing:-0.02em}
+h3{font-size:16px;line-height:1.35;font-weight:600;letter-spacing:-0.01em}
 .muted{color:var(--ink2)} .faint{color:var(--ink3)} .small{font-size:12.5px} .mono{font-family:var(--mono);font-size:12.5px}
 .row{display:flex;align-items:center;gap:10px} .wrap{flex-wrap:wrap} .grow{flex:1;min-width:0} .right{margin-left:auto}
 .stack>*+*{margin-top:14px}
@@ -52,141 +277,304 @@ h3{font-size:16px}
 svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* ---------- layout ---------- */
-.app{display:grid;grid-template-columns:232px 1fr;height:100vh}
-.side{border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;overflow:auto}
-.brand{padding:0 10px 18px}
-.brand b{font-family:var(--serif);font-size:24px;font-weight:500;display:block}
-.brand span{font-size:12px;color:var(--ink3)}
-.nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;color:var(--ink2);text-decoration:none;cursor:pointer}
+.app{display:grid;grid-template-columns:248px 1fr;height:100vh}
+.side{
+  border-right:1px solid var(--line);
+  background:var(--bg-elev);
+  padding:24px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  overflow:auto;
+}
+.brand{padding:0 10px 18px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.brand b{font-family:var(--display);font-size:21px;font-weight:700;display:block}
+.brand span{font-size:11.5px;color:var(--ink3)}
+.nav a{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--r);
+  color:var(--ink2);text-decoration:none;cursor:pointer;font-weight:500;
+  border:1px solid transparent;transition:all .16s ease;
+}
 .nav a:hover{background:var(--sunk);color:var(--ink)}
-.nav a.on{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.nav a.on{
+  background:var(--surface);color:var(--ink);
+  border-color:var(--line2);
+  box-shadow:inset 3px 0 0 var(--accent), var(--card-shadow);
+}
 .nav .count{margin-left:auto;font-size:11.5px;color:var(--ink3)}
 .side-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
 .side-foot .row{margin-top:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
 .dot.warn{background:var(--warn)}
 .main{overflow:auto;position:relative}
-.topbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:12px 36px;display:flex;align-items:center;gap:14px}
+.topbar{
+  position:sticky;top:0;z-index:5;
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+  padding:12px 36px;display:flex;align-items:center;gap:14px;
+}
 .topbar .search{flex:1;max-width:520px;position:relative}
-.topbar .search input{width:100%;padding:8px 12px 8px 34px;border-radius:999px}
+.topbar .search input{width:100%;padding:8px 14px 8px 36px;border-radius:var(--r)}
 .topbar .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink3)}
 .scanstat{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:10px}
-.view{padding:32px 36px 80px;max-width:1120px}
-.head{margin-bottom:22px}
-.head p{margin:6px 0 0;color:var(--ink2);max-width:640px}
+.view{padding:32px 36px 80px;max-width:1180px}
+.head{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--line);position:relative}
+.head::after{
+  content:"◆";position:absolute;bottom:-7px;left:0;font-size:10px;
+  color:var(--accent);background:var(--bg);padding-right:6px;line-height:1;
+}
+.head .epigraph{
+  font-family:var(--display);font-size:10.5px;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:6px;display:block;font-weight:600;
+}
+.head p{margin:6px 0 0;color:var(--ink2);max-width:680px;font-size:14.5px}
+
+/* ---------- Theme Switch Button ---------- */
+.theme-switch{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--line2);background:var(--surface);
+  padding:6px 12px;border-radius:var(--r);cursor:pointer;
+  font-family:var(--display);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink);transition:border-color .18s, background .18s, transform .15s;
+}
+.theme-switch:hover{border-color:var(--accent);background:var(--surface-2)}
+.theme-switch svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:1.8}
 
 /* ---------- controls ---------- */
-input[type=text],input[type=password],input:not([type]),select,textarea{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:8px 11px;outline:none}
+input[type=text],input[type=password],input:not([type]),select,textarea{background:var(--surface);border:1px solid var(--line2);border-radius:var(--r);padding:8px 11px;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 textarea{width:100%;resize:vertical;font-family:var(--mono);font-size:12.5px}
-.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--surface);border-radius:8px;padding:7px 13px;cursor:pointer;white-space:nowrap}
-.btn:hover{border-color:var(--ink3)}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);
+  background:var(--surface);border-radius:var(--r);padding:7px 14px;cursor:pointer;
+  white-space:nowrap;font-weight:500;transition:all .15s ease;
+}
+.btn:hover{border-color:var(--accent);background:var(--surface-2)}
 .btn:disabled{opacity:.5;cursor:default}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{filter:brightness(1.07)}
+.btn.primary{
+  background:var(--accent);border-color:var(--accent);color:var(--accent-ink);
+  font-family:var(--display);letter-spacing:0.06em;font-size:12.5px;font-weight:600;
+}
+.btn.primary:hover{filter:brightness(1.08)}
 .btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--line2))}
 .btn.danger.solid{background:var(--danger);color:#fff;border-color:var(--danger)}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--ink2)}
 .btn.ghost:hover{background:var(--sunk);color:var(--ink)}
-.btn.sm{padding:4px 9px;font-size:12.5px}
-.link{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.btn.sm{padding:4px 10px;font-size:12px}
+.link{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-weight:500}
 label.check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;color:var(--ink2);font-size:13px}
 input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer;background:var(--surface);color:var(--ink2)}
-.chip:hover{color:var(--ink);border-color:var(--ink3)}
-.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--sunk);color:var(--ink2);white-space:nowrap}
-.tag.Sensitive{background:var(--danger-soft);color:var(--danger)}
-.tag.Internal{background:var(--warn-soft);color:var(--warn)}
-.tag.ok{background:var(--accent-soft);color:var(--accent)}
-.tok{font-family:var(--mono);font-size:12px;background:var(--danger-soft);color:var(--danger);padding:0 5px;border-radius:4px}
-mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);
+  border-radius:var(--r);padding:4px 11px;font-size:12.5px;cursor:pointer;
+  background:var(--surface);color:var(--ink2);transition:all .15s ease;
+}
+.chip:hover{color:var(--ink);border-color:var(--accent);background:var(--surface-2)}
+.chip.gold{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:600}
+.tag{
+  display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:3px;
+  background:var(--sunk);color:var(--ink2);white-space:nowrap;
+  font-family:var(--display);letter-spacing:0.06em;text-transform:uppercase;font-weight:600;
+  border:1px solid var(--line);
+}
+.tag.Sensitive{background:var(--danger-soft);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 30%,transparent)}
+.tag.Internal{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.tag.ok{background:var(--accent-soft);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.tok{font-family:var(--mono);font-size:12px;background:var(--danger-soft);color:var(--danger);padding:1px 6px;border-radius:3px;border:1px solid color-mix(in srgb,var(--danger) 25%,transparent)}
+mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 2px}
 mark.pii{background:var(--danger-soft);color:var(--danger)}
 
-/* ---------- surfaces ---------- */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+/* ---------- Architectural Tamrapatra / Inscribed Surfaces ---------- */
+.card{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--line2);
+  border-radius:var(--r);
+  padding:22px 24px;
+  box-shadow:var(--card-shadow);
+  transition:border-color .22s ease, box-shadow .22s ease;
+}
+/* Engraved corner registration brackets */
+.card::before, .card::after {
+  content:"";position:absolute;width:8px;height:8px;pointer-events:none;
+  border-color:var(--accent);border-style:solid;opacity:0.55;
+}
+.card::before{top:5px;left:5px;border-width:1.5px 0 0 1.5px}
+.card::after{bottom:5px;right:5px;border-width:0 1.5px 1.5px 0}
 .card+.card{margin-top:16px}
-.card h3{margin-bottom:12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-bottom:16px}
-.stat{padding:18px 20px}
+.card h3{
+  margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--sans);font-size:16px;font-weight:700;letter-spacing:-0.015em;color:var(--ink);
+}
+.card h3::after{
+  content:"❖";font-size:11px;color:var(--accent);opacity:0.75;font-family:var(--sans);
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+
+/* Inscribed Telemetry Plaques (.stats) */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line2);border-radius:var(--r);
+  background:var(--surface);margin-bottom:20px;
+  box-shadow:var(--card-shadow);position:relative;overflow:hidden;
+}
+.stats::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.stat{padding:20px 22px;position:relative;display:flex;flex-direction:column;justify-content:space-between}
 .stat+.stat{border-left:1px solid var(--line)}
-.stat b{display:block;font-family:var(--serif);font-size:26px;font-weight:500}
+.stat .numeral{
+  font-family:var(--display);font-size:10.5px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;
+  font-weight:700;
+}
+.stat b{
+  display:block;font-family:var(--sans);font-size:28px;font-weight:800;
+  line-height:1.1;color:var(--ink);margin:2px 0 6px;
+  font-feature-settings:"tnum" 1;letter-spacing:-0.025em;
+}
 .stat span{font-size:12.5px;color:var(--ink2)}
+.stat .stat-bar{height:3px;background:var(--sunk);margin-top:12px;border-radius:2px;overflow:hidden}
+.stat .stat-bar-fill{height:100%;background:var(--accent)}
+
 .empty{padding:36px 20px;text-align:center;color:var(--ink2)}
-.empty h3{color:var(--ink);margin-bottom:6px}
-.note{background:var(--sunk);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--ink2)}
-.note.warn{background:var(--warn-soft);color:var(--warn)}
-.bars .b{display:grid;grid-template-columns:110px 1fr 80px;gap:12px;align-items:center;padding:5px 0;font-size:13px}
-.bars .track{height:6px;background:var(--sunk);border-radius:6px;overflow:hidden}
-.bars .fill{height:100%;background:var(--accent);border-radius:6px}
-.bars .b span:last-child{text-align:right;color:var(--ink2)}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.tabs button{border:0;background:none;padding:9px 14px;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent;margin-bottom:-1px}
-.tabs button.on{color:var(--ink);border-color:var(--ink)}
+.empty h3{color:var(--ink);margin-bottom:6px;justify-content:center;border:0;padding:0}
+.empty h3::after{display:none}
+.note{background:var(--sunk);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--ink2)}
+.note.warn{background:var(--warn-soft);color:var(--warn);border-left-color:var(--warn)}
+
+/* ---------- Standout Instrument Charts & Surya Astrolabe ---------- */
+.yantra-chart{
+  display:grid;grid-template-columns:190px 1fr;gap:22px;align-items:center;
+}
+@media (max-width:640px){
+  .yantra-chart{grid-template-columns:1fr;justify-items:center}
+}
+.astrolabe-wrap{
+  position:relative;width:184px;height:184px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle, var(--surface-2) 0%, transparent 72%);
+  border-radius:50%;
+}
+.astrolabe-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;pointer-events:none;padding:24px;
+}
+.astrolabe-center b{font-family:var(--sans);font-size:22px;font-weight:800;line-height:1.05;color:var(--ink);font-feature-settings:"tnum" 1;letter-spacing:-0.02em}
+.astrolabe-center small{font-family:var(--display);font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink3);margin-top:4px;font-weight:700}
+
+.bars{display:flex;flex-direction:column;gap:10px}
+.bars .b{
+  display:grid;grid-template-columns:118px 1fr auto;gap:12px;align-items:center;
+  padding:4px 0;font-size:13px;
+}
+.bars .b-label{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bars .b-swatch{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0;display:inline-block;border:1px solid rgba(255,255,255,0.2)}
+.bars .track{
+  height:10px;background:var(--sunk);border:1px solid var(--line);
+  border-radius:2px;overflow:hidden;position:relative;
+}
+.bars .fill{
+  height:100%;background:var(--accent);border-radius:1px;
+  position:relative;transition:width .5s cubic-bezier(0.22,1,0.36,1);
+}
+.bars .fill::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.22) 100%);
+}
+.bars .b-val{text-align:right;color:var(--ink2);font-size:12.5px;white-space:nowrap;min-width:96px}
+.bars .b-pct{font-size:11px;color:var(--ink3);margin-right:6px}
+
+/* Full-width Spectrum Ribbon for Storage & Privacy */
+.spectrum-ribbon{
+  display:flex;height:14px;border-radius:3px;overflow:hidden;
+  border:1px solid var(--line2);background:var(--sunk);gap:1px;margin:12px 0;
+}
+.spectrum-seg{height:100%;transition:width .4s ease;min-width:3px}
+.spectrum-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--ink2)}
+.spectrum-legend span{display:inline-flex;align-items:center;gap:6px}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line2);margin-bottom:18px}
+.tabs button{
+  border:1px solid transparent;border-bottom:0;background:none;padding:9px 16px;
+  cursor:pointer;color:var(--ink2);margin-bottom:-1px;
+  font-family:var(--display);font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;
+}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{
+  color:var(--accent);background:var(--surface);
+  border-color:var(--line2);border-bottom:2px solid var(--accent);font-weight:700;
+}
 
 /* ---------- lists ---------- */
-.list{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
-.item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line);cursor:default}
+.list{border:1px solid var(--line2);border-radius:var(--r);background:var(--surface);overflow:hidden;box-shadow:var(--card-shadow)}
+.item{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--line);cursor:default;transition:background .12s}
 .item:first-child{border-top:0}
-.item:hover{background:var(--sunk)}
+.item:hover{background:var(--surface-2)}
 .item.clickable{cursor:pointer}
-.item .ic{color:var(--ink3)}
+.item .ic{color:var(--accent)}
 .item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item .sub{font-size:12.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .sub{font-size:12px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item .meta{font-size:12.5px;color:var(--ink2);white-space:nowrap;text-align:right}
 .item .acts{display:flex;gap:2px;opacity:0;transition:opacity .12s}
 .item:hover .acts,.item.sel .acts{opacity:1}
 .item.sel{background:var(--accent-soft)}
-.list-head{display:flex;align-items:center;gap:12px;padding:8px 14px;font-size:12px;color:var(--ink3);border-bottom:1px solid var(--line);background:var(--sunk)}
+.list-head{
+  display:flex;align-items:center;gap:12px;padding:9px 16px;
+  font-family:var(--display);font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink3);border-bottom:1px solid var(--line);background:var(--sunk);font-weight:600;
+}
 
 /* search results */
 .result{padding:16px 18px;border-top:1px solid var(--line);cursor:pointer}
 .result:first-child{border-top:0}
-.result:hover{background:var(--sunk)}
-.result .nm{font-weight:500;font-size:15px}
+.result:hover{background:var(--surface-2)}
+.result .nm{font-weight:600;font-size:15px}
 .result .why{font-size:12.5px;color:var(--accent);margin-top:2px}
 .result .passage{font-size:13px;color:var(--ink2);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .result .path{font-size:12px;color:var(--ink3);margin-top:4px}
 .bigsearch{position:relative}
-.bigsearch input{width:100%;font-size:17px;padding:14px 16px 14px 46px;border-radius:12px}
-.bigsearch svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--ink3)}
+.bigsearch input{width:100%;font-size:17px;padding:14px 16px 14px 46px;border-radius:var(--r)}
+.bigsearch svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:19px;height:19px;color:var(--accent)}
 
 /* explorer */
 .explorer{display:grid;grid-template-columns:210px 1fr;gap:22px}
-.places h4{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);font-weight:600;margin:16px 0 6px}
+.places h4{font-family:var(--display);font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);font-weight:600;margin:16px 0 6px}
 .places h4:first-child{margin-top:0}
-.places a{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:7px;cursor:pointer;color:var(--ink2);text-decoration:none;font-size:13.5px}
+.places a{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:var(--r);cursor:pointer;color:var(--ink2);text-decoration:none;font-size:13.5px}
 .places a:hover{background:var(--sunk);color:var(--ink)}
-.places a.on{color:var(--ink);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.places a.on{color:var(--ink);background:var(--surface);box-shadow:0 0 0 1px var(--line2)}
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:13px;margin:10px 0 12px}
-.crumbs a{cursor:pointer;color:var(--ink2);padding:2px 5px;border-radius:5px;text-decoration:none}
+.crumbs a{cursor:pointer;color:var(--ink2);padding:2px 5px;border-radius:4px;text-decoration:none}
 .crumbs a:hover{background:var(--sunk);color:var(--ink)}
-.crumbs a:last-child{color:var(--ink);font-weight:500}
+.crumbs a:last-child{color:var(--ink);font-weight:600}
 .crumbs .sep{color:var(--ink3)}
 
 /* drawer */
-.scrim{position:fixed;inset:0;background:rgba(30,26,20,.25);z-index:20;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim{position:fixed;inset:0;background:rgba(18,15,10,.38);z-index:20;opacity:0;pointer-events:none;transition:opacity .18s}
 .scrim.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,94vw);background:var(--surface);border-left:1px solid var(--line);z-index:21;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(620px,94vw);background:var(--surface);border-left:1px solid var(--line2);z-index:21;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
 .drawer.open{transform:none}
 .drawer header{padding:18px 22px;border-bottom:1px solid var(--line)}
 .drawer .body{flex:1;overflow:auto;padding:18px 22px}
 .drawer footer{padding:12px 22px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
-.drawer pre{white-space:pre-wrap;word-break:break-word;font:12.5px/1.6 var(--mono);background:var(--sunk);padding:14px;border-radius:8px;margin:0;max-height:none}
-.drawer img,.drawer video{max-width:100%;border-radius:8px;display:block;margin:0 auto}
-.drawer iframe{width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+.drawer pre{white-space:pre-wrap;word-break:break-word;font:12.5px/1.6 var(--mono);background:var(--sunk);padding:14px;border-radius:var(--r);margin:0;max-height:none}
+.drawer img,.drawer video{max-width:100%;border-radius:var(--r);display:block;margin:0 auto}
+.drawer iframe{width:100%;height:70vh;border:1px solid var(--line);border-radius:var(--r);background:#fff}
 dl.meta{display:grid;grid-template-columns:110px 1fr;gap:6px 14px;font-size:13px;margin:0 0 16px}
 dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 
 /* modal */
-.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(30,26,20,.32)}
+.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(18,15,10,.45)}
 .modal.open{display:flex}
-.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:min(600px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.modal .box{background:var(--surface);border:1px solid var(--line2);border-radius:var(--r);width:min(600px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.28)}
 .modal .box>header{padding:20px 24px 8px}
 .modal .box>.body{padding:8px 24px;overflow:auto;flex:1}
 .modal .box>footer{padding:14px 24px 20px;display:flex;justify-content:flex-end;gap:8px}
-.group{border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow:hidden}
+.group{border:1px solid var(--line);border-radius:var(--r);margin:10px 0;overflow:hidden}
 .group .gh{background:var(--sunk);padding:7px 12px;font-size:12.5px;color:var(--ink2)}
 .group .gi{padding:6px 12px;font-size:13px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .group .gi:first-of-type{border-top:0}
@@ -195,22 +583,28 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 .field input,.field select{width:100%}
 
 /* assistant */
-.ask-btn{position:fixed;right:24px;bottom:22px;z-index:15;border-radius:999px;padding:10px 16px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
-.ask{position:fixed;right:24px;bottom:76px;width:min(400px,92vw);height:min(540px,72vh);z-index:16;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.16);display:none;flex-direction:column}
+.ask-btn{
+  position:fixed;right:24px;bottom:22px;z-index:15;border-radius:var(--r);
+  padding:10px 18px;box-shadow:var(--card-shadow);
+  background:var(--surface);border:1px solid var(--accent);color:var(--ink);
+  font-family:var(--display);font-size:12px;letter-spacing:0.08em;font-weight:600;
+}
+.ask-btn:hover{background:var(--accent);color:var(--accent-ink)}
+.ask{position:fixed;right:24px;bottom:76px;width:min(410px,92vw);height:min(540px,72vh);z-index:16;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r);box-shadow:0 18px 50px rgba(0,0,0,.28);display:none;flex-direction:column}
 .ask.open{display:flex}
 .ask header{padding:14px 16px;border-bottom:1px solid var(--line)}
 .ask .log{flex:1;overflow:auto;padding:14px 16px}
 .msg{margin-bottom:12px;font-size:13.5px;white-space:pre-wrap}
 .msg.me{text-align:right}
-.msg.me span{display:inline-block;background:var(--accent-soft);padding:7px 11px;border-radius:12px 12px 2px 12px;text-align:left}
-.msg.bot .it{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:7px;margin-top:6px;cursor:pointer;font-size:12.5px;white-space:normal}
+.msg.me span{display:inline-block;background:var(--accent-soft);border:1px solid var(--line2);padding:7px 11px;border-radius:var(--r);text-align:left}
+.msg.bot .it{display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);margin-top:6px;cursor:pointer;font-size:12.5px;white-space:normal}
 .msg.bot .it:hover{background:var(--sunk)}
 .ask form{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
 .ask form input{flex:1}
 
 /* toast */
 #toasts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;gap:8px;align-items:center}
-.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.toast{background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r);font-size:13px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast button{background:none;border:0;color:var(--bg);text-decoration:underline;cursor:pointer;padding:0}
 
 .spinner{width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
@@ -221,7 +615,7 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 .ledger-row summary::-webkit-details-marker{display:none}
 .ledger-row summary:hover{background:var(--sunk)}
 .ledger-row .cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
-.cmp pre,.pane{white-space:pre-wrap;word-break:break-word;font:12px/1.6 var(--mono);background:var(--sunk);padding:12px;border-radius:8px;margin:0;max-height:260px;overflow:auto}
+.cmp pre,.pane{white-space:pre-wrap;word-break:break-word;font:12px/1.6 var(--mono);background:var(--sunk);padding:12px;border-radius:var(--r);margin:0;max-height:260px;overflow:auto}
 .pane-label{font-size:12px;color:var(--ink3);margin-bottom:5px}
 @media (max-width:900px){
   .app{grid-template-columns:1fr}.side{display:none}
@@ -231,9 +625,58 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 </style>
 </head>
 <body>
+<!-- 1.5-Second Opening Animation (Gandiva Bow & Surya Yantra) -->
+<div class="arjun-splash-overlay" id="arjunSplash" aria-hidden="true">
+  <div style="position:relative;display:flex;align-items:center;justify-content:center;width:176px;height:176px">
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.32;animation:chakraSpin 12s linear infinite" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#d1a43e" stroke-width="0.6" stroke-dasharray="2 2" />
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#d1a43e" stroke-width="0.4" />
+      <polygon points="50,6 61,36 93,36 67,54 77,85 50,66 23,85 33,54 7,36 39,36" fill="none" stroke="#d1a43e" stroke-width="0.5" />
+    </svg>
+    <svg style="width:112px;height:112px" viewBox="0 0 120 120" fill="none">
+      <path class="arjun-bow-svg" d="M22 78 C38 24, 82 24, 98 78" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" />
+      <path class="arjun-bow-svg" d="M22 78 L60 92 L98 78" stroke="#efe9dc" stroke-width="1" stroke-opacity="0.75" />
+      <g class="arjun-arrow-svg">
+        <line x1="60" y1="95" x2="60" y2="18" stroke="#d1a43e" stroke-width="2" stroke-linecap="round" />
+        <polygon points="60,10 54,23 60,19 66,23" fill="#efe9dc" />
+      </g>
+      <defs>
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#8f5f14" />
+          <stop offset="50%" stop-color="#ecd07d" />
+          <stop offset="100%" stop-color="#c9962c" />
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <h1 style="font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:0.22em;color:#ecd07d;margin-top:14px">ARJUN</h1>
+  <p style="font-family:var(--display);font-size:10.5px;letter-spacing:0.28em;text-transform:uppercase;color:#b7ac97;margin-top:6px">Sovereign File Intelligence • Gandiva Protocol</p>
+</div>
+<script>
+  setTimeout(function() {
+    var s = document.getElementById('arjunSplash');
+    if (s) { s.remove(); }
+  }, 1500);
+</script>
 <div class="app">
   <aside class="side">
-    <div class="brand"><b>Aegis</b><span>Your files, understood — privately.</span></div>
+    <div class="brand">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:6px">
+        <div style="width:36px;height:36px;border-radius:var(--r);border:1px solid var(--line2);background:var(--surface);display:flex;align-items:center;justify-content:center;box-shadow:var(--card-shadow);flex-shrink:0">
+          <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none">
+            <path d="M4 16C7 6 17 6 20 16" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M4 16L12 19L20 16" stroke="var(--ink3)" stroke-width="1" stroke-linecap="round"/>
+            <line x1="12" y1="19" x2="12" y2="4" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/>
+            <polygon points="12,2 9,6.5 12,5.2 15,6.5" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div>
+          <b class="artifact-title" style="font-size:20px;letter-spacing:0.16em;line-height:1;margin:0">ARJUN</b>
+          <span style="font-family:var(--display);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink3);display:block;margin-top:3px">Gandiva Archive</span>
+        </div>
+      </div>
+      <span style="font-size:11.5px;color:var(--ink2);display:block;margin-top:4px;font-family:var(--sans);letter-spacing:0.01em">“Your files, understood — privately.”</span>
+    </div>
     <nav class="nav" id="nav">
       <a data-r="home"><svg class="i"><use href="#i-home"/></svg>Overview</a>
       <a data-r="search"><svg class="i"><use href="#i-search"/></svg>Search</a>
@@ -246,7 +689,10 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
     <div class="side-foot">
       <div class="row"><span class="dot" id="egressDot"></span><span id="egressText">Nothing leaves this computer</span></div>
       <div class="row"><label class="check"><input type="checkbox" id="offlineToggle"> Offline only</label></div>
-      <div class="row"><button class="link" onclick="openSettings()">AI settings</button></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="link" onclick="openSettings()">AI settings</button>
+        <button class="link small" onclick="loadJudgeDemo()" title="Seed & scan the Judge Demo Vault">✦ Demo Vault</button>
+      </div>
     </div>
   </aside>
 
@@ -257,6 +703,12 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
         <input id="topSearch" placeholder="Search by meaning — e.g. “notes about recursion from last month”" autocomplete="off">
       </div>
       <div class="scanstat right" id="scanStat"></div>
+      <button class="chip gold" onclick="loadJudgeDemo()" title="Load & scan the curated Judge Showcase Demo Vault">✦ Demo Vault</button>
+      <button class="theme-switch" id="themeToggleBtn" onclick="toggleThemeScheme()" title="Switch between Sanctum Dark and Bhojpatra Light mode" aria-label="Toggle color scheme">
+        <svg id="themeIconSun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg id="themeIconMoon" class="hidden" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span id="themeToggleLabel">Parchment</span>
+      </button>
     </div>
     <div class="view" id="view"></div>
   </main>
@@ -286,27 +738,28 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 
 <!-- settings -->
 <div class="modal" id="settings"><div class="box" style="width:min(480px,94vw)">
-  <header><h2>AI settings</h2><p class="muted small" style="margin:6px 0 0">By default Aegis reasons with local rules — nothing is sent anywhere. If you connect a cloud model, only redacted text is sent, and every request is recorded in the Privacy ledger.</p></header>
+  <header><h2>AI settings</h2><p class="muted small" style="margin:6px 0 0">By default Arjun reasons with local rules — nothing is sent anywhere. If you connect a cloud model, only redacted text is sent, and every request is recorded in the Privacy ledger.</p></header>
   <div class="body">
     <div class="field"><label>Provider</label><select id="sProvider">
       <option value="local-rules">On this computer only (recommended)</option>
       <option value="ollama">Ollama (local model)</option>
+      <option value="google">Google AI (Gemini)</option>
       <option value="anthropic">Anthropic</option>
       <option value="openai">OpenAI-compatible</option>
     </select></div>
-    <div class="field" data-for="anthropic openai"><label>Model</label><input id="sModel" placeholder="optional"></div>
-    <div class="field" data-for="openai"><label>Base URL</label><input id="sBase" placeholder="https://api.openai.com/v1"></div>
-    <div class="field" data-for="anthropic openai"><label>API key <span class="faint">(kept in memory only, never saved)</span></label><input id="sKey" type="password" placeholder="paste to set"></div>
+    <div class="field" data-for="google anthropic openai"><label>Model</label><input id="sModel" placeholder="optional"></div>
+    <div class="field" data-for="google anthropic openai"><label id="sBaseLabel">API URL</label><input id="sBase" placeholder="https://generativelanguage.googleapis.com/v1beta"></div>
+    <div class="field" data-for="google anthropic openai"><label>API key <span class="faint">(kept in memory only, never saved)</span></label><input id="sKey" type="password" placeholder="paste to set"></div>
     <div class="field" data-for="ollama"><label>Ollama URL</label><input id="sOllamaUrl"></div>
     <div class="field" data-for="ollama"><label>Ollama model</label><input id="sOllamaModel"></div>
   </div>
-  <footer><button class="btn ghost" onclick="clearKey()">Forget key</button><span class="grow"></span><button class="btn" onclick="closeModal('settings')">Cancel</button><button class="btn primary" onclick="saveSettings()">Save</button></footer>
+  <footer><button class="btn ghost" onclick="clearKey()">Forget key</button><button class="btn" id="sTestBtn" onclick="testSettings()">Test connection</button><span class="grow"></span><button class="btn" onclick="closeModal('settings')">Cancel</button><button class="btn primary" onclick="saveSettings()">Save</button></footer>
 </div></div>
 
 <!-- assistant -->
-<button class="btn ask-btn" onclick="toggleAsk()"><svg class="i"><use href="#i-chat"/></svg>Ask Aegis</button>
+<button class="btn ask-btn" onclick="toggleAsk()"><svg class="i"><use href="#i-chat"/></svg>Ask Arjun</button>
 <div class="ask" id="ask">
-  <header class="row"><div class="grow"><h3>Ask Aegis</h3><div class="small faint">Answers come from your local index.</div></div><button class="btn ghost sm" onclick="toggleAsk()"><svg class="i"><use href="#i-x"/></svg></button></header>
+  <header class="row"><div class="grow"><h3>Ask Arjun</h3><div class="small faint">Answers come from your local index.</div></div><button class="btn ghost sm" onclick="toggleAsk()"><svg class="i"><use href="#i-x"/></svg></button></header>
   <div class="log" id="askLog"></div>
   <form onsubmit="askSubmit(event)"><input id="askInput" placeholder="What can I delete?" autocomplete="off"><button class="btn primary">Send</button></form>
 </div>
@@ -343,7 +796,7 @@ dl.meta dt{color:var(--ink3)} dl.meta dd{margin:0;word-break:break-all}
 <script>
 "use strict";
 /* =====================================================================
-   Aegis frontend — one file, no build step, talks only to 127.0.0.1.
+   ARJUN frontend — one file, no build step, talks only to 127.0.0.1.
    ===================================================================== */
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -589,8 +1042,73 @@ function fileRow(f, opts = {}) {
   </div>`;
 }
 const picked = (root = view()) => $$(".pick:checked", root).map(x => x.value);
-function needsScan(msg = "Aegis hasn't looked at your files yet.") {
-  return `<div class="card empty"><h3>${esc(msg)}</h3><p>Choose a folder on the Overview page and Aegis will read it — entirely on this computer.</p><button class="btn primary" onclick="go('home')">Go to Overview</button></div>`;
+function needsScan(msg = "Arjun hasn't looked at your files yet.") {
+  return `<div class="card empty"><h3>${esc(msg)}</h3><p>Choose a folder on the Overview page and Arjun will read it — entirely on this computer.</p><button class="btn primary" onclick="go('home')">Go to Overview</button></div>`;
+}
+
+/* ---------- Standout Astrolabe and Color Pigment Chart ---------- */
+const PIGMENT_PALETTE = [
+  "#c9962c", /* Gold */
+  "#347d5a", /* Jade */
+  "#3c659c", /* Lapis */
+  "#b66c2b", /* Copper */
+  "#b9462f", /* Cinnabar */
+  "#7d4e78", /* Mulberry */
+  "#736958"  /* Warm Stone */
+];
+
+function renderStorageAstrolabe(cats, totalBytes) {
+  if (!cats || !cats.length || !totalBytes) {
+    return '<p class="faint">No storage data available.</p>';
+  }
+  const sumBytes = cats.reduce((acc, [, b]) => acc + b, 0) || totalBytes;
+  const radius = 64;
+  const circumference = 2 * Math.PI * radius; // ~402.124
+  let accumulatedLength = 0;
+  
+  const arcs = cats.map(([c, b], i) => {
+    const fraction = b / sumBytes;
+    const length = Math.max(2, fraction * circumference);
+    const color = PIGMENT_PALETTE[i % PIGMENT_PALETTE.length];
+    const offset = -accumulatedLength;
+    accumulatedLength += length;
+    return `<circle cx="92" cy="92" r="${radius}" fill="none" stroke="${color}" stroke-width="14" stroke-dasharray="${length.toFixed(1)} ${(circumference - length).toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" style="transition:all 0.6s ease;transform-origin:center;" />`;
+  }).join("");
+
+  const bars = cats.slice(0, 6).map(([c, b], i) => {
+    const pct = ((b / sumBytes) * 100).toFixed(1);
+    const color = PIGMENT_PALETTE[i % PIGMENT_PALETTE.length];
+    return `<div class="b">
+      <span class="b-label" title="${esc(c)}">
+        <span class="b-swatch" style="background:${color};border-color:${color}"></span>
+        ${esc(c)}
+      </span>
+      <div class="track"><div class="fill" style="width:${pct}%;background:${color}"></div></div>
+      <span class="b-val"><span class="b-pct">${pct}%</span>${bytes(b)}</span>
+    </div>`;
+  }).join("");
+
+  return `
+    <div class="yantra-chart">
+      <div class="astrolabe-wrap">
+        <svg viewBox="0 0 184 184" style="width:100%;height:100%;transform:rotate(-90deg)">
+          <!-- Outer Celestial Astrolabe Ring -->
+          <circle cx="92" cy="92" r="86" fill="none" stroke="var(--line2)" stroke-width="1" stroke-dasharray="2 6" opacity="0.6" />
+          <circle cx="92" cy="92" r="77" fill="none" stroke="var(--line)" stroke-width="0.8" opacity="0.4" />
+          <!-- Segmented Ring -->
+          ${arcs}
+          <!-- Inner Hub Border -->
+          <circle cx="92" cy="92" r="53" fill="none" stroke="var(--line2)" stroke-width="1" opacity="0.7" />
+        </svg>
+        <div class="astrolabe-center">
+          <small>Total Archive</small>
+          <b>${bytes(totalBytes)}</b>
+        </div>
+      </div>
+      <div class="bars grow">
+        ${bars}
+      </div>
+    </div>`;
 }
 
 /* =====================================================================
@@ -617,25 +1135,58 @@ async function vHome() {
 
   if (!d.indexed) {
     view().innerHTML = `
-      <div class="head"><h1>Welcome.</h1><p>Aegis helps you find files by what they're about, free up space, and keep personal documents private. Start by letting it read a folder — nothing is uploaded.</p></div>
-      ${scanCard("Pick a folder to begin", "Your Documents or Downloads folder is a good place to start. Large folders take a minute or two.")}`;
+      <div class="head">
+        <span class="epigraph">Sovereign Vault • Gandiva Protocol</span>
+        <h1>Welcome to Arjun.</h1>
+        <p>Arjun discovers and organizes your files by meaning, frees reclaimable disk space, and locks personal PII locally. Start by letting it inspect a directory — zero telemetry leaves this machine.</p>
+      </div>
+      ${scanCard("Pick a folder to begin", "Your Documents, Downloads, or the curated Judge Demo Vault is a good place to start. Large directories take just a moment.")}`;
     return;
   }
   const cats = d.by_category || [];
   const maxCat = Math.max(1, ...cats.map(c => c[1]));
+  const reclaimPct = Math.min(100, Math.round((d.reclaimable / Math.max(1, d.total)) * 100));
   view().innerHTML = `
-    <div class="head"><h1>${num(d.files)} files, ${bytes(d.total)}.</h1><p>Here's what stands out, and what you might want to do about it.</p></div>
+    <div class="head">
+      <span class="epigraph">Sovereign Vault • Gandiva Protocol</span>
+      <h1>${num(d.files)} files, ${bytes(d.total)}.</h1>
+      <p>Here is your sovereign storage telemetry and private data integrity report.</p>
+    </div>
     <div class="stats">
-      <div class="stat"><b>${bytes(d.reclaimable)}</b><span>could be freed</span></div>
-      <div class="stat"><b>${num(d.sensitive_count ?? (d.sensitive || []).length)}</b><span>sensitive files kept local</span></div>
-      <div class="stat"><b>${d.bytes_sent ? bytes(d.bytes_sent) : "None"}</b><span>sent to the cloud</span></div>
-      <div class="stat"><b>${num(d.entities)}</b><span>personal details redacted</span></div>
+      <div class="stat">
+        <div class="numeral"><span>Reclaimable</span><span>I</span></div>
+        <b>${bytes(d.reclaimable)}</b>
+        <span>Safe to clear or deduplicate</span>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:${reclaimPct}%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="numeral"><span>Sovereign Vault</span><span>II</span></div>
+        <b>${num(d.sensitive_count ?? (d.sensitive || []).length)}</b>
+        <span>Sensitive files guarded locally</span>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--accent)"></div></div>
+      </div>
+      <div class="stat">
+        <div class="numeral"><span>Cloud Egress</span><span>III</span></div>
+        <b>${d.bytes_sent ? bytes(d.bytes_sent) : "Zero B"}</b>
+        <span>Data exfiltrated to cloud</span>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:0%;background:var(--warn)"></div></div>
+      </div>
+      <div class="stat">
+        <div class="numeral"><span>Redacted PII</span><span>IV</span></div>
+        <b>${num(d.entities)}</b>
+        <span>Personal identifiers masked</span>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:${d.entities ? 100 : 0}%;background:var(--pigment-cinnabar)"></div></div>
+      </div>
     </div>
     <div class="grid2">
       <div class="card"><h3>Suggestions</h3><div id="sugg">${loading("Thinking…")}</div></div>
-      <div class="card"><h3>What takes up space</h3>
-        <div class="bars">${cats.map(([c, b]) => `<div class="b"><span>${esc(c)}</span><div class="track"><div class="fill" style="width:${(b / maxCat * 100).toFixed(1)}%"></div></div><span>${bytes(b)}</span></div>`).join("") || '<p class="faint">No data.</p>'}</div>
-        <div style="margin-top:12px"><button class="link" onclick="go('storage')">Explore storage</button></div>
+      <div class="card">
+        <h3>What takes up space</h3>
+        ${renderStorageAstrolabe(cats, d.total)}
+        <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between">
+          <button class="link" onclick="go('storage')">Explore full storage breakdown →</button>
+          <span class="small faint font-mono">${cats.length} categories indexed</span>
+        </div>
       </div>
     </div>
     <div class="grid2" style="margin-top:16px">
@@ -670,7 +1221,7 @@ const EXAMPLES = ["notes about recursion", "bank statement from last year", "pho
 function vSearch(params) {
   S.searchQ = params.q || "";
   view().innerHTML = `
-    <div class="head"><h1>Search by meaning</h1><p>Describe what you're looking for in your own words. Aegis matches topics, file types and dates — you don't need the exact file name.</p></div>
+    <div class="head"><h1>Search by meaning</h1><p>Describe what you're looking for in your own words. Arjun matches topics, file types and dates — you don't need the exact file name.</p></div>
     <div class="bigsearch">${icon("search")}<input id="bigQ" value="${esc(S.searchQ)}" placeholder="e.g. lecture notes on inheritance from last semester" autocomplete="off"></div>
     <div class="row wrap" style="margin:12px 0 22px">${EXAMPLES.map(x => `<button class="chip" onclick='runSearch(${attr(x)})'>${esc(x)}</button>`).join("")}</div>
     <div id="results"></div>`;
@@ -711,16 +1262,37 @@ async function doSearch(q) {
   const folders = (r.folders || []).length ? `<div class="row wrap" style="margin-bottom:14px"><span class="small faint">Folders:</span>${r.folders.map(f => `<button class="chip" onclick='go("files",{path:${attr(f.path)}})'>${icon("folder")}${esc(f.name)}</button>`).join("")}</div>` : "";
   const results = r.results || [];
   box.innerHTML = `
-    <div class="small muted" style="margin-bottom:12px">${bits.length ? "Understood as " + bits.join(" · ") + " · " : ""}${results.length} result${results.length === 1 ? "" : "s"} in ${r.ms} ms</div>
+    <div class="row wrap" style="margin-bottom:12px">
+      <div class="small muted grow">${bits.length ? "Understood as " + bits.join(" · ") + " · " : ""}${results.length} result${results.length === 1 ? "" : "s"} in ${r.ms} ms</div>
+      ${results.length ? `<button class="btn sm" id="srAssistBtn" onclick='askSearchAssist(${attr(q)})'>Summarise with AI</button>` : ""}
+    </div>
+    <div id="srAssistBox"></div>
     ${folders}
     ${results.length ? `<div class="list">${results.map(x => `
       <div class="result" onclick='preview(${attr(x.path)})'>
-        <div class="row"><span class="ic faint">${icon(kindIcon(x.name))}</span><span class="nm grow">${hl(x.name, x.terms)}</span>${tierTag(x.tier)}<span class="small faint">${bytes(x.size)} · ${when(x.mtime)}</span></div>
+        <div class="row"><span class="ic faint">${icon(kindIcon(x.name))}</span><span class="nm grow">${hl(x.name, x.terms)}</span>${x.match === "Best match" ? '<span class="tag ok">Best match</span>' : ""}${tierTag(x.tier)}<span class="small faint">${bytes(x.size)} · ${when(x.mtime)}</span></div>
         ${(x.why || []).length ? `<div class="why">${esc(x.why.join(" · "))}</div>` : ""}
         ${x.passage ? `<div class="passage">${hl(x.passage, x.terms)}</div>` : ""}
-        <div class="path">${esc(x.folder)}</div>
+        <div class="row" style="margin-top:4px"><div class="path grow">${esc(x.folder)}</div><button class="link small" onclick='event.stopPropagation();go("files",{path:${attr(x.folder)}})'>Open folder</button></div>
       </div>`).join("")}</div>`
-    : `<div class="card empty"><h3>Nothing matched.</h3><p>Try fewer words, or describe the topic differently. If the file lives somewhere Aegis hasn't scanned, add that folder on the Overview page.</p></div>`}`;
+    : `<div class="card empty"><h3>Nothing matched.</h3><p>Try fewer words, or describe the topic differently. If the file lives somewhere Arjun hasn't scanned, add that folder on the Overview page.</p></div>`}`;
+}
+async function askSearchAssist(q) {
+  const btn = $("#srAssistBtn"), box = $("#srAssistBox");
+  if (!box) return;
+  if (btn) { btn.disabled = true; btn.textContent = "Thinking…"; }
+  box.innerHTML = `<div class="note" style="margin-bottom:12px"><span class="spinner"></span> Synthesising answer from matching files…</div>`;
+  try {
+    const a = await api("/api/search/assist", { q });
+    const badge = a.source === "cloud"
+      ? `<span class="tag Internal">Redacted AI (${a.files_sent} snippet${a.files_sent === 1 ? "" : "s"} sent${a.withheld ? `, ${a.withheld} sensitive withheld` : ""})</span>`
+      : `<span class="tag ok">On-device summary${a.withheld ? ` · ${a.withheld} sensitive kept local` : ""}</span>`;
+    box.innerHTML = `<div class="card" style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><b class="grow">AI Search Summary</b>${badge}</div><div class="small" style="line-height:1.55">${esc(a.summary)}</div></div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="note warn" style="margin-bottom:12px">${esc(e.message)}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Summarise with AI"; }
+  }
 }
 $("#topSearch").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.value.trim()) { const q = e.target.value.trim(); e.target.value = ""; e.target.blur(); go("search", { q }); }
@@ -729,8 +1301,8 @@ $("#topSearch").addEventListener("keydown", e => {
 /* =====================================================================
    FILES (explorer)
    ===================================================================== */
-const netSaved = () => { try { return JSON.parse(localStorage.getItem("aegis.net") || "[]"); } catch (_) { return []; } };
-function saveNet(p) { const l = netSaved().filter(x => x !== p); l.unshift(p); localStorage.setItem("aegis.net", JSON.stringify(l.slice(0, 6))); }
+const netSaved = () => { try { return JSON.parse(localStorage.getItem("arjun.net") || localStorage.getItem("aegis.net") || "[]"); } catch (_) { return []; } };
+function saveNet(p) { const l = netSaved().filter(x => x !== p); l.unshift(p); localStorage.setItem("arjun.net", JSON.stringify(l.slice(0, 6))); }
 
 async function vFiles(params) {
   if (!S.drives) { try { S.drives = await api("/api/drives"); } catch (e) { return fail(e); } }
@@ -800,8 +1372,8 @@ async function loadDir() {
   }
   dirItems = r.items || [];
   const ro = isNetwork(S.cwd);
-  $("#fsNote").innerHTML = ro ? `<div class="note" style="margin-bottom:12px">${icon("lock")} This is a network share. Aegis opens it read-only — you can browse, preview and open files, but nothing here will be changed.</div>`
-    : S.power ? `<div class="note" style="margin-bottom:12px">Hidden and system files are visible. System locations are protected — Aegis won't move or delete anything in them.</div>` : "";
+  $("#fsNote").innerHTML = ro ? `<div class="note" style="margin-bottom:12px">${icon("lock")} This is a network share. Arjun opens it read-only — you can browse, preview and open files, but nothing here will be changed.</div>`
+    : S.power ? `<div class="note" style="margin-bottom:12px">Hidden and system files are visible. System locations are protected — Arjun won't move or delete anything in them.</div>` : "";
   $("#fsActions").innerHTML = ro ? "" : `<button class="btn sm" onclick="newFolder()">${icon("plus")}New folder</button>`;
   drawList();
 }
@@ -840,6 +1412,7 @@ function newFolder() { promptText("New folder name", "New folder", v => change("
 /* =====================================================================
    STORAGE
    ===================================================================== */
+const STORAGE_TABS = [["largest", "Largest files"], ["folders", "Folders"], ["stale", "Large & untouched"], ["junk", "Leftovers & caches"], ["dups", "Duplicates"]];
 async function vStorage(params) {
   if (params.tab) S.storageTab = params.tab;
   view().innerHTML = loading();
@@ -848,13 +1421,26 @@ async function vStorage(params) {
   if (!ov.count) { view().innerHTML = `<div class="head"><h1>Storage</h1></div>` + needsScan(); return; }
   const cats = ov.by_category || [], max = Math.max(1, ...cats.map(c => c[1]));
   view().innerHTML = `
-    <div class="head"><h1>Storage</h1><p>${bytes(ov.total)} across ${num(ov.count)} files. About <b>${bytes(ov.reclaimable)}</b> looks safe to clear — review before anything is moved, and everything goes to the Bin first.</p></div>
+    <div class="head">
+      <span class="epigraph">Sovereign Vault • Storage Telemetry</span>
+      <h1>Storage &amp; Allocation.</h1>
+      <p>${bytes(ov.total)} across ${num(ov.count)} files. About <b>${bytes(ov.reclaimable)}</b> looks safe to clear — review before anything is moved, and everything goes to the Bin first.</p>
+    </div>
+    <div class="card" style="margin-bottom:18px">
+      <h3>Storage Spectrum Ribbon</h3>
+      <div class="spectrum-ribbon">
+        ${cats.map(([c, b], i) => `<div class="spectrum-seg" style="width:${((b / Math.max(1, ov.total)) * 100).toFixed(2)}%;background:${PIGMENT_PALETTE[i % PIGMENT_PALETTE.length]}" title="${esc(c)}: ${bytes(b)}"></div>`).join("")}
+      </div>
+      <div class="spectrum-legend">
+        ${cats.map(([c, b], i) => `<span><span class="b-swatch" style="background:${PIGMENT_PALETTE[i % PIGMENT_PALETTE.length]};border-color:${PIGMENT_PALETTE[i % PIGMENT_PALETTE.length]}"></span>${esc(c)} (${((b / Math.max(1, ov.total)) * 100).toFixed(1)}%)</span>`).join("")}
+      </div>
+    </div>
     <div class="grid2">
-      <div class="card"><h3>By kind</h3><div class="bars">${cats.map(([c, b]) => `<div class="b"><span>${esc(c)}</span><div class="track"><div class="fill" style="width:${(b / max * 100).toFixed(1)}%"></div></div><span>${bytes(b)}</span></div>`).join("")}</div></div>
-      <div class="card"><h3>Biggest file types</h3><div class="bars">${(ov.top_exts || []).slice(0, 7).map(([e, v]) => `<div class="b"><span class="mono">${esc(e)}</span><div class="track"><div class="fill" style="width:${(v.size / Math.max(1, ov.top_exts[0][1].size) * 100).toFixed(1)}%;background:var(--ink3)"></div></div><span>${bytes(v.size)}</span></div>`).join("")}</div></div>
+      <div class="card"><h3>By kind</h3><div class="bars">${cats.map(([c, b], i) => `<div class="b"><span class="b-label"><span class="b-swatch" style="background:${PIGMENT_PALETTE[i % PIGMENT_PALETTE.length]}"></span>${esc(c)}</span><div class="track"><div class="fill" style="width:${(b / max * 100).toFixed(1)}%;background:${PIGMENT_PALETTE[i % PIGMENT_PALETTE.length]}"></div></div><span>${bytes(b)}</span></div>`).join("")}</div></div>
+      <div class="card"><h3>Biggest file types</h3><div class="bars">${(ov.top_exts || []).slice(0, 7).map(([e, v]) => `<div class="b"><span class="mono">${esc(e)}</span><div class="track"><div class="fill" style="width:${(v.size / Math.max(1, ov.top_exts[0][1].size) * 100).toFixed(1)}%;background:var(--accent)"></div></div><span>${bytes(v.size)}</span></div>`).join("")}</div></div>
     </div>
     <div class="tabs" style="margin-top:22px">
-      ${[["largest", "Largest files"], ["stale", "Large & untouched"], ["junk", "Leftovers & caches"], ["dups", "Duplicates"]].map(([k, l]) => `<button class="${S.storageTab === k ? "on" : ""}" onclick="S.storageTab='${k}';storageTab()">${l}</button>`).join("")}
+      ${STORAGE_TABS.map(([k, l]) => `<button class="${S.storageTab === k ? "on" : ""}" onclick="S.storageTab='${k}';storageTab()">${l}</button>`).join("")}
     </div>
     <div id="stBody"></div>`;
   storageTab();
@@ -864,14 +1450,35 @@ function selBar(label) {
 }
 function selCount() { const n = picked($("#stBody")).length; const el = $("#selInfo"); if (el) el.textContent = n ? n + " selected" : ""; }
 function trashPicked() { const p = picked($("#stBody")); if (!p.length) return toast("Select some files first."); trash(p, () => storageTab()); }
-async function storageTab() {
-  $$(".tabs button").forEach((b, i) => b.classList.toggle("on", ["largest", "stale", "junk", "dups"][i] === S.storageTab));
+async function storageTab(treePath = "") {
+  $$(".tabs button").forEach((b, i) => b.classList.toggle("on", STORAGE_TABS[i][0] === S.storageTab));
   const box = $("#stBody"); if (!box) return;
   box.innerHTML = loading();
   try {
     if (S.storageTab === "largest") {
       const l = await api("/api/storage/largest?n=60");
       box.innerHTML = selBar("Move to Bin") + `<div class="list">${l.map(f => fileRow(f, { check: true, meta: `${bytes(f.size)}<div class="small faint">${when(f.mtime)}</div>` })).join("")}</div>`;
+    } else if (S.storageTab === "folders") {
+      const tm = await api("/api/storage/treemap?path=" + encodeURIComponent(treePath));
+      const dirs = tm.dirs || [], files = tm.files || [];
+      const maxD = Math.max(1, ...dirs.map(d => d.size || 0), ...files.map(f => f.size || 0));
+      const parentPath = dirname(tm.path);
+      box.innerHTML = `
+        <div class="row wrap" style="margin-bottom:12px">
+          ${parentPath && parentPath !== tm.path ? `<button class="btn sm" onclick='storageTab(${attr(parentPath)})'>${icon("up")}Up</button>` : ""}
+          <span class="mono small muted grow">${esc(tm.path)}</span>
+          <button class="btn sm" onclick='go("files",{path:${attr(tm.path)}})'>Open in Files</button>
+        </div>
+        ${dirs.length ? `<div class="list" style="margin-bottom:14px">${dirs.slice(0, 40).map(d => `
+          <div class="item clickable" onclick='storageTab(${attr(d.path)})'>
+            <span class="ic">${icon("folder")}</span>
+            <div class="grow">
+              <div class="nm">${esc(d.name)} <span class="small faint">· ${num(d.count)} file${d.count === 1 ? "" : "s"}</span></div>
+              <div class="track" style="height:6px;background:var(--bg2);border-radius:4px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${Math.max(2, (d.size / maxD * 100)).toFixed(1)}%;background:var(--accent)"></div></div>
+            </div>
+            <div class="meta">${bytes(d.size)}</div>
+          </div>`).join("")}</div>` : ""}
+        ${files.length ? `<h4 class="small faint" style="margin:8px 0">Files in this folder</h4><div class="list">${files.slice(0, 30).map(f => fileRow(f)).join("")}</div>` : (!dirs.length ? `<div class="card empty">No indexed subfolders here.</div>` : "")}`;
     } else if (S.storageTab === "stale") {
       const l = await api("/api/storage/stale");
       box.innerHTML = l.length ? `<p class="muted small">Files over 50 MB that haven't changed in six months.</p>` + selBar("Move to Bin") + `<div class="list">${l.map(f => fileRow(f, { check: true, meta: `${bytes(f.size)}<div class="small faint">last changed ${when(f.mtime)}</div>` })).join("")}</div>`
@@ -896,7 +1503,7 @@ async function dupsView(box) {
   }
   const groups = s.groups || [];
   if (!s.done && !groups.length) {
-    box.innerHTML = `<div class="card empty"><h3>Find identical copies</h3><p>Aegis compares file sizes, then fingerprints the contents. Only exact copies are shown.</p><button class="btn primary" onclick="api('/api/dups/start',{}).then(storageTab)">Look for duplicates</button></div>`;
+    box.innerHTML = `<div class="card empty"><h3>Find identical copies</h3><p>Arjun compares file sizes, then fingerprints the contents. Only exact copies are shown.</p><button class="btn primary" onclick="api('/api/dups/start',{}).then(storageTab)">Look for duplicates</button></div>`;
     return;
   }
   if (!groups.length) { box.innerHTML = `<div class="card empty"><h3>No duplicates.</h3><button class="btn" onclick="api('/api/dups/start',{}).then(storageTab)">Check again</button></div>`; return; }
@@ -926,11 +1533,11 @@ let unnamedItems = [], plan = null;
 async function vTidy() {
   view().innerHTML = `
     <div class="head"><h1>Tidy up</h1><p>Give vague file names a meaningful one, and sort a messy folder into sensible groups. You'll see every change before it happens, and can undo it afterwards.</p></div>
-    <div class="card"><div class="row"><h3 class="grow" style="margin:0">Files with vague names</h3><button class="btn primary sm" onclick="applyRenames()">Rename selected</button></div>
+    <div class="card"><div class="row"><h3 class="grow" style="margin:0">Files with vague names</h3><button class="btn sm" id="unAiBtn" onclick="aiRefineUnnamed()">AI refine names</button><button class="btn primary sm" onclick="applyRenames()">Rename selected</button></div>
       <p class="muted small" style="margin:6px 0 14px">Names like “IMG_2041”, “Untitled (3)” or “scan0001”. Suggestions come from each file's contents, read on this computer. Edit any suggestion before applying.</p>
       <div id="unBox">${loading()}</div></div>
     <div class="card"><h3>Organise a folder</h3>
-      <p class="muted small" style="margin:-4px 0 14px">Aegis proposes a structure (Finance, College, Travel, Images…). Sensitive files are planned locally and filed into a Private_Vault folder — they are never shown to an AI service.</p>
+      <p class="muted small" style="margin:-4px 0 14px">Arjun proposes a structure (Finance, College, Travel, Images…). Sensitive files are planned locally and filed into a Private_Vault folder — they are never shown to an AI service.</p>
       <div class="row wrap"><input id="orgPath" class="grow mono" placeholder="${esc((S.drives && S.drives.specials.find(s => s.label === "Downloads") || {}).path || "C:\\Users\\you\\Downloads")}" style="min-width:260px">
         <label class="check"><input type="checkbox" id="orgRec"> Include subfolders</label>
         <button class="btn primary" onclick="buildPlan()">Suggest a plan</button></div>
@@ -939,17 +1546,34 @@ async function vTidy() {
   if (!S.drives) api("/api/drives").then(d => { S.drives = d; const p = (d.specials.find(s => s.label === "Downloads") || {}).path; if (p && $("#orgPath")) $("#orgPath").placeholder = p; }).catch(() => {});
   loadUnnamed(); loadHistory();
 }
-async function loadUnnamed() {
+function renderUnnamedList(noteHtml = "") {
   const box = $("#unBox"); if (!box) return;
-  try { const r = await api("/api/unnamed"); unnamedItems = r.items || []; } catch (e) { box.innerHTML = esc(e.message); return; }
   if (!unnamedItems.length) { box.innerHTML = `<div class="empty small">No vaguely named files found in the scanned folders.</div>`; return; }
-  box.innerHTML = `<div class="list"><div class="list-head"><input type="checkbox" checked onchange="$$('#unBox .pick').forEach(c=>c.checked=this.checked)"><span style="width:38%">Current name</span><span class="grow">Suggested name</span></div>
+  box.innerHTML = `${noteHtml}<div class="list"><div class="list-head"><input type="checkbox" checked onchange="$$('#unBox .pick').forEach(c=>c.checked=this.checked)"><span style="width:38%">Current name</span><span class="grow">Suggested name</span></div>
     ${unnamedItems.map((x, i) => `<div class="item">
       <input type="checkbox" class="pick" value="${i}" checked>
       <div style="width:38%;min-width:0"><div class="nm" style="font-weight:400"><button class="link" style="color:var(--ink);text-decoration:none" onclick='preview(${attr(x.path)})'>${esc(x.name)}</button></div><div class="sub">${esc(x.folder)}</div></div>
       <input class="grow mono un-name" data-i="${i}" value="${esc(x.suggested_name)}">
       ${tierTag(x.tier)}
     </div>`).join("")}</div>`;
+}
+async function loadUnnamed() {
+  const box = $("#unBox"); if (!box) return;
+  try { const r = await api("/api/unnamed"); unnamedItems = r.items || []; } catch (e) { box.innerHTML = esc(e.message); return; }
+  renderUnnamedList();
+}
+async function aiRefineUnnamed() {
+  const btn = $("#unAiBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Refining…"; }
+  try {
+    const r = await api("/api/unnamed/ai", {});
+    unnamedItems = r.items || [];
+    const note = r.source === "cloud"
+      ? `<div class="note" style="margin-bottom:10px">Refined with your AI provider using redacted snippets only.${r.withheld ? ` ${r.withheld} sensitive file(s) were kept private and named locally.` : ""}</div>`
+      : `<div class="note" style="margin-bottom:10px">Generated on this computer using local content rules.${r.withheld ? ` ${r.withheld} sensitive file(s) kept private.` : ""}</div>`;
+    renderUnnamedList(note);
+  } catch (e) { fail(e); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = "AI refine names"; } }
 }
 function applyRenames() {
   const items = $$("#unBox .pick:checked").map(c => { const i = +c.value; return { path: unnamedItems[i].path, new_name: $(`#unBox .un-name[data-i="${i}"]`).value.trim() }; }).filter(x => x.new_name);
@@ -1002,7 +1626,7 @@ async function vPrivacy() {
   try { [t, l] = await Promise.all([api("/api/privacy/tiers"), api("/api/ledger?limit=40")]); } catch (e) { return fail(e); }
   const st = l.stats || {}, sm = t.summary;
   view().innerHTML = `
-    <div class="head"><h1>Privacy</h1><p>Aegis reads your files on this computer. Before anything could reach an AI service, personal details are found and swapped for placeholders like <span class="tok">[PAN_1]</span>. The real values never leave — they're put back only when the answer comes home.</p></div>
+    <div class="head"><h1>Privacy</h1><p>Arjun reads your files on this computer. Before anything could reach an AI service, personal details are found and swapped for placeholders like <span class="tok">[PAN_1]</span>. The real values never leave — they're put back only when the answer comes home.</p></div>
     <div class="stats">
       <div class="stat"><b>${num(st.entities_redacted)}</b><span>details replaced with placeholders</span></div>
       <div class="stat"><b>${num(st.withheld)}</b><span>sensitive files withheld entirely</span></div>
@@ -1014,7 +1638,7 @@ async function vPrivacy() {
         <div class="card"><div class="row"><h3 class="grow" style="margin:0">${label}</h3><span class="tag ${k === "Public" ? "ok" : k}">${num(sm[k].count)}</span></div><p class="small muted" style="margin:6px 0 0">${d} ${bytes(sm[k].bytes)}.</p></div>`).join("")}
     </div>
     <div class="grid2" style="margin-top:16px">
-      <div class="card"><h3>What Aegis found in your files</h3>
+      <div class="card"><h3>What Arjun found in your files</h3>
         ${(t.entity_types || []).length ? `<div class="bars">${t.entity_types.map(([k, n]) => `<div class="b"><span>${esc(TYPE_NAMES[k] || k)}</span><div class="track"><div class="fill" style="width:${(n / t.entity_types[0][1] * 100).toFixed(0)}%;background:var(--danger)"></div></div><span>${num(n)} file${n === 1 ? "" : "s"}</span></div>`).join("")}</div>` : '<p class="faint small">No personal details detected yet.</p>'}
       </div>
       <div class="card"><h3>Sensitive files</h3>
@@ -1067,7 +1691,7 @@ async function vBin() {
   let b; try { b = await api("/api/bin"); } catch (e) { return fail(e); }
   setBinCount(b.count);
   view().innerHTML = `
-    <div class="head"><h1>Bin</h1><p>Anything Aegis removes lands here first. Put it back any time — files are only erased when you empty the Bin.</p></div>
+    <div class="head"><h1>Bin</h1><p>Anything Arjun removes lands here first. Put it back any time — files are only erased when you empty the Bin.</p></div>
     ${b.count ? `<div class="row" style="margin-bottom:12px"><span class="muted small">${b.count} item${b.count === 1 ? "" : "s"} · ${bytes(b.bytes)}</span><span class="grow"></span>
       <button class="btn sm" onclick="restoreSelected()">Put back selected</button>
       <button class="btn sm" onclick='change("restore",{})'>Put back all</button>
@@ -1096,12 +1720,35 @@ async function openSettings() {
   syncSettingsFields();
   $("#settings").classList.add("open");
 }
-function syncSettingsFields() { const p = $("#sProvider").value; $$("#settings [data-for]").forEach(el => el.classList.toggle("hidden", !el.dataset.for.split(" ").includes(p))); }
+function syncSettingsFields() {
+  const p = $("#sProvider").value;
+  $$("#settings [data-for]").forEach(el => el.classList.toggle("hidden", !el.dataset.for.split(" ").includes(p)));
+  const defaults = {
+    google: { model: "gemini-2.0-flash", url: "https://generativelanguage.googleapis.com/v1beta", label: "Google AI URL" },
+    openai: { model: "gpt-4o-mini", url: "https://api.openai.com/v1", label: "Base URL" },
+    anthropic: { model: "claude-sonnet-4-20250514", url: "https://api.anthropic.com", label: "Base URL" },
+  }[p];
+  if (defaults) {
+    $("#sModel").placeholder = defaults.model;
+    $("#sBase").placeholder = defaults.url;
+    $("#sBaseLabel").textContent = defaults.label;
+  }
+}
 $("#sProvider").onchange = syncSettingsFields;
 async function saveSettings() {
   const body = { provider: $("#sProvider").value, model: $("#sModel").value.trim(), base_url: $("#sBase").value.trim(), ollama_url: $("#sOllamaUrl").value.trim(), ollama_model: $("#sOllamaModel").value.trim() };
   const k = $("#sKey").value.trim(); if (k) body.api_key = k;
   try { await api("/api/settings", body); closeModal("settings"); toast("Saved."); syncStatus(); } catch (e) { fail(e); }
+}
+async function testSettings() {
+  const btn = $("#sTestBtn"); btn.disabled = true; btn.textContent = "Testing…";
+  const body = { provider: $("#sProvider").value, model: $("#sModel").value.trim(), base_url: $("#sBase").value.trim(), ollama_url: $("#sOllamaUrl").value.trim(), ollama_model: $("#sOllamaModel").value.trim() };
+  const k = $("#sKey").value.trim(); if (k) body.api_key = k;
+  try {
+    const r = await api("/api/settings/test", body);
+    toast(r.ok ? (r.message || "Connected!") : ("Connection failed: " + (r.error || "Unknown error")));
+  } catch (e) { fail(e); }
+  finally { btn.disabled = false; btn.textContent = "Test connection"; }
 }
 async function clearKey() { try { await api("/api/settings", { clear_key: true }); toast("Key forgotten."); $("#sKey").placeholder = "paste to set"; } catch (e) { fail(e); } }
 $("#offlineToggle").onchange = async e => { try { await api("/api/offline", { on: e.target.checked }); syncStatus(); toast(e.target.checked ? "Offline: nothing will be sent anywhere." : "Online features enabled."); } catch (err) { fail(err); } };
@@ -1113,7 +1760,7 @@ async function syncStatus() {
     $("#egressDot").className = "dot" + (local ? "" : " warn");
     $("#egressText").textContent = local ? "Nothing leaves this computer" : `Redacted requests go to ${h.provider}`;
   } catch (_) {
-    $("#egressDot").className = "dot warn"; $("#egressText").textContent = "Can't reach the Aegis service";
+    $("#egressDot").className = "dot warn"; $("#egressText").textContent = "Can't reach the Arjun service";
   }
 }
 
@@ -1144,8 +1791,81 @@ async function askSend(text) {
 }
 function askSubmit(e) { e.preventDefault(); const v = $("#askInput").value.trim(); if (!v) return; $("#askInput").value = ""; askSend(v); }
 
+/* ---------- theme switch & judge demo vault ---------- */
+function getResolvedScheme() {
+  const stored = localStorage.getItem("color-scheme");
+  if (stored === "dark" || stored === "light") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function syncThemeUI() {
+  const current = getResolvedScheme();
+  const sun = $("#themeIconSun");
+  const moon = $("#themeIconMoon");
+  const lbl = $("#themeToggleLabel");
+  if (sun && moon && lbl) {
+    if (current === "dark") {
+      sun.classList.remove("hidden");
+      moon.classList.add("hidden");
+      lbl.textContent = "Parchment";
+    } else {
+      sun.classList.add("hidden");
+      moon.classList.remove("hidden");
+      lbl.textContent = "Sanctum";
+    }
+  }
+}
+
+function toggleThemeScheme() {
+  const current = getResolvedScheme();
+  const target = current === "dark" ? "light" : "dark";
+  const sysDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const sysDefault = sysDark ? "dark" : "light";
+  if (target !== sysDefault) {
+    localStorage.setItem("color-scheme", target);
+  } else {
+    localStorage.removeItem("color-scheme");
+  }
+  const meta = document.querySelector('meta[name="color-scheme"]');
+  if (meta) {
+    meta.content = localStorage.getItem("color-scheme") ?? "light dark";
+  }
+  syncThemeUI();
+}
+
+window.addEventListener("storage", e => {
+  if (e.key === "color-scheme") {
+    const meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) meta.content = localStorage.getItem("color-scheme") ?? "light dark";
+    syncThemeUI();
+  }
+});
+
+try {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (!localStorage.getItem("color-scheme")) syncThemeUI();
+  });
+} catch (_) {}
+
+async function loadJudgeDemo() {
+  toast("Loading curated Judge Demo Vault…");
+  try {
+    const r = await api("/api/demo/load", {});
+    toast("Judge Demo Vault loaded! Scanning files…");
+    S.scanning = true;
+    pollScan();
+    try {
+      S.dash = await api("/api/dashboard");
+      S.drives = await api("/api/drives");
+    } catch (_) {}
+    render();
+  } catch (e) {
+    fail(e);
+  }
+}
+
 /* ---------- boot ---------- */
-syncStatus(); refreshBin(); pollScan(); render();
+syncThemeUI(); syncStatus(); refreshBin(); pollScan(); render();
 </script>
 </body>
 </html>

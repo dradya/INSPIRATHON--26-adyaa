@@ -1,0 +1,11 @@
+COMMERCIAL INVOICE — PRECISION WORKSTATION SUPPLY
+==================================================
+Invoice Number : INV-2026-104
+Invoice Date   : 10-Oct-2026
+Customer       : Arjun Research Lab (+91 98765 43210)
+
+1x Custom Local AI Workstation (64GB DDR5, NVMe 4TB RAID)      INR 1,68,000.00
+1x Calibrated 4K Reference Display                             INR   42,000.00
+GST (18%)                                                      INR   37,800.00
+------------------------------------------------------------------------------
+Total Paid via NEFT (Ref: HDFC0001245)                         INR 2,47,800.00

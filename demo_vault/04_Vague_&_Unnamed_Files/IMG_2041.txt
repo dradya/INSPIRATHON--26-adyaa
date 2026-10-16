@@ -1,0 +1,2 @@
+# Whiteboarding Session Neural Search Architecture
+Diagram notes from our architecture review covering hybrid BM25 lexical scoring combined with dense vector cosine similarity.

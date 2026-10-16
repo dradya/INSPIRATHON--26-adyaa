@@ -2,10 +2,10 @@
 from pathlib import Path
 
 SETTINGS = {
-    "provider": "local-rules",   # local-rules | anthropic | openai | ollama
+    "provider": "local-rules",   # local-rules | google | anthropic | openai | ollama
     "api_key": "",               # MEMORY ONLY. /api/settings never returns it.
     "model": "",
-    "base_url": "",              # OpenAI-compatible endpoint base
+    "base_url": "",              # Google AI / OpenAI-compatible / custom endpoint base
     "ollama_url": "http://127.0.0.1:11434",
     "ollama_model": "llama3.1",
     "offline": False,            # True -> Ollama if up, else local-rules. Zero egress.

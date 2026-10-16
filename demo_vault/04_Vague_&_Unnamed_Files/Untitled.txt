@@ -1,0 +1,3 @@
+# Quantum Cryptography Protocol Specification
+Lattice-based post-quantum key exchange mechanism (CRYSTALS-Kyber) for local vault encryption.
+Ensures zero-knowledge file indexing across untrusted storage media.
